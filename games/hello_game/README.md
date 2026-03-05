@@ -7,3 +7,4 @@ It is intentionally tiny: the autonomous loop can update this workspace in small
 - Loop 2: Tighten the hello game pipeline and runtime narrative without expanding scope
 - Loop 3: Refresh observability artifacts and keep the website aligned with the latest runtime state
 - Loop 4: Tighten the hello game pipeline and runtime narrative without expanding scope
+- Loop 5: Refresh observability artifacts and keep the website aligned with the latest runtime state

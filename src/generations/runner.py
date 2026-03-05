@@ -79,7 +79,7 @@ class Runner:
         criteria = memory["criteria_history"][-1]
 
         plan = OpenCodePlan(
-            summary=proposal.description,
+            summary=f"{proposal.workstream}:{proposal.capability_target}: {proposal.description}",
             files_expected=proposal.target_files + [
                 "state/loop_snapshot.json",
                 "state/website_notes.md",
@@ -123,6 +123,8 @@ class Runner:
             "seed_hash": seed_hash,
             "criteria": criteria,
             "next_step": {
+                "workstream": proposal.workstream,
+                "capability_target": proposal.capability_target,
                 "description": proposal.description,
                 "rationale": proposal.rationale,
             },
@@ -182,6 +184,8 @@ class Runner:
         touched: list[str] = []
         runtime_note = {
             "loop": loop_counter,
+            "workstream": proposal.workstream,
+            "capability_target": proposal.capability_target,
             "proposal": proposal.description,
             "model": model_metadata,
             "timestamp": self._timestamp(),
@@ -218,6 +222,8 @@ class Runner:
             "execution_surface": f"OpenCode CLI ({self.opencode.binary}) with local session export and guarded shell execution",
             "model_provider": f"{model_metadata['provider']}:{model_metadata['model']}",
         }
+        updated_memory["last_workstream"] = proposal.workstream
+        updated_memory["last_capability_target"] = proposal.capability_target
         self.memory.replace(updated_memory, created_at=self._timestamp())
         touched.append(str(self.config.memory_path.relative_to(self.root)))
 

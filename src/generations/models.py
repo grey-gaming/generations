@@ -48,6 +48,8 @@ class OpenCodePlan:
 
 @dataclass(slots=True)
 class StepProposal:
+    workstream: str
+    capability_target: str
     description: str
     rationale: str
     target_files: list[str]

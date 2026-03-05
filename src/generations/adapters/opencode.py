@@ -129,13 +129,18 @@ class OpenCodeAdapter:
         if not self.binary.exists():
             return None
         before = set(self._list_sessions())
+        attachments = self._prepare_session_files(plan, commit_message)
         prompt = json.dumps(
             {
                 "task": "Record this Generations workflow session.",
                 "plan": plan.as_dict(),
                 "commit_message": commit_message,
                 "cwd": str(self.root),
-                "instruction": "Summarize the plan in one concise paragraph and do not edit files.",
+                "instruction": (
+                    "Summarize the plan in one concise paragraph. "
+                    "You may inspect the attached git context and plan files to understand repository state. "
+                    "Do not edit files."
+                ),
             },
             sort_keys=True,
         )
@@ -146,10 +151,14 @@ class OpenCodeAdapter:
             "json",
             "--title",
             f"Generations workflow: {plan.summary[:48]}",
+            "--dir",
+            str(self.root),
             "--model",
             f"ollama/{DEFAULT_MODEL}",
-            prompt,
         ]
+        for attachment in attachments:
+            command.extend(["--file", str(attachment)])
+        command.append(prompt)
         completed = subprocess.run(command, cwd=self.root, env=self._env(), check=False, capture_output=True, text=True)
         if completed.returncode != 0:
             command = [
@@ -159,16 +168,56 @@ class OpenCodeAdapter:
                 "json",
                 "--title",
                 f"Generations workflow: {plan.summary[:48]}",
+                "--dir",
+                str(self.root),
                 "--command",
                 "/bin/true",
-                prompt,
             ]
+            for attachment in attachments:
+                command.extend(["--file", str(attachment)])
+            command.append(prompt)
             subprocess.run(command, cwd=self.root, env=self._env(), check=False, capture_output=True, text=True)
         after = self._list_sessions()
         for session_id in after:
             if session_id not in before:
                 return session_id
         return after[0] if after else None
+
+    def _prepare_session_files(self, plan: OpenCodePlan, commit_message: str) -> list[Path]:
+        input_dir = self.config.opencode_state_dir / "input"
+        input_dir.mkdir(parents=True, exist_ok=True)
+        plan_path = input_dir / "workflow_plan.json"
+        git_path = input_dir / "git_context.json"
+        note_path = input_dir / "workflow_note.txt"
+
+        plan_path.write_text(json.dumps(plan.as_dict(), indent=2) + "\n", encoding="utf-8")
+        git_path.write_text(json.dumps(self._git_context(commit_message), indent=2) + "\n", encoding="utf-8")
+        note_path.write_text(
+            "Generations OpenCode session bootstrap.\n"
+            "Attached files provide the planned workflow and current git context.\n"
+            "Use them for repository-aware summarization only.\n",
+            encoding="utf-8",
+        )
+        return [plan_path, git_path, note_path]
+
+    def _git_context(self, commit_message: str) -> dict[str, object]:
+        return {
+            "head": self._git_output(["git", "rev-parse", "HEAD"]),
+            "branch": self._git_output(["git", "branch", "--show-current"]),
+            "status_short": self._git_output(["git", "status", "--short"]),
+            "recent_commits": self._git_output(["git", "log", "--oneline", "-n", "5"]),
+            "planned_commit_message": commit_message,
+        }
+
+    def _git_output(self, command: list[str]) -> str:
+        completed = subprocess.run(
+            command,
+            cwd=self.root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        return completed.stdout.strip()
 
     def _list_sessions(self) -> list[str]:
         if not self.binary.exists():
