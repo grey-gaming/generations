@@ -1,0 +1,16 @@
+{
+  "summary": "autonomous_platform:journaling: Create a standardized markdown template for recording loop decisions and outcomes.",
+  "editable_files": [
+    "docs/journal_template.md"
+  ],
+  "files_expected": [
+    "docs/journal_template.md",
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html",
+    "site/style.css"
+  ],
+  "website_change_reason": "Journal entries populate the public journey log.",
+  "monetization_change_reason": "Defer monetization until core loop stability is proven."
+}
