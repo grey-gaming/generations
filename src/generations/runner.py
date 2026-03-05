@@ -236,8 +236,6 @@ class Runner:
             return 0, False, "Stop after validation failure to preserve repository integrity."
         if self.config.test_mode:
             return 0, False, "Test harness mode performs exactly one safe loop for fast verification."
-        if loop_counter >= 3:
-            return 0, False, "Current criteria judge the bootstrap phase complete after three successful tiny loops."
         return min(1, self.config.max_rest_seconds), True, "Continue with another small step after a short bounded rest."
 
     def _verification_commands(self) -> list[list[str]]:
