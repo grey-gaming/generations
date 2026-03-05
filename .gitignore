@@ -1,0 +1,8 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.generations_tmp_backup/
+state/opencode/cache/
+state/opencode/config/
+state/opencode/data/
+state/opencode/state/

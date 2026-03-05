@@ -1,5 +1,5 @@
 {
-  "summary": "Tighten the hello game pipeline and runtime narrative without expanding scope",
+  "summary": "Refresh observability artifacts and keep the website aligned with the latest runtime state",
   "files_expected": [
     "README.md",
     "state/runtime.json",
