@@ -1,6 +1,6 @@
 # Website Notes
 
-Latest loop: 8
+Latest loop: 10
 
 Visible intent: Keep the journey page and exported site in sync with the latest autonomous state.
 

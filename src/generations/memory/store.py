@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+import threading
 from pathlib import Path
 from typing import Any
 
@@ -61,41 +62,47 @@ class MemoryStore:
     def __init__(self, path: Path) -> None:
         self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.connection = sqlite3.connect(self.path)
+        self._lock = threading.Lock()
+        self.connection = sqlite3.connect(self.path, check_same_thread=False)
         self.connection.row_factory = sqlite3.Row
         self._init_schema()
         self._ensure_snapshot()
 
     def _init_schema(self) -> None:
-        self.connection.execute(
-            "create table if not exists memory_snapshots (id integer primary key autoincrement, created_at text not null, payload text not null)"
-        )
-        self.connection.commit()
+        with self._lock:
+            self.connection.execute(
+                "create table if not exists memory_snapshots (id integer primary key autoincrement, created_at text not null, payload text not null)"
+            )
+            self.connection.commit()
 
     def _ensure_snapshot(self) -> None:
-        row = self.connection.execute(
-            "select payload from memory_snapshots order by id desc limit 1"
-        ).fetchone()
+        with self._lock:
+            row = self.connection.execute(
+                "select payload from memory_snapshots order by id desc limit 1"
+            ).fetchone()
         if row is None:
             self.replace(DEFAULT_MEMORY, created_at="bootstrap")
 
     def latest(self) -> dict[str, Any]:
-        row = self.connection.execute(
-            "select payload from memory_snapshots order by id desc limit 1"
-        ).fetchone()
+        with self._lock:
+            row = self.connection.execute(
+                "select payload from memory_snapshots order by id desc limit 1"
+            ).fetchone()
         if row is None:
             return dict(DEFAULT_MEMORY)
         return json.loads(row["payload"])
 
     def replace(self, payload: dict[str, Any], created_at: str) -> None:
-        self.connection.execute(
-            "insert into memory_snapshots(created_at, payload) values(?, ?)",
-            (created_at, json.dumps(payload, sort_keys=True)),
-        )
-        self.connection.commit()
+        with self._lock:
+            self.connection.execute(
+                "insert into memory_snapshots(created_at, payload) values(?, ?)",
+                (created_at, json.dumps(payload, sort_keys=True)),
+            )
+            self.connection.commit()
 
     def snapshot_rows(self) -> list[dict[str, Any]]:
-        rows = self.connection.execute(
-            "select id, created_at, payload from memory_snapshots order by id desc"
-        ).fetchall()
+        with self._lock:
+            rows = self.connection.execute(
+                "select id, created_at, payload from memory_snapshots order by id desc"
+            ).fetchall()
         return [dict(row) for row in rows]
