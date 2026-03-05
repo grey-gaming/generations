@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 1
+Latest loop: 2
 
-Visible intent: Journal entries populate the public journey log.
+Visible intent: Internal observability improvement only.
 
 Support remains a minimal placeholder until a logged experiment is justified.

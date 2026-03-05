@@ -1,5 +1,5 @@
 {
-  "summary": "autonomous_platform:journaling: Create a standardized markdown template for recording loop decisions and outcomes.",
+  "summary": "autonomous_platform:journaling: Add game concept and milestone fields to the journal entry template.",
   "editable_files": [
     "docs/journal_template.md"
   ],
@@ -11,6 +11,6 @@
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Journal entries populate the public journey log.",
-  "monetization_change_reason": "Defer monetization until core loop stability is proven."
+  "website_change_reason": "Internal observability improvement only.",
+  "monetization_change_reason": "No monetization logic modified."
 }
