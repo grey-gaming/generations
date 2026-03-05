@@ -1,7 +1,0 @@
-{
-  "head": "ca1c9f3e8e2cafb0dc3a569022ff5d1a58d99f92",
-  "branch": "main",
-  "status_short": "M site/index.html\n M src/generations/__pycache__/models.cpython-312.pyc\n M src/generations/__pycache__/runner.cpython-312.pyc\n M src/generations/adapters/__pycache__/ollama_cloud.cpython-312.pyc\n M src/generations/adapters/__pycache__/opencode.cpython-312.pyc\n M src/generations/adapters/ollama_cloud.py\n M src/generations/adapters/opencode.py\n M src/generations/models.py\n M src/generations/runner.py\n M state/journal.jsonl\n M state/last_plan.json\n M state/memory.sqlite3\n M state/runtime.json\n?? state/opencode/input/\n?? state/opencode/ses_3402747b9ffeQjFcaXAJs2iokk.json",
-  "recent_commits": "ca1c9f3 loop 4: Tighten the hello game pipeline and runtime narrative without expand\nb0f81db loop 3: Refresh observability artifacts and keep the website aligned with th\n754d0d3 loop 2: Tighten the hello game pipeline and runtime narrative without expand\nbab2bc4 loop 1: Refresh observability artifacts and keep the website aligned with th\ndcab437 Initial commit",
-  "planned_commit_message": "loop 5: Refresh observability artifacts and keep the website aligned with th"
-}

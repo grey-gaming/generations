@@ -1,3 +1,0 @@
-Generations OpenCode session bootstrap.
-Attached files provide the planned workflow and current git context.
-Use them for repository-aware summarization only.
