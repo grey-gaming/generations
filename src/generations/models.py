@@ -33,6 +33,7 @@ class ValidationResult:
 @dataclass(slots=True)
 class OpenCodePlan:
     summary: str
+    editable_files: list[str]
     files_expected: list[str]
     website_change_reason: str
     monetization_change_reason: str
@@ -40,6 +41,7 @@ class OpenCodePlan:
     def as_dict(self) -> dict[str, Any]:
         return {
             "summary": self.summary,
+            "editable_files": self.editable_files,
             "files_expected": self.files_expected,
             "website_change_reason": self.website_change_reason,
             "monetization_change_reason": self.monetization_change_reason,

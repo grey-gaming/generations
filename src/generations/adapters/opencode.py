@@ -23,6 +23,7 @@ class OpenCodeResult:
     rolled_back: bool
     opencode_session_id: str | None
     opencode_session_export: str | None
+    opencode_changed_files: list[str]
 
 
 class OpenCodeAdapter:
@@ -38,19 +39,19 @@ class OpenCodeAdapter:
         verify_commands: list[list[str]],
         commit_message: str,
     ) -> OpenCodeResult:
-        session_id = self._start_session(plan, commit_message)
         backup_dir = self.root / ".generations_tmp_backup"
         backups = self._snapshot_files(plan.files_expected, backup_dir)
-        files_touched = apply_fn()
+        session_id, opencode_files = self._apply_via_opencode(plan, commit_message)
+        files_touched = list(dict.fromkeys(opencode_files + apply_fn()))
         validation = [self._run_command(cmd) for cmd in verify_commands]
         if not all(item.success for item in validation):
             self._restore_files(backups, backup_dir)
             export_path = self._export_session(session_id) if session_id else None
-            return OpenCodeResult(plan, files_touched, validation, None, False, True, session_id, export_path)
+            return OpenCodeResult(plan, files_touched, validation, None, False, True, session_id, export_path, opencode_files)
         commit_hash = self._commit(commit_message)
         shutil.rmtree(backup_dir, ignore_errors=True)
         export_path = self._export_session(session_id) if session_id else None
-        return OpenCodeResult(plan, files_touched, validation, commit_hash, commit_hash is not None, False, session_id, export_path)
+        return OpenCodeResult(plan, files_touched, validation, commit_hash, commit_hash is not None, False, session_id, export_path, opencode_files)
 
     def _run_command(self, command: list[str]) -> ValidationResult:
         completed = subprocess.run(
@@ -125,21 +126,23 @@ class OpenCodeAdapter:
     def export_plan(self, plan: OpenCodePlan, path: Path) -> None:
         path.write_text(json.dumps(plan.as_dict(), indent=2) + "\n", encoding="utf-8")
 
-    def _start_session(self, plan: OpenCodePlan, commit_message: str) -> str | None:
+    def _apply_via_opencode(self, plan: OpenCodePlan, commit_message: str) -> tuple[str | None, list[str]]:
         if not self.binary.exists():
-            return None
+            return None, []
         before = set(self._list_sessions())
+        before_diff = set(self._git_changed_files())
         attachments = self._prepare_session_files(plan, commit_message)
         prompt = json.dumps(
             {
-                "task": "Record this Generations workflow session.",
+                "task": "Apply one tiny coherent repository edit for Generations.",
                 "plan": plan.as_dict(),
                 "commit_message": commit_message,
                 "cwd": str(self.root),
                 "instruction": (
-                    "Summarize the plan in one concise paragraph. "
-                    "You may inspect the attached git context and plan files to understand repository state. "
-                    "Do not edit files."
+                    "Use the attached plan and git context to make a real file edit in this repository. "
+                    "Only edit files listed in editable_files. Keep the change tiny, coherent, and reversible. "
+                    "Do not commit. Do not touch generated state, caches, sqlite files, or logs. "
+                    "Prefer the smallest change that advances the stated workstream and capability target."
                 ),
             },
             sort_keys=True,
@@ -161,27 +164,17 @@ class OpenCodeAdapter:
         command.append(prompt)
         completed = subprocess.run(command, cwd=self.root, env=self._env(), check=False, capture_output=True, text=True)
         if completed.returncode != 0:
-            command = [
-                str(self.binary),
-                "run",
-                "--format",
-                "json",
-                "--title",
-                f"Generations workflow: {plan.summary[:48]}",
-                "--dir",
-                str(self.root),
-                "--command",
-                "/bin/true",
-            ]
-            for attachment in attachments:
-                command.extend(["--file", str(attachment)])
-            command.append(prompt)
-            subprocess.run(command, cwd=self.root, env=self._env(), check=False, capture_output=True, text=True)
+            return None, []
         after = self._list_sessions()
+        session_id = None
         for session_id in after:
             if session_id not in before:
-                return session_id
-        return after[0] if after else None
+                break
+        if session_id is None:
+            session_id = after[0] if after else None
+        after_diff = set(self._git_changed_files())
+        opencode_files = sorted(after_diff - before_diff)
+        return session_id, opencode_files
 
     def _prepare_session_files(self, plan: OpenCodePlan, commit_message: str) -> list[Path]:
         input_dir = self.config.opencode_state_dir / "input"
@@ -195,10 +188,15 @@ class OpenCodeAdapter:
         note_path.write_text(
             "Generations OpenCode session bootstrap.\n"
             "Attached files provide the planned workflow and current git context.\n"
-            "Use them for repository-aware summarization only.\n",
+            "Use them for repository-aware editing within the allowed editable files only.\n",
             encoding="utf-8",
         )
-        return [plan_path, git_path, note_path]
+        attachments = [plan_path, git_path, note_path]
+        for relative in plan.editable_files:
+            candidate = self.root / relative
+            if candidate.exists() and candidate.is_file():
+                attachments.append(candidate)
+        return attachments
 
     def _git_context(self, commit_message: str) -> dict[str, object]:
         return {
@@ -218,6 +216,15 @@ class OpenCodeAdapter:
             text=True,
         )
         return completed.stdout.strip()
+
+    def _git_changed_files(self) -> list[str]:
+        output = self._git_output(["git", "status", "--short"])
+        changed: list[str] = []
+        for line in output.splitlines():
+            if not line.strip():
+                continue
+            changed.append(line[3:])
+        return changed
 
     def _list_sessions(self) -> list[str]:
         if not self.binary.exists():

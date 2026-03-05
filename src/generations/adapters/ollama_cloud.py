@@ -109,6 +109,7 @@ class OllamaCloudAdapter:
             "- Favor steps that help the system become better at developing software that can eventually produce a game.\n"
             "- Treat the website as a first-class artifact that may evolve over time.\n"
             "- target_files must be a short list of relative repository paths.\n"
+            "- target_files should prefer source files, docs, templates, or game workspace files; avoid generated state files, sqlite files, caches, and logs.\n"
             "Return JSON only. No markdown. No prose before or after JSON.\n"
             "Required JSON keys:\n"
             "- workstream: one of autonomous_platform or game_workspace\n"
@@ -154,8 +155,8 @@ class OllamaCloudAdapter:
             ),
             target_files=[
                 "README.md",
-                "state/runtime.json",
                 "games/hello_game/README.md",
+                "src/generations/web/templates/index.html",
             ],
             website_change=True,
             website_reason="Keep the journey page and exported site in sync with the latest autonomous state.",

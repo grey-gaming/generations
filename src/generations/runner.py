@@ -80,6 +80,7 @@ class Runner:
 
         plan = OpenCodePlan(
             summary=f"{proposal.workstream}:{proposal.capability_target}: {proposal.description}",
+            editable_files=proposal.target_files,
             files_expected=proposal.target_files + [
                 "state/loop_snapshot.json",
                 "state/website_notes.md",
@@ -136,6 +137,7 @@ class Runner:
             "opencode": {
                 "session_id": result.opencode_session_id,
                 "session_export": result.opencode_session_export,
+                "changed_files": result.opencode_changed_files,
                 "binary": str(self.opencode.binary),
             },
             "model_provider": model_metadata,
@@ -194,13 +196,6 @@ class Runner:
         runtime_snapshot_path = self.config.state_dir / "loop_snapshot.json"
         runtime_snapshot_path.write_text(json.dumps(runtime_note, indent=2) + "\n", encoding="utf-8")
         touched.append(str(runtime_snapshot_path.relative_to(self.root)))
-
-        hello_readme = self.root / "games" / "hello_game" / "README.md"
-        line = f"- Loop {loop_counter}: {proposal.description}\n"
-        existing = hello_readme.read_text(encoding="utf-8") if hello_readme.exists() else "# Hello Game\n\n"
-        if line not in existing:
-            hello_readme.write_text(existing + line, encoding="utf-8")
-            touched.append(str(hello_readme.relative_to(self.root)))
 
         website_notes = self.root / "state" / "website_notes.md"
         website_notes.write_text(

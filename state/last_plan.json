@@ -1,9 +1,14 @@
 {
-  "summary": "autonomous_platform:website: Refresh observability artifacts and keep the website aligned with the latest runtime state",
+  "summary": "game_workspace:game_pipeline: Tighten the hello game pipeline and runtime narrative without expanding scope",
+  "editable_files": [
+    "README.md",
+    "games/hello_game/README.md",
+    "src/generations/web/templates/index.html"
+  ],
   "files_expected": [
     "README.md",
-    "state/runtime.json",
     "games/hello_game/README.md",
+    "src/generations/web/templates/index.html",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
