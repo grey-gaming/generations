@@ -1,0 +1,16 @@
+{
+  "summary": "game_workspace:game_design: Create initial game design document outlining core logistics loop and success criteria.",
+  "editable_files": [
+    "docs/GAME_DESIGN_V1.md"
+  ],
+  "files_expected": [
+    "docs/GAME_DESIGN_V1.md",
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html",
+    "site/style.css"
+  ],
+  "website_change_reason": "Publicly commit to the project direction to build audience trust and accountability.",
+  "monetization_change_reason": "Premature to monetize before validating core design and building audience trust."
+}
