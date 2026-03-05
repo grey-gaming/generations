@@ -9,6 +9,7 @@ import subprocess
 from typing import Callable
 
 from generations.config import AppConfig
+from generations.config import DEFAULT_MODEL
 from generations.models import OpenCodePlan, ValidationResult
 
 
@@ -128,6 +129,16 @@ class OpenCodeAdapter:
         if not self.binary.exists():
             return None
         before = set(self._list_sessions())
+        prompt = json.dumps(
+            {
+                "task": "Record this Generations workflow session.",
+                "plan": plan.as_dict(),
+                "commit_message": commit_message,
+                "cwd": str(self.root),
+                "instruction": "Summarize the plan in one concise paragraph and do not edit files.",
+            },
+            sort_keys=True,
+        )
         command = [
             str(self.binary),
             "run",
@@ -135,18 +146,24 @@ class OpenCodeAdapter:
             "json",
             "--title",
             f"Generations workflow: {plan.summary[:48]}",
-            "--command",
-            "/bin/true",
-            json.dumps(
-                {
-                    "plan": plan.as_dict(),
-                    "commit_message": commit_message,
-                    "cwd": str(self.root),
-                },
-                sort_keys=True,
-            ),
+            "--model",
+            f"ollama/{DEFAULT_MODEL}",
+            prompt,
         ]
-        subprocess.run(command, cwd=self.root, env=self._env(), check=False, capture_output=True, text=True)
+        completed = subprocess.run(command, cwd=self.root, env=self._env(), check=False, capture_output=True, text=True)
+        if completed.returncode != 0:
+            command = [
+                str(self.binary),
+                "run",
+                "--format",
+                "json",
+                "--title",
+                f"Generations workflow: {plan.summary[:48]}",
+                "--command",
+                "/bin/true",
+                prompt,
+            ]
+            subprocess.run(command, cwd=self.root, env=self._env(), check=False, capture_output=True, text=True)
         after = self._list_sessions()
         for session_id in after:
             if session_id not in before:
@@ -211,4 +228,28 @@ class OpenCodeAdapter:
                 "XDG_CACHE_HOME": str(cache_dir),
             }
         )
+        self._write_config(config_dir)
         return env
+
+    def _write_config(self, config_dir: Path) -> None:
+        opencode_dir = config_dir / "opencode"
+        opencode_dir.mkdir(parents=True, exist_ok=True)
+        config_path = opencode_dir / "opencode.json"
+        config = {
+            "$schema": "https://opencode.ai/config.json",
+            "provider": {
+                "ollama": {
+                    "npm": "@ai-sdk/openai-compatible",
+                    "name": "Ollama",
+                    "options": {
+                        "baseURL": os.getenv("OLLAMA_OPENCODE_BASE_URL", "http://localhost:11434/v1"),
+                    },
+                    "models": {
+                        DEFAULT_MODEL: {
+                            "name": DEFAULT_MODEL,
+                        }
+                    },
+                }
+            },
+        }
+        config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")

@@ -1,0 +1,32 @@
+{
+  "info": {
+    "id": "ses_340290a06ffeo4qJ9roS8DplmD",
+    "slug": "cosmic-tiger",
+    "projectID": "dcab437ad58279a2521db9a5f641845ff0e8695c",
+    "directory": "/home/jishm/code/generations",
+    "title": "Generations workflow: Refresh observability artifacts and keep the web",
+    "version": "1.2.18",
+    "permission": [
+      {
+        "permission": "question",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_enter",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_exit",
+        "pattern": "*",
+        "action": "deny"
+      }
+    ],
+    "time": {
+      "created": 1772745061881,
+      "updated": 1772745061881
+    }
+  },
+  "messages": []
+}
