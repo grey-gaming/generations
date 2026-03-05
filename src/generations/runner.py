@@ -50,19 +50,23 @@ class Runner:
         export_site(self.root)
 
     def run(self) -> None:
+        self._log_run_header()
         while True:
             if self.config.pause_flag.exists():
                 self.runtime.paused = True
                 self.runtime.last_decision = "paused"
                 save_runtime_state(self.config.runtime_path, self.runtime)
+                self._log("paused", "pause flag detected")
                 break
 
             if self.stop_requested:
                 self._journal_shutdown("graceful shutdown requested via Ctrl+C")
+                self._log("stop", "graceful shutdown requested via Ctrl+C")
                 break
 
             if self.config.operational_max_loops is not None and self.runtime.loop_count >= self.config.operational_max_loops:
                 self._journal_shutdown("operational safety valve reached max loop count")
+                self._log("stop", "operational max loop limit reached")
                 break
 
             continue_running = self._run_single_loop()
@@ -157,6 +161,7 @@ class Runner:
             "journal_entry_count_before_write": before_journal_count,
         }
         self.journal.append(entry)
+        self._log_loop_result(loop_counter, proposal, result, validation_success, continue_running, reason)
 
         self.runtime = RuntimeState(
             loop_count=loop_counter,
@@ -314,6 +319,35 @@ class Runner:
 
     def _timestamp(self) -> str:
         return datetime.now(timezone.utc).isoformat()
+
+    def _log_run_header(self) -> None:
+        print(
+            f"run start: seed_sha={sha256(self.seed.encode('utf-8')).hexdigest()[:12]} "
+            f"loop_start={self.runtime.loop_count} criteria_v={self.runtime.current_criteria_version}",
+            flush=True,
+        )
+
+    def _log_loop_result(
+        self,
+        loop_counter: int,
+        proposal: Any,
+        result: Any,
+        validation_success: bool,
+        continue_running: bool,
+        reason: str,
+    ) -> None:
+        changed_files = ",".join(result.opencode_changed_files[:4]) if result.opencode_changed_files else "-"
+        commit_hash = result.commit_hash[:10] if result.commit_hash else "none"
+        print(
+            f"loop={loop_counter} workstream={proposal.workstream} capability={proposal.capability_target} "
+            f"validation={'pass' if validation_success else 'fail'} commit={commit_hash} "
+            f"opencode_files={changed_files} decision={'continue' if continue_running else 'stop'}",
+            flush=True,
+        )
+        print(f"reason: {reason}", flush=True)
+
+    def _log(self, event: str, message: str) -> None:
+        print(f"{event}: {message}", flush=True)
 
 
 def init_repo_if_needed(root: Path) -> None:

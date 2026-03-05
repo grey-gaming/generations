@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 from pathlib import Path
+import threading
 import sys
 
 from generations.config import AppConfig
@@ -16,6 +17,8 @@ def build_parser() -> argparse.ArgumentParser:
 
     run_parser = subparsers.add_parser("run")
     run_parser.add_argument("--seed", required=True)
+    run_parser.add_argument("--host", default="127.0.0.1")
+    run_parser.add_argument("--port", type=int, default=8000)
 
     web_parser = subparsers.add_parser("web")
     web_parser.add_argument("--host", default="127.0.0.1")
@@ -37,6 +40,7 @@ def main(argv: list[str] | None = None) -> int:
     init_repo_if_needed(root)
 
     if args.command == "run":
+        _maybe_start_embedded_web(root, args.host, args.port)
         Runner(root, args.seed).run()
         return 0
 
@@ -78,6 +82,22 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     return 1
+
+
+def _maybe_start_embedded_web(root: Path, host: str, port: int) -> None:
+    try:
+        import uvicorn
+        from generations.web.app import create_app
+    except ModuleNotFoundError:
+        print("web unavailable: install project dependencies to enable the embedded journey server", flush=True)
+        return
+
+    app = create_app(root)
+    config = uvicorn.Config(app=app, host=host, port=port, log_level="warning")
+    server = uvicorn.Server(config)
+    thread = threading.Thread(target=server.run, daemon=True, name="generations-web")
+    thread.start()
+    print(f"web ready: http://{host}:{port}", flush=True)
 
 
 if __name__ == "__main__":
