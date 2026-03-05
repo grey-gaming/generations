@@ -1,16 +1,20 @@
 {
-  "summary": "game_workspace:game_design: Create initial game design document outlining core logistics loop and success criteria.",
+  "summary": "game_workspace:game_pipeline: Tighten the hello game pipeline and runtime narrative without expanding scope",
   "editable_files": [
-    "docs/GAME_DESIGN_V1.md"
+    "README.md",
+    "games/hello_game/README.md",
+    "src/generations/web/templates/index.html"
   ],
   "files_expected": [
-    "docs/GAME_DESIGN_V1.md",
+    "README.md",
+    "games/hello_game/README.md",
+    "src/generations/web/templates/index.html",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Publicly commit to the project direction to build audience trust and accountability.",
-  "monetization_change_reason": "Premature to monetize before validating core design and building audience trust."
+  "website_change_reason": "Keep the journey page and exported site in sync with the latest autonomous state.",
+  "monetization_change_reason": "No change; preserve the honest support placeholder until more evidence exists."
 }

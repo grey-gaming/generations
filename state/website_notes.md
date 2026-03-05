@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 1
+Latest loop: 2
 
-Visible intent: Publicly commit to the project direction to build audience trust and accountability.
+Visible intent: Keep the journey page and exported site in sync with the latest autonomous state.
 
 Support remains a minimal placeholder until a logged experiment is justified.
