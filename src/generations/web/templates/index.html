@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generations Journey</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">Generations</p>
+      <h1>Autonomous journey</h1>
+      <p class="lede">The system can evolve its criteria, website, and monetization strategy over time. Each change is logged in the journal and reflected here.</p>
+    </section>
+
+    <section class="grid">
+      <article class="card emphasis">
+        <h2>Status</h2>
+        <dl>
+          <dt>Loop Count</dt><dd>{{ runtime.loop_count }}</dd>
+          <dt>Criteria Version</dt><dd>{{ runtime.current_criteria_version }}</dd>
+          <dt>Paused</dt><dd>{{ runtime.paused }}</dd>
+          <dt>Last Decision</dt><dd>{{ runtime.last_decision }}</dd>
+          <dt>Last Commit</dt><dd>{{ runtime.last_commit or "none yet" }}</dd>
+        </dl>
+      </article>
+
+      <article class="card">
+        <h2>Current Criteria</h2>
+        {% set criteria = memory.criteria_history[-1] %}
+        <p>{{ criteria.summary }}</p>
+        <ul>
+          {% for item in criteria.ship_rules %}
+          <li>{{ item }}</li>
+          {% endfor %}
+        </ul>
+      </article>
+
+      <article class="card">
+        <h2>Support</h2>
+        <p>This is a placeholder support area. Generations may test small, honest income ideas later, and every experiment will be logged before it is expanded.</p>
+      </article>
+
+      <article class="card">
+        <h2>Disclosure</h2>
+        <p>No deceptive UI, fake scarcity, dark patterns, or default tracking. Sponsorships, affiliates, and analytics must be labeled, reversible, and validated.</p>
+      </article>
+    </section>
+
+    <section class="card wide">
+      <h2>Heuristics</h2>
+      <div class="columns">
+        <div>
+          <h3>Core</h3>
+          <ul>
+            {% for item in memory.heuristics %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h3>Website</h3>
+          <ul>
+            {% for item in memory.website_heuristics %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h3>Monetization</h3>
+          <ul>
+            {% for item in memory.monetization_heuristics %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card wide">
+      <h2>Monetization Experiments</h2>
+      <ul>
+        {% for item in memory.monetization_experiments %}
+        <li>{{ item.name }} - {{ item.status }} - {{ item.reason }} - outcome: {{ item.outcome }}</li>
+        {% endfor %}
+      </ul>
+      <p class="note">Generations may evolve this page and its monetization approach over time. Website changes are treated as first-class artifacts and are logged with intent.</p>
+    </section>
+
+    <section class="card wide">
+      <h2>Journal Timeline</h2>
+      {% if entries %}
+        {% for entry in entries %}
+        <article class="entry">
+          <header>
+            <strong>Loop {{ entry.loop_counter }}</strong>
+            <span>{{ entry.timestamp }}</span>
+          </header>
+          <p>{{ entry.next_step.description }}</p>
+          <p>Validation: {{ entry.validation_summary }}</p>
+          <p>Website: {{ entry.website_change.summary }}</p>
+          <p>Monetization: {{ entry.monetization_change.summary }}</p>
+        </article>
+        {% endfor %}
+      {% else %}
+        <p>No journal entries yet.</p>
+      {% endif %}
+    </section>
+  </main>
+</body>
+</html>
