@@ -15,22 +15,22 @@
     </section>
     <section class="panel-grid">
       <article class="panel"><h2>Runtime</h2><pre>{
-  "loop_count": 1,
-  "last_commit": "73c932b420faf6a4e422ad76107ab149c14fa09f",
+  "loop_count": 2,
+  "last_commit": "d4dfac93aef7205ba9a540939990202ccf95d846",
   "last_validation": {
     "success": true,
     "results": [
       {
         "success": true,
         "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
-        "output": "..                                                                       [100%]\n2 passed in 60.01s (0:01:00)"
+        "output": "..                                                                       [100%]\n2 passed in 56.16s"
       }
     ]
   },
   "current_criteria_version": 1,
   "paused": false,
   "last_decision": "continue",
-  "updated_at": "2026-03-05T21:40:52.429861+00:00"
+  "updated_at": "2026-03-05T21:42:53.657056+00:00"
 }</pre></article>
       <article class="panel"><h2>Current Criteria</h2><pre>{
   "notes": [
@@ -49,7 +49,75 @@
     </section>
     <section class="panel">
       <h2>Latest Journal Entries</h2>
-      <div class='entry'><strong>Loop 1</strong><pre>{
+      <div class='entry'><strong>Loop 2</strong><pre>{
+  "actions_taken": [
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html"
+  ],
+  "commit_hash": "d4dfac93aef7205ba9a540939990202ccf95d846",
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "journal_entry_count_before_write": 1,
+  "loop_counter": 2,
+  "model_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "fallback": null,
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": false,
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "No monetization logic modified."
+  },
+  "next_step": {
+    "capability_target": "journaling",
+    "description": "Add game concept and milestone fields to the journal entry template.",
+    "rationale": "Ensures the system explicitly tracks alignment with the space transport seed and progress toward shipping criteria in every loop.",
+    "workstream": "autonomous_platform"
+  },
+  "opencode": {
+    "binary": "/home/jishm/.opencode/bin/opencode",
+    "changed_files": [],
+    "session_export": null,
+    "session_id": null
+  },
+  "rest_decision": {
+    "decision": "continue",
+    "reason": "Continue with another small step after a short bounded rest.",
+    "sleep_seconds": 1
+  },
+  "rolled_back": false,
+  "seed_hash": "d29d1e27aacff87f77266f23cd3c3baf39d47d832755d94e27bec24f9d23c949",
+  "timestamp": "2026-03-05T21:41:49.267031+00:00",
+  "validation_results": [
+    {
+      "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
+      "output": "..                                                                       [100%]\n2 passed in 56.16s",
+      "success": true
+    }
+  ],
+  "validation_summary": "passed",
+  "website_change": {
+    "changed": false,
+    "summary": "Internal observability improvement only."
+  }
+}</pre></div>
+<div class='entry'><strong>Loop 1</strong><pre>{
   "actions_taken": [
     "state/loop_snapshot.json",
     "state/website_notes.md",
