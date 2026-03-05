@@ -15,7 +15,7 @@ Generations is a minimal Ubuntu-first autonomous codebase that can run locally, 
 - Append-only journal in `state/journal.jsonl`
 - Queryable memory snapshots in `state/memory.sqlite3`
 - Local journey website rendered from on-disk artifacts
-- `games/hello_game/` seed game workspace
+- `games/space_logistics/` seed game workspace
 - OpenCode CLI adapter using the installed `opencode` binary for workflow session artifacts
 - Ollama adapter using the local daemon/API with required default model `qwen3.5:397b-cloud`
 

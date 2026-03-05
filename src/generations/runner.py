@@ -121,6 +121,11 @@ class Runner:
         else:
             latest_memory["outcomes"]["fail_count"] += 1
             latest_memory["outcomes"]["last_error"] = result.validation[-1].output if result.validation else "validation failed"
+            heuristics = list(latest_memory.get("heuristics", []))
+            failure_heuristic = "Avoid no-op loops: each successful iteration should produce a meaningful repo edit outside generated state."
+            if failure_heuristic not in heuristics:
+                heuristics.append(failure_heuristic)
+            latest_memory["heuristics"] = heuristics
         latest_memory["evaluation_metrics"] = self._update_metrics_memory(
             latest_memory.get("evaluation_metrics", {}),
             loop_counter,
@@ -151,6 +156,8 @@ class Runner:
                 "session_id": result.opencode_session_id,
                 "session_export": result.opencode_session_export,
                 "changed_files": result.opencode_changed_files,
+                "pushed": result.pushed,
+                "push_output": result.push_output,
                 "binary": str(self.opencode.binary),
             },
             "model_provider": model_metadata,
@@ -327,10 +334,10 @@ class Runner:
                 "project_status": {
                     "website": "running and exportable",
                     "monetization": "minimal support placeholder with disclosure",
-                    "games": "hello_game placeholder present",
+                    "games": "space_logistics seed workspace present",
                 },
                 "last_known_validation_state": memory["outcomes"].get("last_validation"),
-                "would_do_next": "Expand evaluation heuristics and grow the hello_game prototype toward a more Steam-plausible direction.",
+                "would_do_next": "Grow the space_logistics workspace from design toward a more credible playable prototype.",
             },
         }
         self.journal.append(final_entry)

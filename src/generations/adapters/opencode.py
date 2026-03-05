@@ -24,6 +24,8 @@ class OpenCodeResult:
     opencode_session_id: str | None
     opencode_session_export: str | None
     opencode_changed_files: list[str]
+    pushed: bool
+    push_output: str
 
 
 class OpenCodeAdapter:
@@ -43,15 +45,28 @@ class OpenCodeAdapter:
         backups = self._snapshot_files(plan.files_expected, backup_dir)
         session_id, opencode_files = self._apply_via_opencode(plan, commit_message)
         files_touched = list(dict.fromkeys(opencode_files + apply_fn()))
+        meaningful_files = self._meaningful_repo_files(files_touched)
+        if not meaningful_files:
+            self._restore_files(backups, backup_dir)
+            export_path = self._export_session(session_id) if session_id else None
+            validation = [
+                ValidationResult(
+                    success=False,
+                    command="policy:meaningful-repo-edit",
+                    output="No meaningful repository edit was produced outside state/ and site/.",
+                )
+            ]
+            return OpenCodeResult(plan, files_touched, validation, None, False, True, session_id, export_path, opencode_files, False, "")
         validation = [self._run_command(cmd) for cmd in verify_commands]
         if not all(item.success for item in validation):
             self._restore_files(backups, backup_dir)
             export_path = self._export_session(session_id) if session_id else None
-            return OpenCodeResult(plan, files_touched, validation, None, False, True, session_id, export_path, opencode_files)
+            return OpenCodeResult(plan, files_touched, validation, None, False, True, session_id, export_path, opencode_files, False, "")
         commit_hash = self._commit(commit_message)
+        pushed, push_output = self._push_current_branch() if commit_hash else (False, "")
         shutil.rmtree(backup_dir, ignore_errors=True)
         export_path = self._export_session(session_id) if session_id else None
-        return OpenCodeResult(plan, files_touched, validation, commit_hash, commit_hash is not None, False, session_id, export_path, opencode_files)
+        return OpenCodeResult(plan, files_touched, validation, commit_hash, commit_hash is not None, False, session_id, export_path, opencode_files, pushed, push_output)
 
     def _run_command(self, command: list[str]) -> ValidationResult:
         completed = subprocess.run(
@@ -225,6 +240,30 @@ class OpenCodeAdapter:
                 continue
             changed.append(line[3:])
         return changed
+
+    def _meaningful_repo_files(self, files: list[str]) -> list[str]:
+        return [
+            path for path in files
+            if path
+            and not path.startswith("state/")
+            and not path.startswith("site/")
+            and "__pycache__" not in path
+            and not path.endswith(".pyc")
+        ]
+
+    def _push_current_branch(self) -> tuple[bool, str]:
+        branch = self._git_output(["git", "branch", "--show-current"])
+        if not branch:
+            return False, "No current branch to push."
+        completed = subprocess.run(
+            ["git", "push", "origin", branch],
+            cwd=self.root,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        output = (completed.stdout + completed.stderr).strip()
+        return completed.returncode == 0, output
 
     def _list_sessions(self) -> list[str]:
         if not self.binary.exists():

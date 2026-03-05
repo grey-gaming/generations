@@ -161,7 +161,7 @@ class OllamaCloudAdapter:
         description = (
             "Refresh observability artifacts and keep the website aligned with the latest runtime state"
             if loop_count % 2 == 1
-            else "Tighten the hello game pipeline and runtime narrative without expanding scope"
+            else "Advance the space logistics game workspace toward a clearer design and build pipeline"
         )
         return StepProposal(
             workstream="autonomous_platform" if loop_count % 2 == 1 else "game_workspace",
@@ -173,7 +173,7 @@ class OllamaCloudAdapter:
             ),
             target_files=[
                 "README.md",
-                "games/hello_game/README.md",
+                "games/space_logistics/README.md",
                 "src/generations/web/templates/index.html",
             ],
             website_change=True,
