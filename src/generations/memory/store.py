@@ -51,8 +51,8 @@ DEFAULT_MEMORY = {
         }
     ],
     "tool_routing": {
-        "execution_surface": "OpenCode adapter stub",
-        "model_provider": "Ollama Cloud adapter stub",
+        "execution_surface": "OpenCode CLI adapter",
+        "model_provider": "Ollama local daemon adapter",
     },
 }
 

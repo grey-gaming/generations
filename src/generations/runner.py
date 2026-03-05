@@ -131,6 +131,11 @@ class Runner:
             "validation_summary": "passed" if validation_success else "failed",
             "commit_hash": result.commit_hash,
             "rolled_back": result.rolled_back,
+            "opencode": {
+                "session_id": result.opencode_session_id,
+                "session_export": result.opencode_session_export,
+                "binary": str(self.opencode.binary),
+            },
             "model_provider": model_metadata,
             "rest_decision": {
                 "decision": "continue" if continue_running else "stop",
@@ -210,7 +215,7 @@ class Runner:
                 heuristics.append(item)
         updated_memory["heuristics"] = heuristics
         updated_memory["tool_routing"] = {
-            "execution_surface": "OpenCode adapter stub (plan -> apply -> verify -> commit)",
+            "execution_surface": f"OpenCode CLI ({self.opencode.binary}) with local session export and guarded shell execution",
             "model_provider": f"{model_metadata['provider']}:{model_metadata['model']}",
         }
         self.memory.replace(updated_memory, created_at=self._timestamp())

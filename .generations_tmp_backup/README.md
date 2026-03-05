@@ -16,8 +16,8 @@ Generations is a minimal Ubuntu-first autonomous codebase that can run locally, 
 - Queryable memory snapshots in `state/memory.sqlite3`
 - Local journey website rendered from on-disk artifacts
 - `games/hello_game/` seed game workspace
-- OpenCode adapter stub with `plan -> apply -> verify -> commit`
-- Ollama Cloud adapter stub with required default model `qwen3.5:397b-cloud`
+- OpenCode CLI adapter using the installed `opencode` binary for workflow session artifacts
+- Ollama adapter using the local daemon/API with required default model `qwen3.5:397b-cloud`
 
 ## Ubuntu Setup
 
@@ -115,13 +115,19 @@ The runner treats website changes as first-class artifacts and records their int
 
 All autonomous edits go through the OpenCode adapter interface only.
 
-Current local adapter behavior:
+Current adapter behavior:
 1. produce a plan
 2. apply a small change
 3. run validation
 4. create one small commit if validation passes
 
-If validation fails, the loop stops and the failure is journaled. The adapter boundary is the intended swap point for a real OpenCode integration later.
+OpenCode notes:
+- uses the installed `opencode` binary if available
+- stores OpenCode session artifacts under `state/opencode/`
+- keeps rollback and shell execution guardrails in Python because OpenCode CLI command execution is not yet relied on for file mutation here
+- each loop journals the OpenCode session id/export path
+
+If validation fails, the loop stops, expected touched files are rolled back, and the failure is journaled.
 
 Validation behavior:
 - preferred: `pytest` smoke/unit checks
@@ -134,17 +140,27 @@ Validation behavior:
 
 Current file: `src/generations/adapters/opencode.py`
 
-Replace the local subprocess workflow with real OpenCode API calls while preserving the adapter interface consumed by `runner.py`.
+Defaults:
+- binary path: `~/.opencode/bin/opencode`
+- state dirs redirected into `state/opencode/` to avoid writing into restricted home paths
 
-### Ollama Cloud
+Override with:
+- `OPENCODE_BIN=/path/to/opencode`
+
+### Ollama
 
 Current file: `src/generations/adapters/ollama_cloud.py`
 
-Default metadata always names:
-- provider: `ollama_cloud`
+Defaults:
+- provider metadata: `ollama_cloud`
 - model: `qwen3.5:397b-cloud`
+- base URL: `http://127.0.0.1:11434`
 
-When credentials are available, replace the deterministic proposal stub with real Ollama Cloud requests without changing the caller contract.
+Override with:
+- `GENERATIONS_MODEL=...`
+- `OLLAMA_BASE_URL=http://host:11434`
+
+If the local daemon is unreachable, the adapter falls back to the deterministic proposal path and records that fallback in journal metadata.
 
 ## Tests
 

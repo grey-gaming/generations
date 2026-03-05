@@ -15,13 +15,22 @@
     </section>
     <section class="panel-grid">
       <article class="panel"><h2>Runtime</h2><pre>{
-  "loop_count": 0,
-  "last_commit": null,
-  "last_validation": null,
+  "loop_count": 1,
+  "last_commit": "bab2bc4c7be812881099cf1e7fc0a367fdd5029b",
+  "last_validation": {
+    "success": true,
+    "results": [
+      {
+        "success": true,
+        "command": "/usr/bin/python3 -m compileall src tests games",
+        "output": "Listing 'src'...\nListing 'src/generations'...\nListing 'src/generations/adapters'...\nListing 'src/generations/journal'...\nListing 'src/generations/memory'...\nListing 'src/generations/web'...\nListing 'src/generations/web/static'...\nListing 'src/generations/web/templates'...\nListing 'tests'...\nListing 'games'...\nListing 'games/hello_game'..."
+      }
+    ]
+  },
   "current_criteria_version": 1,
   "paused": false,
-  "last_decision": "idle",
-  "updated_at": "2026-03-05T21:01:08.347429+00:00"
+  "last_decision": "stop",
+  "updated_at": "2026-03-05T21:10:03.053923+00:00"
 }</pre></article>
       <article class="panel"><h2>Current Criteria</h2><pre>{
   "notes": [
@@ -40,7 +49,142 @@
     </section>
     <section class="panel">
       <h2>Latest Journal Entries</h2>
-      <p>No journal entries yet.</p>
+      <div class='entry'><strong>Loop 1</strong><pre>{
+  "actions_taken": [],
+  "commit_hash": "bab2bc4c7be812881099cf1e7fc0a367fdd5029b",
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "done_summary": {
+    "criteria_version": 1,
+    "heuristics_used": [
+      "Favor tiny, coherent edits over ambitious rewrites.",
+      "Delay game scope growth until the website, journal, and memory remain healthy.",
+      "Prefer improvements that increase observability before increasing game complexity."
+    ],
+    "last_known_validation_state": [
+      {
+        "command": "/usr/bin/python3 -m compileall src tests games",
+        "output": "Listing 'src'...\nListing 'src/generations'...\nListing 'src/generations/adapters'...\nListing 'src/generations/journal'...\nListing 'src/generations/memory'...\nListing 'src/generations/web'...\nListing 'src/generations/web/static'...\nListing 'src/generations/web/templates'...\nListing 'tests'...\nListing 'games'...\nListing 'games/hello_game'...",
+        "success": true
+      }
+    ],
+    "project_status": {
+      "games": "hello_game placeholder present",
+      "monetization": "minimal support placeholder with disclosure",
+      "website": "running and exportable"
+    },
+    "reasons": [
+      "Bootstrap observability and self-edit loop are functioning.",
+      "Validation passed for the latest loop set.",
+      "Website and monetization baseline are active and logged."
+    ],
+    "would_do_next": "Expand evaluation heuristics and grow the hello_game prototype toward a more Steam-plausible direction."
+  },
+  "loop_counter": 1,
+  "model_provider": {
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": true,
+    "todo": "Swap deterministic stub with real Ollama Cloud API calls when credentials are available."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "Support placeholder remains active; no new monetization experiment was required."
+  },
+  "next_step": {
+    "description": "done",
+    "rationale": "Generations decided the current bootstrap objective is complete under the active criteria."
+  },
+  "rest_decision": {
+    "decision": "stop",
+    "reason": "Done under current criteria for the bootstrap stage.",
+    "sleep_seconds": 0
+  },
+  "seed_hash": "5e30cbaebeb39ac9e737a7279ffa0d17341446ae5dcd11b467eb4904277e998e",
+  "timestamp": "2026-03-05T21:01:08.696044+00:00",
+  "validation_results": [
+    {
+      "command": "/usr/bin/python3 -m compileall src tests games",
+      "output": "Listing 'src'...\nListing 'src/generations'...\nListing 'src/generations/adapters'...\nListing 'src/generations/journal'...\nListing 'src/generations/memory'...\nListing 'src/generations/web'...\nListing 'src/generations/web/static'...\nListing 'src/generations/web/templates'...\nListing 'tests'...\nListing 'games'...\nListing 'games/hello_game'...",
+      "success": true
+    }
+  ],
+  "validation_summary": "passed",
+  "website_change": {
+    "changed": false,
+    "summary": "Website remains available as the external journey surface."
+  }
+}</pre></div>
+<div class='entry'><strong>Loop 1</strong><pre>{
+  "actions_taken": [
+    "state/loop_snapshot.json",
+    "games/hello_game/README.md",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html"
+  ],
+  "commit_hash": "bab2bc4c7be812881099cf1e7fc0a367fdd5029b",
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "journal_entry_count_before_write": 0,
+  "loop_counter": 1,
+  "model_provider": {
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": true,
+    "todo": "Swap deterministic stub with real Ollama Cloud API calls when credentials are available."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "No change; preserve the honest support placeholder until more evidence exists."
+  },
+  "next_step": {
+    "description": "Refresh observability artifacts and keep the website aligned with the latest runtime state",
+    "rationale": "Deterministic stub proposal derived from seed digest 346b2cbf5510 and current heuristics count 2."
+  },
+  "rest_decision": {
+    "decision": "stop",
+    "reason": "Test harness mode performs exactly one safe loop for fast verification.",
+    "sleep_seconds": 0
+  },
+  "rolled_back": false,
+  "seed_hash": "5e30cbaebeb39ac9e737a7279ffa0d17341446ae5dcd11b467eb4904277e998e",
+  "timestamp": "2026-03-05T21:01:08.691620+00:00",
+  "validation_results": [
+    {
+      "command": "/usr/bin/python3 -m compileall src tests games",
+      "output": "Listing 'src'...\nListing 'src/generations'...\nListing 'src/generations/adapters'...\nListing 'src/generations/journal'...\nListing 'src/generations/memory'...\nListing 'src/generations/web'...\nListing 'src/generations/web/static'...\nListing 'src/generations/web/templates'...\nListing 'tests'...\nListing 'games'...\nListing 'games/hello_game'...",
+      "success": true
+    }
+  ],
+  "validation_summary": "passed",
+  "website_change": {
+    "changed": true,
+    "summary": "Keep the journey page and exported site in sync with the latest autonomous state."
+  }
+}</pre></div>
     </section>
   </main>
 </body>

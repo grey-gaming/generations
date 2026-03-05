@@ -37,6 +37,14 @@ class OpenCodePlan:
     website_change_reason: str
     monetization_change_reason: str
 
+    def as_dict(self) -> dict[str, Any]:
+        return {
+            "summary": self.summary,
+            "files_expected": self.files_expected,
+            "website_change_reason": self.website_change_reason,
+            "monetization_change_reason": self.monetization_change_reason,
+        }
+
 
 @dataclass(slots=True)
 class StepProposal:

@@ -19,6 +19,7 @@ class AppConfig:
     runtime_path: Path
     web_export_dir: Path
     games_dir: Path
+    opencode_state_dir: Path
     max_rest_seconds: int
     test_mode: bool
     operational_max_loops: int | None
@@ -37,6 +38,7 @@ class AppConfig:
             runtime_path=state_dir / "runtime.json",
             web_export_dir=root / "site",
             games_dir=root / "games",
+            opencode_state_dir=state_dir / "opencode",
             max_rest_seconds=int(os.getenv("GENERATIONS_MAX_REST_SECONDS", "5")),
             test_mode=os.getenv("GENERATIONS_TEST_MODE", "0") == "1",
             operational_max_loops=_optional_int(os.getenv("GENERATIONS_MAX_LOOPS")),

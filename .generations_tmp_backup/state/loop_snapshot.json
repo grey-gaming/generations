@@ -1,0 +1,12 @@
+{
+  "loop": 1,
+  "proposal": "Refresh observability artifacts and keep the website aligned with the latest runtime state",
+  "model": {
+    "provider": "ollama_cloud",
+    "model": "qwen3.5:397b-cloud",
+    "stubbed": true,
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "todo": "Swap deterministic stub with real Ollama Cloud API calls when credentials are available."
+  },
+  "timestamp": "2026-03-05T21:01:08.306965+00:00"
+}
