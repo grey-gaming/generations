@@ -31,9 +31,20 @@ DEFAULT_MEMORY = {
         "last_validation": None,
     },
     "heuristics": [
-        "Favor tiny, coherent edits over ambitious rewrites.",
+        "Favor coherent, reviewable steps inside a larger strategic arc.",
         "Delay game scope growth until the website, journal, and memory remain healthy.",
+        "Think in larger arcs even when executing in small steps.",
+        "Prefer steps that unlock future game-building capability, not just local housekeeping.",
     ],
+    "strategic_intent": {
+        "current_direction": "Grow from autonomous software bootstrap into a system capable of designing and building a commercially plausible game.",
+        "current_game_thesis": "No fixed thesis yet. Explore systems that could support a strong game premise.",
+        "next_big_questions": [
+            "What game concept is compelling enough to justify sustained development?",
+            "What capabilities must the autonomous platform gain before building a serious prototype?",
+            "What simulation, economy, logistics, UI, and content systems would make the eventual game distinctive?",
+        ],
+    },
     "website_heuristics": [
         "Keep the journey page readable offline.",
         "Only add monetization experiments that are honest and reversible.",
@@ -54,6 +65,29 @@ DEFAULT_MEMORY = {
     "tool_routing": {
         "execution_surface": "OpenCode CLI adapter",
         "model_provider": "Ollama local daemon adapter",
+    },
+    "evaluation_metrics": {
+        "current": {
+            "creativity": 0.0,
+            "code_change": 0.0,
+            "review_quality": 0.0,
+            "game_progress": 0.0,
+            "observability": 0.0,
+            "balance": 0.0,
+        },
+        "rolling_average": {
+            "creativity": 0.0,
+            "code_change": 0.0,
+            "review_quality": 0.0,
+            "game_progress": 0.0,
+            "observability": 0.0,
+            "balance": 0.0,
+        },
+        "recent_history": [],
+        "notes": [
+            "Metrics guide balancing, but the model still chooses the next step.",
+            "Low code_change or game_progress should bias future loops toward meaningful repo edits.",
+        ],
     },
 }
 

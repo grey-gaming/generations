@@ -16,7 +16,7 @@ from generations.adapters.opencode import OpenCodeAdapter
 from generations.config import AppConfig
 from generations.git_utils import ensure_git_identity
 from generations.journal.store import JournalStore
-from generations.memory.store import MemoryStore
+from generations.memory.store import DEFAULT_MEMORY, MemoryStore
 from generations.models import OpenCodePlan
 from generations.state import RuntimeState, load_runtime_state, save_runtime_state
 from generations.web.exporter import export_site
@@ -76,7 +76,8 @@ class Runner:
                 break
 
     def _run_single_loop(self) -> bool:
-        memory = self.memory.latest()
+        memory = self._normalize_memory(self.memory.latest())
+        self.memory.replace(memory, created_at=self._timestamp())
         loop_counter = self.runtime.loop_count + 1
         seed_hash = sha256(self.seed.encode("utf-8")).hexdigest()
         proposal, model_metadata = self.model.choose_next_step(self.seed, loop_counter, memory)
@@ -111,6 +112,7 @@ class Runner:
 
         latest_memory = self.memory.latest()
         validation_success = all(item.success for item in result.validation)
+        metrics = self._score_loop(proposal, result, validation_success)
         latest_memory["outcomes"]["last_validation"] = [item.as_dict() for item in result.validation]
         if validation_success:
             latest_memory["outcomes"]["pass_count"] += 1
@@ -119,6 +121,12 @@ class Runner:
         else:
             latest_memory["outcomes"]["fail_count"] += 1
             latest_memory["outcomes"]["last_error"] = result.validation[-1].output if result.validation else "validation failed"
+        latest_memory["evaluation_metrics"] = self._update_metrics_memory(
+            latest_memory.get("evaluation_metrics", {}),
+            loop_counter,
+            proposal,
+            metrics,
+        )
         self.memory.replace(latest_memory, created_at=self._timestamp())
 
         rest_seconds, continue_running, reason = self._rest_decision(loop_counter, validation_success)
@@ -136,6 +144,7 @@ class Runner:
             "actions_taken": result.files_touched,
             "validation_results": [item.as_dict() for item in result.validation],
             "validation_summary": "passed" if validation_success else "failed",
+            "evaluation_metrics": metrics,
             "commit_hash": result.commit_hash,
             "rolled_back": result.rolled_back,
             "opencode": {
@@ -224,6 +233,18 @@ class Runner:
         }
         updated_memory["last_workstream"] = proposal.workstream
         updated_memory["last_capability_target"] = proposal.capability_target
+        strategic_intent = dict(updated_memory.get("strategic_intent", {}))
+        questions = list(strategic_intent.get("next_big_questions", []))
+        if proposal.workstream == "game_workspace":
+            strategic_intent["current_game_thesis"] = (
+                "Investigate a transport/logistics game with economy, routing, progression, and world simulation."
+            )
+        if proposal.capability_target not in {"journaling", "website", "memory"}:
+            question = f"What larger arc does {proposal.capability_target} unlock for the eventual game or platform?"
+            if question not in questions:
+                questions.append(question)
+        strategic_intent["next_big_questions"] = questions[-6:]
+        updated_memory["strategic_intent"] = strategic_intent
         self.memory.replace(updated_memory, created_at=self._timestamp())
         touched.append(str(self.config.memory_path.relative_to(self.root)))
 
@@ -342,10 +363,136 @@ class Runner:
             f"opencode_files={changed_files} decision={'continue' if continue_running else 'stop'}",
             flush=True,
         )
+        latest_metrics = self.memory.latest().get("evaluation_metrics", {}).get("current", {})
+        if latest_metrics:
+            print(
+                "metrics: "
+                f"creativity={latest_metrics.get('creativity', 0):.2f} "
+                f"code_change={latest_metrics.get('code_change', 0):.2f} "
+                f"review={latest_metrics.get('review_quality', 0):.2f} "
+                f"game={latest_metrics.get('game_progress', 0):.2f} "
+                f"obs={latest_metrics.get('observability', 0):.2f} "
+                f"balance={latest_metrics.get('balance', 0):.2f}",
+                flush=True,
+            )
         print(f"reason: {reason}", flush=True)
 
     def _log(self, event: str, message: str) -> None:
         print(f"{event}: {message}", flush=True)
+
+    def _normalize_memory(self, memory: dict[str, Any]) -> dict[str, Any]:
+        normalized = dict(memory)
+        heuristics = list(normalized.get("heuristics", []))
+        old = "Favor tiny, coherent edits over ambitious rewrites."
+        new = "Favor coherent, reviewable steps inside a larger strategic arc."
+        if old in heuristics:
+            heuristics = [new if item == old else item for item in heuristics]
+        if new not in heuristics:
+            heuristics.insert(0, new)
+        normalized["heuristics"] = heuristics
+
+        if "strategic_intent" not in normalized:
+            normalized["strategic_intent"] = DEFAULT_MEMORY["strategic_intent"]
+        if "evaluation_metrics" not in normalized:
+            normalized["evaluation_metrics"] = DEFAULT_MEMORY["evaluation_metrics"]
+        return normalized
+
+    def _score_loop(self, proposal: Any, result: Any, validation_success: bool) -> dict[str, float]:
+        changed_files = [
+            path for path in result.files_touched
+            if not path.startswith("state/") and not path.startswith("site/")
+        ]
+        opencode_changed = [
+            path for path in result.opencode_changed_files
+            if not path.startswith("state/") and not path.startswith("site/")
+        ]
+        all_meaningful = sorted(set(changed_files + opencode_changed))
+        creativity = 0.25
+        if proposal.capability_target in {"game_design", "game_pipeline", "game_prototype", "tooling", "evaluation"}:
+            creativity += 0.25
+        if proposal.workstream == "game_workspace":
+            creativity += 0.2
+        if len(all_meaningful) >= 2:
+            creativity += 0.2
+        if proposal.website_change and proposal.capability_target == "website":
+            creativity += 0.1
+
+        code_change = min(1.0, 0.35 * len(all_meaningful))
+        if any(path.startswith("src/") for path in all_meaningful):
+            code_change += 0.25
+        if any(path.startswith("games/") for path in all_meaningful):
+            code_change += 0.25
+        code_change = min(1.0, code_change)
+
+        review_quality = 0.2 if validation_success else 0.0
+        if result.validation:
+            review_quality += 0.5 if validation_success else 0.1
+        if any("pytest" in item.command for item in result.validation):
+            review_quality += 0.2
+        if result.rolled_back:
+            review_quality += 0.1
+        review_quality = min(1.0, review_quality)
+
+        game_progress = 0.1
+        if proposal.workstream == "game_workspace":
+            game_progress += 0.35
+        if proposal.capability_target in {"game_design", "game_pipeline", "game_prototype"}:
+            game_progress += 0.3
+        if any(path.startswith("games/") for path in all_meaningful):
+            game_progress += 0.25
+        game_progress = min(1.0, game_progress)
+
+        observability = 0.2
+        if proposal.capability_target in {"journaling", "memory", "website", "evaluation"}:
+            observability += 0.25
+        if proposal.website_change:
+            observability += 0.15
+        if self.config.journal_path.exists() and self.config.runtime_path.exists():
+            observability += 0.2
+        observability = min(1.0, observability)
+
+        values = [creativity, code_change, review_quality, game_progress, observability]
+        balance = max(0.0, 1.0 - (max(values) - min(values)))
+        return {
+            "creativity": round(creativity, 2),
+            "code_change": round(code_change, 2),
+            "review_quality": round(review_quality, 2),
+            "game_progress": round(game_progress, 2),
+            "observability": round(observability, 2),
+            "balance": round(balance, 2),
+        }
+
+    def _update_metrics_memory(
+        self,
+        metrics_block: dict[str, Any],
+        loop_counter: int,
+        proposal: Any,
+        metrics: dict[str, float],
+    ) -> dict[str, Any]:
+        history = list(metrics_block.get("recent_history", []))
+        history.append(
+            {
+                "loop": loop_counter,
+                "workstream": proposal.workstream,
+                "capability_target": proposal.capability_target,
+                "metrics": metrics,
+            }
+        )
+        history = history[-10:]
+        rolling_average: dict[str, float] = {}
+        keys = ["creativity", "code_change", "review_quality", "game_progress", "observability", "balance"]
+        for key in keys:
+            values = [float(item["metrics"].get(key, 0.0)) for item in history]
+            rolling_average[key] = round(sum(values) / len(values), 2) if values else 0.0
+        return {
+            "current": metrics,
+            "rolling_average": rolling_average,
+            "recent_history": history,
+            "notes": metrics_block.get("notes", [
+                "Metrics guide balancing, but the model still chooses the next step.",
+                "Low code_change or game_progress should bias future loops toward meaningful repo edits.",
+            ]),
+        }
 
 
 def init_repo_if_needed(root: Path) -> None:

@@ -49,6 +49,36 @@
     </section>
 
     <section class="card wide">
+      <h2>Evaluation Metrics</h2>
+      <div class="columns">
+        <div>
+          <h3>Current</h3>
+          <ul>
+            {% for key, value in memory.evaluation_metrics.current.items() %}
+            <li>{{ key }}: {{ value }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h3>Rolling Average</h3>
+          <ul>
+            {% for key, value in memory.evaluation_metrics.rolling_average.items() %}
+            <li>{{ key }}: {{ value }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h3>Metric Notes</h3>
+          <ul>
+            {% for item in memory.evaluation_metrics.notes %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card wide">
       <h2>Heuristics</h2>
       <div class="columns">
         <div>
@@ -98,6 +128,9 @@
             <span>{{ entry.timestamp }}</span>
           </header>
           <p>{{ entry.next_step.description }}</p>
+          {% if entry.evaluation_metrics %}
+          <p>Metrics: creativity {{ entry.evaluation_metrics.creativity }}, code {{ entry.evaluation_metrics.code_change }}, review {{ entry.evaluation_metrics.review_quality }}, game {{ entry.evaluation_metrics.game_progress }}, balance {{ entry.evaluation_metrics.balance }}</p>
+          {% endif %}
           <p>Validation: {{ entry.validation_summary }}</p>
           <p>Website: {{ entry.website_change.summary }}</p>
           <p>Monetization: {{ entry.monetization_change.summary }}</p>

@@ -88,6 +88,8 @@ class OllamaCloudAdapter:
         website_heuristics = memory.get("website_heuristics", [])
         monetization_heuristics = memory.get("monetization_heuristics", [])
         outcomes = memory.get("outcomes", {})
+        metrics = memory.get("evaluation_metrics", {})
+        strategic_intent = memory.get("strategic_intent", {})
         return (
             "You are Generations.\n"
             "Your long-term mission is to autonomously improve this software system until it can manage the end-to-end "
@@ -96,6 +98,13 @@ class OllamaCloudAdapter:
             "You are not merely writing a game directly. You are improving the autonomous software, tooling, heuristics, "
             "evaluation criteria, observability, and website needed to eventually produce and ship a game.\n"
             "For this loop, decide one tiny safe next step.\n"
+            "Think bigger than the next edit. You should reason in terms of multi-loop arcs such as:\n"
+            "- evolving toward a distinctive game concept\n"
+            "- building an economy or logistics simulation foundation\n"
+            "- improving autonomous coding/review/testing capability\n"
+            "- strengthening website trust and audience-building\n"
+            "- preparing release-readiness criteria and production discipline\n"
+            "The step itself must still be small, but it should clearly serve a bigger direction.\n"
             "The next step should improve at least one of:\n"
             "- autonomous software development capability\n"
             "- game-production readiness\n"
@@ -129,11 +138,20 @@ class OllamaCloudAdapter:
             f"Current website heuristics: {json.dumps(website_heuristics, ensure_ascii=True)}\n"
             f"Current monetization heuristics: {json.dumps(monetization_heuristics, ensure_ascii=True)}\n"
             f"Recent outcomes: {json.dumps(outcomes, sort_keys=True)}\n"
+            f"Evaluation metrics: {json.dumps(metrics, sort_keys=True)}\n"
+            f"Strategic intent: {json.dumps(strategic_intent, sort_keys=True)}\n"
             "First decide which workstream is better for this loop:\n"
             "- autonomous_platform: improve the self-improving software system itself\n"
             "- game_workspace: improve the current game workspace or game-production readiness\n"
             "Prefer autonomous_platform when core tooling, evaluation, observability, journaling, memory, or website foundations are still weak.\n"
             "Prefer game_workspace when the platform is stable enough to support a small, validated improvement to game readiness.\n"
+            "Use past heuristics and evaluation metrics as guides, not as absolute rules.\n"
+            "If recent code_change is low, prefer a real repository edit over pure state churn.\n"
+            "If recent game_progress is low, bias toward game design, prototype, pipeline, or economy/system work.\n"
+            "If recent creativity is low, prefer a step that adds a new mechanic, concept, tool, or framing rather than repeating the same maintenance action.\n"
+            "If recent review_quality is low, strengthen tests, checks, or self-review before broadening scope.\n"
+            "Avoid getting trapped in journaling-only or website-only loops unless observability is genuinely broken.\n"
+            "When possible, choose a step that clarifies or advances the likely game direction, especially around transport, logistics, simulation, economy, progression, or player motivation.\n"
             "Pick the smallest useful step that moves the system toward autonomous software development capability and eventual game production.\n"
         )
 
@@ -151,7 +169,7 @@ class OllamaCloudAdapter:
             description=description,
             rationale=(
                 f"Deterministic fallback derived from seed digest {digest} and current heuristics count {len(heuristics)}. "
-                "The chosen step prioritizes observability and software-system readiness before expanding direct game scope."
+                "The chosen step prioritizes a larger development arc while keeping the individual change small and reversible."
             ),
             target_files=[
                 "README.md",
