@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from generations.adapters.ollama_cloud import OllamaCloudAdapter
 from generations.models import ExecutionTask, LoopPlan
 from generations.runner import Runner
 
@@ -34,3 +35,11 @@ def test_runner_rejects_invalid_task_scopes(tmp_path: Path) -> None:
     assert runner._validate_loop_plan(plan) is None
     plan.tasks[0].scope = "vision/long_term_vision.json"  # type: ignore[assignment]
     assert runner._validate_loop_plan(plan) == "Planner produced invalid task scopes for task(s): A."
+
+
+def test_ollama_adapter_normalizes_semantic_task_scopes() -> None:
+    adapter = OllamaCloudAdapter(debug=False)
+    assert adapter._normalize_scope("validation_hooks") == "platform"
+    assert adapter._normalize_scope("journey_page") == "website"
+    assert adapter._normalize_scope("simulation") == "active_game"
+    assert adapter._normalize_scope("support") == "monetization_platform"

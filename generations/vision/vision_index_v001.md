@@ -3,7 +3,7 @@
 Version: 1
 Refined at loop: 0
 
-Loop 0 vision definition establishing the foundational purpose and constraints for the autonomous studio, the target game product, and the commercial platform.
+Initial long-term vision definition for Generations autonomous studio. Establishes the foundational purpose, end states, and failure modes for the three core pillars: self, game, and monetization_platform. This document serves as the constitutional anchor for all future loop planning and strategic decisions.
 
 ## Pillars
 - self: The autonomous platform, its website, memory, validation, and operator visibility.

@@ -345,7 +345,7 @@ class OllamaCloudAdapter:
         )
 
     def _normalize_task(self, task: dict[str, Any]) -> dict[str, Any]:
-        scope = str(task.get("scope") or "platform")
+        scope = self._normalize_scope(task.get("scope"))
         if scope not in {"platform", "active_game", "website", "cross_cutting", "monetization_platform"}:
             raise ValueError(f"Invalid task scope from planner: {scope}")
         return {
@@ -357,6 +357,37 @@ class OllamaCloudAdapter:
             "priority": int(task.get("priority") or 1),
             "support_reason": str(task.get("support_reason") or "Supports the current block objective."),
         }
+
+    def _normalize_scope(self, raw_scope: Any) -> str:
+        scope = str(raw_scope or "platform").strip().lower().replace("-", "_").replace(" ", "_")
+        canonical = {
+            "platform": "platform",
+            "self": "platform",
+            "validation_hooks": "platform",
+            "validation": "platform",
+            "planner": "platform",
+            "planning": "platform",
+            "memory": "platform",
+            "observability": "platform",
+            "website": "website",
+            "web": "website",
+            "journey": "website",
+            "journey_page": "website",
+            "public_log": "website",
+            "active_game": "active_game",
+            "game": "active_game",
+            "gameplay": "active_game",
+            "simulation": "active_game",
+            "design": "active_game",
+            "cross_cutting": "cross_cutting",
+            "integration": "cross_cutting",
+            "tests": "cross_cutting",
+            "monetization_platform": "monetization_platform",
+            "monetization": "monetization_platform",
+            "support": "monetization_platform",
+            "commercial": "monetization_platform",
+        }
+        return canonical.get(scope, scope)
 
     def _test_vision(self, seed: str, loop_counter: int, current_version: int) -> LongTermVisionRecord:
         version = current_version + 1
