@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 3
+Latest loop: 4
 
-Visible intent: Internal observability improvement first; public journey updates follow validation.
+Visible intent: Focus is on game foundation, not audience facing content this loop.
 
 Support remains a minimal placeholder until a logged experiment is justified.

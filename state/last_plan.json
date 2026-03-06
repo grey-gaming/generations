@@ -1,16 +1,16 @@
 {
-  "summary": "autonomous_platform:memory: Add a Design Decision Record template to docs for tracking game mechanic rationale.",
+  "summary": "game_workspace:game_design: Create a design document defining the core cargo and route data structures for the logistics simulation.",
   "editable_files": [
-    "docs/design_decision_record.md"
+    "game_workspace/design/cargo_routing.md"
   ],
   "files_expected": [
-    "docs/design_decision_record.md",
+    "game_workspace/design/cargo_routing.md",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Internal observability improvement first; public journey updates follow validation.",
-  "monetization_change_reason": "No monetization changes in this loop."
+  "website_change_reason": "Focus is on game foundation, not audience facing content this loop.",
+  "monetization_change_reason": "Premature to optimize monetization before core mechanic is defined."
 }
