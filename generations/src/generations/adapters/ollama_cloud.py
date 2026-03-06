@@ -11,12 +11,12 @@ from generations.state import now_iso
 
 
 class OllamaCloudAdapter:
-    def __init__(self) -> None:
+    def __init__(self, *, debug: bool = False) -> None:
         self.provider = os.getenv("GENERATIONS_MODEL_PROVIDER", DEFAULT_PROVIDER)
         self.model = os.getenv("GENERATIONS_MODEL", DEFAULT_MODEL)
         self.base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
         self.timeout_seconds = int(os.getenv("GENERATIONS_MODEL_TIMEOUT_SECONDS", "600"))
-        self.debug = os.getenv("GENERATIONS_DEBUG", "0") == "1"
+        self.debug = debug or os.getenv("GENERATIONS_DEBUG", "0") == "1"
         self.test_mode = os.getenv("GENERATIONS_TEST_MODE", "0") == "1"
         self.stubbed = False
 
@@ -245,6 +245,8 @@ class OllamaCloudAdapter:
             "The block must be focused on self. This means improving the autonomous platform, planning, validation, observability, and the public journey page.\n"
             "Do not drift into general game building yet. The point is to make the system itself sharper for the next blocks.\n"
             "Target outcomes should describe specific capability gains, not slogans.\n"
+            "All expected_artifacts and any path-like references must use real repo roots only: generations/... or games/active/....\n"
+            "Do not invent roots like platform/, website/, memory/, docs/, ci/, or vision/ unless they are prefixed by generations/ or games/active/.\n"
             f"Seed: {seed}\n"
             f"Loop: {loop_counter}\n"
             f"Long-term vision: {json.dumps(vision, sort_keys=True)}\n"
@@ -260,6 +262,8 @@ class OllamaCloudAdapter:
             "Write a plan that would let an execution agent know what artifacts should plausibly exist by the end of the block.\n"
             "Expected_artifacts should name real outputs such as tests, modules, design documents, vision updates, or website sections.\n"
             "Explicit_non_goals should make it obvious what the block is refusing to chase.\n"
+            "All expected_artifacts and any path-like references must use real repo roots only: generations/... or games/active/....\n"
+            "Do not invent roots like platform/, website/, memory/, docs/, ci/, or vision/ unless they are prefixed by generations/ or games/active/.\n"
             f"Seed: {seed}\n"
             f"Planning loop: {loop_counter}\n"
             f"Next block id: {block_id}\n"
