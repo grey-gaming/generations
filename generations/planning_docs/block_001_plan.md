@@ -5,56 +5,58 @@ Execution range: 2-10
 Primary pillar: self
 
 ## Why This Pillar Now
-Loop 0 defined the strategic vision; Block 1 must establish the operational engine (validation, memory, observability) to ensure subsequent game development loops are disciplined, observable, and trustworthy before any game logic is committed.
+Loop 0 established constitutional boundaries. Block 1 must instantiate the operational engine defined in the Self pillar. Without automated validation and persistent memory infrastructure in , subsequent game work risks accumulating technical debt and losing context across loops, violating the LTV mandate against amnesia and drift.
 
 ## Target Outcomes
-- Automated validation pipeline prevents invalid memory state commits.
-- Public journey page renders current status from memory.
-- Planning module successfully decomposes block goals into loop tasks.
-- Memory schema enforces structure on all execution logs.
+- Enable automated rejection of untested code changes in via validation script
+- Persist loop context state to disk for retrieval by subsequent loops without manual intervention
+- Enable programmatic generation of journey status page from memory artifacts
+- Enforce block planning schema programmatically before loop execution begins
 
 ## Sub Goals
-- Implement pre-commit hook for memory schema validation.
-- Build static site generator for journey page within generations root.
-- Create loop closure script that updates memory and triggers site build.
-- Define metric collection interface for observability.
+- Scaffold directory structure for planning, validation, and observability
+- Implement validate_loop script that exits non-zero on test failure
+- Create journey_index.html generator that reads
+- Define and validate Loop Plan JSON schema
 
 ## Allowed Support Work
-- Repository scaffolding for directory.
-- CI configuration for validation scripts.
-- Documentation of the block planning protocol.
+- CI configuration for validation
+- Basic CSS for journey_index.html within/
 
 ## Explicit Non Goals
-- Game mechanics implementation.
-- Art asset creation.
-- Monetization integration.
-- Physics simulation logic.
+- Game mechanics implementation
+- Space logistics simulation logic
+- Monetization integration
+- Art asset creation
+- / code changes
 
 ## Success Signals
-- Validation script returns non-zero exit code on invalid JSON.
-- Journey page updates within 5 minutes of loop closure.
-- Memory file grows linearly with loop count.
-- Block plan remains stable throughout 9 loops.
+- Validation script runs automatically on commit
+- Journey page displays current loop number and status accurately
+- Loop context file persists data across simulated restarts
+- Block plan JSON passes schema validation
 
 ## Failure Signals
-- Manual bypass of validation hooks.
-- Journey page displays stale Loop 0 data.
-- Memory schema drifts without version increment.
-- Sub-goals remain unstarted after Loop 3.
+- Validation step skipped or bypassed
+- Memory file corrupted or empty after loop
+- Journey page shows stale or hardcoded data
+- Plan schema errors detected during execution
 
 ## Expected Artifacts
 - Describe the capability or artifact without naming repository paths.
 
 ## Metrics To Watch
 - validation_pass_rate
-- loop_closure_latency
-- memory_write_success
-- site_build_duration
+- memory_retention_fidelity
+- loop_completion_time
+- artifact_generation_success
 
 ## Risks
-- Over-engineering validation logic delaying execution.
-- Site styling distractions consuming loop capacity.
-- Memory schema becoming too rigid for future game data.
+- Over-engineering validation infrastructure before testing utility
+- Getting stuck in infinite setup loops without producing artifacts
+- Violating path constraints by creating forbidden directories
 
 ## Review Focus
-- Does the validation actually protect integrity? Is the journey page honest about failures? Is the memory schema extensible?
+- Does validation actually stop bad code?
+- Is memory structure readable by human and machine?
+- Are path constraints strictly obeyed?
