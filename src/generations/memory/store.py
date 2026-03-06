@@ -81,6 +81,10 @@ DEFAULT_MEMORY = {
         "execution_surface": "OpenCode CLI adapter",
         "model_provider": "Ollama local daemon adapter",
     },
+    "planning": {
+        "current": None,
+        "history": [],
+    },
     "evaluation_metrics": {
         "current": {
             "creativity": 0.0,

@@ -31,6 +31,10 @@ HTML_TEMPLATE = """<!doctype html>
       <article class=\"panel\"><h2>Disclosure</h2><p>Website and monetization can evolve. Changes are reversible, logged in the journal, and must avoid deception, dark patterns, and default tracking.</p></article>
     </section>
     <section class=\"panel\">
+      <h2>Current Plan</h2>
+      {planning}
+    </section>
+    <section class=\"panel\">
       <h2>Latest Journal Entries</h2>
       {entries}
     </section>
@@ -50,6 +54,7 @@ def export_site(root: Path, out_dir: Path | None = None) -> Path:
     journal = JournalStore(config.journal_path).read_all()
     memory = MemoryStore(config.memory_path).latest()
     runtime = load_runtime_state(config.runtime_path).as_dict()
+    planning = memory.get("planning", {}).get("current")
 
     entries = "\n".join(
         f"<div class='entry'><strong>Loop {entry.get('loop_counter')}</strong><pre>{json.dumps(entry, indent=2)}</pre></div>"
@@ -59,6 +64,7 @@ def export_site(root: Path, out_dir: Path | None = None) -> Path:
     html = HTML_TEMPLATE.format(
         runtime=json.dumps(runtime, indent=2),
         criteria=json.dumps(memory.get("criteria_history", [])[-1], indent=2),
+        planning=json.dumps(planning, indent=2) if planning else "<p>No 10-loop planning retrospective yet.</p>",
         entries=entries,
     )
 

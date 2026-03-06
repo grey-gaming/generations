@@ -26,6 +26,7 @@ class AppConfig:
     disable_web: bool
     test_mode: bool
     operational_max_loops: int | None
+    operational_loop_timeout_seconds: int | None
 
     @classmethod
     def from_root(cls, root: Path) -> "AppConfig":
@@ -48,6 +49,7 @@ class AppConfig:
             disable_web=os.getenv("GENERATIONS_DISABLE_WEB", "0") == "1",
             test_mode=os.getenv("GENERATIONS_TEST_MODE", "0") == "1",
             operational_max_loops=_optional_int(os.getenv("GENERATIONS_MAX_LOOPS")),
+            operational_loop_timeout_seconds=_optional_int(os.getenv("GENERATIONS_LOOP_TIMEOUT_SECONDS", "300")),
         )
 
 

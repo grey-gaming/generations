@@ -50,6 +50,27 @@ class OllamaCloudAdapter:
                 metadata["prompt_preview"] = self._prompt(seed, loop_count, memory)[:1200]
             return proposal, metadata
 
+    def plan_next_arc(
+        self,
+        seed: str,
+        loop_count: int,
+        recent_entries: list[dict[str, object]],
+        memory: dict[str, object],
+    ) -> tuple[dict[str, object], dict[str, object]]:
+        try:
+            plan = self._plan_via_ollama(seed, loop_count, recent_entries, memory)
+            metadata = self.metadata()
+            metadata["fallback"] = None
+            metadata["planning_call"] = True
+            return plan, metadata
+        except Exception as exc:
+            self.stubbed = True
+            plan = self._fallback_plan(seed, loop_count, recent_entries, memory)
+            metadata = self.metadata()
+            metadata["fallback"] = f"{type(exc).__name__}: {exc}"
+            metadata["planning_call"] = True
+            return plan, metadata
+
     def _choose_via_ollama(self, seed: str, loop_count: int, memory: dict[str, object]) -> StepProposal:
         prompt = self._prompt(seed, loop_count, memory)
         payload = {
@@ -87,6 +108,40 @@ class OllamaCloudAdapter:
         with request.urlopen(req, timeout=60) as response:
             return json.loads(response.read().decode("utf-8"))
 
+    def _plan_via_ollama(
+        self,
+        seed: str,
+        loop_count: int,
+        recent_entries: list[dict[str, object]],
+        memory: dict[str, object],
+    ) -> dict[str, object]:
+        prompt = self._planning_prompt(seed, loop_count, recent_entries, memory)
+        payload = {
+            "model": self.model,
+            "prompt": prompt,
+            "stream": False,
+            "options": {
+                "temperature": 0,
+            },
+        }
+        response_payload = self._post_json("/api/generate", payload)
+        raw_response = response_payload.get("response", "").strip()
+        parsed = json.loads(raw_response)
+        return {
+            "planning_loop": loop_count,
+            "retrospective_summary": parsed["retrospective_summary"],
+            "wins": list(parsed["wins"]),
+            "mistakes": list(parsed["mistakes"]),
+            "repeated_patterns": list(parsed["repeated_patterns"]),
+            "next_chunk_theme": parsed["next_chunk_theme"],
+            "next_chunk_goals": list(parsed["next_chunk_goals"]),
+            "next_chunk_focus": list(parsed["next_chunk_focus"]),
+            "risks": list(parsed["risks"]),
+            "website_plan": parsed["website_plan"],
+            "monetization_plan": parsed["monetization_plan"],
+            "rationale": parsed["rationale"],
+        }
+
     def _prompt(self, seed: str, loop_count: int, memory: dict[str, object]) -> str:
         criteria = memory.get("criteria_history", [])[-1]
         heuristics = memory.get("heuristics", [])
@@ -98,6 +153,7 @@ class OllamaCloudAdapter:
         outcomes = memory.get("outcomes", {})
         metrics = memory.get("evaluation_metrics", {})
         strategic_intent = memory.get("strategic_intent", {})
+        planning = memory.get("planning", {}).get("current")
         return (
             "You are Generations.\n"
             "Your long-term mission is to autonomously improve this software system until it can manage the end-to-end "
@@ -148,6 +204,7 @@ class OllamaCloudAdapter:
             f"Recent outcomes: {json.dumps(outcomes, sort_keys=True)}\n"
             f"Evaluation metrics: {json.dumps(metrics, sort_keys=True)}\n"
             f"Strategic intent: {json.dumps(strategic_intent, sort_keys=True)}\n"
+            f"Current 10-loop plan: {json.dumps(planning, sort_keys=True) if planning else 'null'}\n"
             "First decide which workstream is better for this loop:\n"
             "- autonomous_platform: improve the self-improving software system itself\n"
             "- game_workspace: improve the current game workspace or game-production readiness\n"
@@ -159,8 +216,41 @@ class OllamaCloudAdapter:
             "If recent creativity is low, prefer a step that adds a new mechanic, concept, tool, or framing rather than repeating the same maintenance action.\n"
             "If recent review_quality is low, strengthen tests, checks, or self-review before broadening scope.\n"
             "Avoid getting trapped in journaling-only or website-only loops unless observability is genuinely broken.\n"
+            "If a current 10-loop plan exists, choose a step that advances that plan unless new evidence makes it clearly obsolete.\n"
             "When possible, choose a step that clarifies or advances the likely game direction, especially around transport, logistics, simulation, economy, progression, or player motivation.\n"
             "Pick the smallest useful step that moves the system toward autonomous software development capability and eventual game production.\n"
+        )
+
+    def _planning_prompt(
+        self,
+        seed: str,
+        loop_count: int,
+        recent_entries: list[dict[str, object]],
+        memory: dict[str, object],
+    ) -> str:
+        return (
+            "You are Generations.\n"
+            "Every 10 completed loops, pause to run a planning phase.\n"
+            "Review the last 10 loops, identify what is working, what is weak, and define a larger strategic chunk for the next 10 loops.\n"
+            "Return JSON only.\n"
+            "Required JSON keys:\n"
+            "- retrospective_summary\n"
+            "- wins: array of short bullets\n"
+            "- mistakes: array of short bullets\n"
+            "- repeated_patterns: array of short bullets\n"
+            "- next_chunk_theme: short title\n"
+            "- next_chunk_goals: array of short goals\n"
+            "- next_chunk_focus: array of short focus areas\n"
+            "- risks: array of short risks\n"
+            "- website_plan: short sentence\n"
+            "- monetization_plan: short sentence\n"
+            "- rationale: short paragraph\n"
+            f"Seed: {seed}\n"
+            f"Completed loops so far: {loop_count}\n"
+            f"Last 10 journal entries: {json.dumps(recent_entries, sort_keys=True)}\n"
+            f"Current memory: {json.dumps(memory, sort_keys=True)}\n"
+            "Bias toward larger coherent chunks, not isolated one-off edits.\n"
+            "Use the retrospective to decide what the next chunk should optimize.\n"
         )
 
     def _weighted_heuristics(
@@ -208,6 +298,39 @@ class OllamaCloudAdapter:
                 "Prefer improvements that increase observability before increasing game complexity.",
             ],
         )
+
+    def _fallback_plan(
+        self,
+        seed: str,
+        loop_count: int,
+        recent_entries: list[dict[str, object]],
+        memory: dict[str, object],
+    ) -> dict[str, object]:
+        del seed, memory
+        return {
+            "planning_loop": loop_count,
+            "retrospective_summary": f"Fallback planning pass over {len(recent_entries)} recent entries.",
+            "wins": ["Validation and journaling remained intact across the recent chunk."],
+            "mistakes": ["Some loops still favored observability or website work without enough meaningful repo change."],
+            "repeated_patterns": ["Small documentation-heavy edits dominated the recent chunk."],
+            "next_chunk_theme": "Turn recent design thinking into stronger repository changes",
+            "next_chunk_goals": [
+                "Land more meaningful source or game-workspace edits.",
+                "Use each loop to serve a coherent larger arc.",
+            ],
+            "next_chunk_focus": [
+                "game design",
+                "game pipeline",
+                "platform capability only when it unlocks the game arc",
+            ],
+            "risks": [
+                "drifting into website-only loops",
+                "inflating metrics without meaningful repo progress",
+            ],
+            "website_plan": "Keep the journey page aligned with the new chunk plan and retrospective.",
+            "monetization_plan": "Do not expand monetization until the next chunk produces clearer product progress.",
+            "rationale": "The next 10-loop chunk should convert recent reflection into more concrete autonomous game-building movement.",
+        }
 
     def metadata(self) -> dict[str, object]:
         return {

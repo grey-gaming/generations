@@ -80,6 +80,7 @@ class Runner:
         self.memory.replace(memory, created_at=self._timestamp())
         loop_counter = self.runtime.loop_count + 1
         seed_hash = sha256(self.seed.encode("utf-8")).hexdigest()
+        memory = self._maybe_run_planning_phase(loop_counter, memory, seed_hash)
         proposal, model_metadata = self.model.choose_next_step(self.seed, loop_counter, memory)
         criteria = memory["criteria_history"][-1]
         if self.config.debug and model_metadata.get("prompt_preview"):
@@ -106,12 +107,76 @@ class Runner:
         before_journal_count = len(self.journal.read_all())
         verify_commands = self._verification_commands()
 
-        result = self.opencode.run_workflow(
-            plan=plan,
-            apply_fn=lambda: self._apply_iteration(loop_counter, proposal, memory, model_metadata),
-            verify_commands=verify_commands,
-            commit_message=f"loop {loop_counter}: {proposal.description[:68]}",
-        )
+        loop_start = time.time()
+        timeout_seconds = self.config.operational_loop_timeout_seconds or 300
+        try:
+            result = self.opencode.run_workflow(
+                plan=plan,
+                apply_fn=lambda: self._apply_iteration(loop_counter, proposal, memory, model_metadata),
+                verify_commands=verify_commands,
+                commit_message=f"loop {loop_counter}: {proposal.description[:68]}",
+            )
+        except TimeoutError as exc:
+            elapsed = time.time() - loop_start
+            self._log("timeout", f"loop {loop_counter} exceeded {timeout_seconds}s timeout after {elapsed:.1f}s")
+            self.runtime = RuntimeState(
+                loop_count=loop_counter,
+                last_commit=self.runtime.last_commit,
+                last_validation={"success": False, "results": []},
+                current_criteria_version=self.runtime.current_criteria_version,
+                paused=False,
+                last_decision="timeout",
+            )
+            save_runtime_state(self.config.runtime_path, self.runtime)
+            entry = {
+                "timestamp": self._timestamp(),
+                "loop_counter": loop_counter,
+                "seed_hash": seed_hash,
+                "criteria": criteria,
+                "next_step": {
+                    "workstream": proposal.workstream,
+                    "capability_target": proposal.capability_target,
+                    "description": proposal.description,
+                    "rationale": proposal.rationale,
+                },
+                "actions_taken": [],
+                "validation_results": [],
+                "validation_summary": "timeout",
+                "evaluation_metrics": {},
+                "commit_hash": self.runtime.last_commit,
+                "rolled_back": False,
+                "opencode": {
+                    "session_id": None,
+                    "session_export": None,
+                    "changed_files": [],
+                    "pushed": False,
+                    "push_output": None,
+                    "debug_stdout_path": None,
+                    "debug_stderr_path": None,
+                    "binary": str(self.opencode.binary),
+                },
+                "model_provider": model_metadata,
+                "rest_decision": {
+                    "decision": "stop",
+                    "sleep_seconds": 0,
+                    "reason": f"Loop timed out after {timeout_seconds}s",
+                },
+                "website_change": {
+                    "changed": False,
+                    "summary": "no change",
+                },
+                "monetization_change": {
+                    "changed": False,
+                    "summary": "no change",
+                },
+                "journal_entry_count_before_write": before_journal_count,
+                "timeout_error": str(exc),
+            }
+            self.journal.append(entry)
+            return False
+
+        loop_elapsed = time.time() - loop_start
+        self._log("timing", f"loop {loop_counter} completed in {loop_elapsed:.1f}s (timeout={timeout_seconds}s)")
 
         latest_memory = self.memory.latest()
         validation_success = all(item.success for item in result.validation)
@@ -429,9 +494,60 @@ class Runner:
 
         if "strategic_intent" not in normalized:
             normalized["strategic_intent"] = DEFAULT_MEMORY["strategic_intent"]
+        if "planning" not in normalized:
+            normalized["planning"] = DEFAULT_MEMORY["planning"]
         if "evaluation_metrics" not in normalized:
             normalized["evaluation_metrics"] = DEFAULT_MEMORY["evaluation_metrics"]
         return normalized
+
+    def _maybe_run_planning_phase(
+        self,
+        loop_counter: int,
+        memory: dict[str, Any],
+        seed_hash: str,
+    ) -> dict[str, Any]:
+        completed_loops = self.runtime.loop_count
+        if completed_loops == 0 or completed_loops % 10 != 0:
+            return memory
+
+        planning_state = dict(memory.get("planning", {}))
+        current_plan = planning_state.get("current")
+        if current_plan and current_plan.get("planning_loop") == completed_loops:
+            return memory
+
+        recent_entries = self.journal.read_all()[-10:]
+        plan, metadata = self.model.plan_next_arc(self.seed, completed_loops, recent_entries, memory)
+        history = list(planning_state.get("history", []))
+        history.append(plan)
+        planning_state["current"] = plan
+        planning_state["history"] = history[-5:]
+        updated_memory = dict(memory)
+        updated_memory["planning"] = planning_state
+        self.memory.replace(updated_memory, created_at=self._timestamp())
+
+        self.journal.append(
+            {
+                "timestamp": self._timestamp(),
+                "loop_counter": completed_loops,
+                "seed_hash": seed_hash,
+                "entry_type": "planning_phase",
+                "criteria": updated_memory["criteria_history"][-1],
+                "next_step": {
+                    "description": f"Plan next chunk after loop {completed_loops}",
+                    "rationale": plan.get("rationale", ""),
+                },
+                "planning": plan,
+                "model_provider": metadata,
+                "validation_results": [],
+                "validation_summary": "not run",
+                "actions_taken": [],
+                "website_change": {"changed": False, "summary": plan.get("website_plan", "no change")},
+                "monetization_change": {"changed": False, "summary": plan.get("monetization_plan", "no change")},
+                "rest_decision": {"decision": "continue", "sleep_seconds": 0, "reason": "Planning phase completed."},
+            }
+        )
+        export_site(self.root)
+        return updated_memory
 
     def _normalize_heuristic_scores(
         self,

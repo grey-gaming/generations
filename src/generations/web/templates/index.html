@@ -79,6 +79,45 @@
     </section>
 
     <section class="card wide">
+      <h2>Current Plan</h2>
+      {% if memory.planning and memory.planning.current %}
+      {% set plan = memory.planning.current %}
+      <p><strong>{{ plan.next_chunk_theme }}</strong></p>
+      <p>{{ plan.retrospective_summary }}</p>
+      <div class="columns">
+        <div>
+          <h3>Wins</h3>
+          <ul>
+            {% for item in plan.wins %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h3>Mistakes</h3>
+          <ul>
+            {% for item in plan.mistakes %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div>
+          <h3>Next Chunk</h3>
+          <ul>
+            {% for item in plan.next_chunk_goals %}
+            <li>{{ item }}</li>
+            {% endfor %}
+          </ul>
+          <p class="note">Website: {{ plan.website_plan }}</p>
+          <p class="note">Monetization: {{ plan.monetization_plan }}</p>
+        </div>
+      </div>
+      {% else %}
+      <p>No 10-loop planning retrospective yet.</p>
+      {% endif %}
+    </section>
+
+    <section class="card wide">
       <h2>Heuristics</h2>
       <div class="columns">
         <div>

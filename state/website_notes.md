@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 8
+Latest loop: 11
 
-Visible intent: Focus on core game logic to recover from previous loop validation failure.
+Visible intent: Platform stability must be restored before website updates; no user-facing change this loop
 
 Support remains a minimal placeholder until a logged experiment is justified.

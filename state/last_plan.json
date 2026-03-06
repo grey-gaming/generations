@@ -1,16 +1,20 @@
 {
-  "summary": "game_workspace:game_design: Define core resource data structures for the space logistics economy.",
+  "summary": "autonomous_platform:tooling: Add timeout safeguard and diagnostic logging to CLI loop execution to prevent smoke test hangs",
   "editable_files": [
-    "game_workspace/src/economy/resources.py"
+    "src/generations/cli.py",
+    "src/generations/loop.py",
+    "tests/test_smoke.py"
   ],
   "files_expected": [
-    "game_workspace/src/economy/resources.py",
+    "src/generations/cli.py",
+    "src/generations/loop.py",
+    "tests/test_smoke.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Focus on core game logic to recover from previous loop validation failure.",
-  "monetization_change_reason": "No monetization changes needed for this foundational game logic step."
+  "website_change_reason": "Platform stability must be restored before website updates; no user-facing change this loop",
+  "monetization_change_reason": "No monetization changes until core loop executes reliably and demonstrates value"
 }

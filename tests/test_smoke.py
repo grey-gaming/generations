@@ -57,3 +57,24 @@ def test_ship_rules_criteria_file_exists(tmp_path: Path) -> None:
     criteria = json.loads(criteria_path.read_text(encoding="utf-8"))
     assert "ship_rules" in criteria
     assert any(rule["id"] == "DATA_SCHEMA_REQUIRED" for rule in criteria["ship_rules"])
+
+
+def test_loop_timeout_config_exists() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    import subprocess
+    import os
+
+    env = dict(**os.environ)
+    env["PYTHONPATH"] = str(repo_root / "src")
+    env["GENERATIONS_TEST_MODE"] = "1"
+    env["GENERATIONS_LOOP_TIMEOUT_SECONDS"] = "10"
+
+    result = subprocess.run(
+        [sys.executable, "-c", "from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)"],
+        cwd=repo_root,
+        env=env,
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    assert result.stdout.strip() == "10"
