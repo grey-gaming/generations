@@ -1,18 +1,18 @@
 {
-  "summary": "game_workspace:website: Update journey page and roadmap to mark Core Logistics complete and Integration Phase active.",
+  "summary": "game_workspace:game_pipeline: Define a unified Turn dataclass to encapsulate one cycle of logistics (pickup, transit, delivery) and economy updates.",
   "editable_files": [
-    "website/index.html",
-    "docs/roadmap.md"
+    "game/turn.py",
+    "game/state.py"
   ],
   "files_expected": [
-    "website/index.html",
-    "docs/roadmap.md",
+    "game/turn.py",
+    "game/state.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Reflects current development phase to improve clarity and trust for observers.",
-  "monetization_change_reason": "No monetization changes until playable loop demonstrates engagement."
+  "website_change_reason": "Loop 23 focused on website; this loop prioritizes code integration to improve game_progress metric.",
+  "monetization_change_reason": "Monetization plan requires a playable loop demonstrating engagement; integration must precede monetization experiments."
 }
