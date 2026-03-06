@@ -110,6 +110,8 @@ def _task_summary(task: dict[str, Any]) -> str:
     summary = str(task.get("summary") or "")
     if "ProviderModelNotFoundError" in summary:
         return "Blocked: OpenCode could not find the configured Ollama model."
+    if task.get("status") == "merged":
+        return "Task reported success, but no repository files were merged."
     if task.get("status") == "no_change":
         return "No repository change landed in this task."
     return summary or "Task recorded."
@@ -119,7 +121,11 @@ def _loop_summary(tasks: list[dict[str, Any]]) -> str:
     if not tasks:
         return "No task plan is active."
     changed = sum(1 for task in tasks if task.get("changed_files"))
-    blocked = sum(1 for task in tasks if task.get("status") == "no_change")
+    blocked = sum(
+        1
+        for task in tasks
+        if task.get("status") in {"no_change", "failed", "rejected"} or (task.get("status") == "merged" and not task.get("changed_files"))
+    )
     return f"{changed} task(s) changed the repo; {blocked} task(s) stalled or produced no change."
 
 
