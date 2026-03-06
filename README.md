@@ -25,6 +25,10 @@ pip install -e .[dev]
 pytest
 ```
 
+Configure OpenCode for the local Ollama model and launch the runner:
+```bash
+./scripts/configure-opencode-and-run.sh "Build a space transport and logistics web game"
+```
 
 Run the slower end-to-end smoke test explicitly:
 ```bash

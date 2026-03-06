@@ -18,6 +18,7 @@ class OpenCodeAdapter:
         self.root = root
         self.config = AppConfig.from_root(root)
         self.binary = Path(os.getenv("OPENCODE_BIN", str(Path.home() / ".opencode" / "bin" / "opencode")))
+        self.model = os.getenv("GENERATIONS_OPENCODE_MODEL", f"ollama/{DEFAULT_MODEL}")
         self.worktrees = WorktreeManager(self.config)
 
     def run_parallel_tasks(self, loop_counter: int, theme: str, tasks: list[ExecutionTask], debug_dir: Path) -> list[TaskResult]:
@@ -45,7 +46,7 @@ class OpenCodeAdapter:
             )
             before = set(self._git_changed_files(worktree))
             completed = subprocess.run(
-                [str(self.binary), "run", "--format", "json", "--dir", str(worktree), "--agent", self.config.opencode_agent, "--model", f"ollama/{DEFAULT_MODEL}", "--", prompt],
+                [str(self.binary), "run", "--format", "json", "--dir", str(worktree), "--agent", self.config.opencode_agent, "--model", self.model, "--", prompt],
                 cwd=worktree,
                 env=self._env(),
                 capture_output=True,
