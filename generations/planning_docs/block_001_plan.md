@@ -5,64 +5,56 @@ Execution range: 2-10
 Primary pillar: self
 
 ## Why This Pillar Now
-Long-term vision is established (Block 0). Before constructing the game product, the autonomous platform must demonstrate reliable execution, validation, and observability to ensure operator trust and strategic coherence. This block hardens the engine that will drive future game development.
+Loop 0 defined the strategic vision; Block 1 must establish the operational engine (validation, memory, observability) to ensure subsequent game development loops are disciplined, observable, and trustworthy before any game logic is committed.
 
 ## Target Outcomes
-- Validation pipeline automatically rejects commits lacking test coverage or failing lint checks.
-- Public journey page renders current block and loop state directly from memory without manual editing.
-- Memory schema supports persistent state across loop transitions without data loss.
-- Planning module enforces 9-loop structure with mandatory retrospective hooks.
+- Automated validation pipeline prevents invalid memory state commits.
+- Public journey page renders current status from memory.
+- Planning module successfully decomposes block goals into loop tasks.
+- Memory schema enforces structure on all execution logs.
 
 ## Sub Goals
-- Implement pre-commit hook script for test validation.
-- Create static site generation script to pull state from generations/memory/.
-- Define JSON schema for loop metrics and block outcomes.
-- Verify memory file integrity after simulated loop transition.
+- Implement pre-commit hook for memory schema validation.
+- Build static site generator for journey page within generations root.
+- Create loop closure script that updates memory and triggers site build.
+- Define metric collection interface for observability.
 
 ## Allowed Support Work
-- Documentation of platform architecture in generations/docs/.
-- CI/CD configuration updates for validation pipeline.
-- Refinement of memory schema to support future game state.
+- Repository scaffolding for directory.
+- CI configuration for validation scripts.
+- Documentation of the block planning protocol.
 
 ## Explicit Non Goals
-- Implementation of game mechanics or simulation logic.
-- Creation of art assets or visual design for the game.
-- Integration of monetization features or payment processing.
-- Backend server setup for game multiplayer or persistence.
+- Game mechanics implementation.
+- Art asset creation.
+- Monetization integration.
+- Physics simulation logic.
 
 ## Success Signals
-- Validation pipeline blocks a test commit intentionally lacking tests.
-- Journey page displays correct block_id and loop_counter after update.
-- Memory file checksum remains valid after write operations.
-- Planning module prevents loop increment without retrospective entry.
+- Validation script returns non-zero exit code on invalid JSON.
+- Journey page updates within 5 minutes of loop closure.
+- Memory file grows linearly with loop count.
+- Block plan remains stable throughout 9 loops.
 
 ## Failure Signals
-- Validation check is bypassed or disabled to speed up merge.
-- Journey page shows stale data requiring manual correction.
-- Memory file corruption or loss during loop transition.
-- Platform work extends beyond 9 loops without shippable capability.
+- Manual bypass of validation hooks.
+- Journey page displays stale Loop 0 data.
+- Memory schema drifts without version increment.
+- Sub-goals remain unstarted after Loop 3.
 
 ## Expected Artifacts
-- generations/platform/validation.py
-- generations/website/journey.html
-- generations/memory/state_schema.json
-- generations/planning/block_001_plan.json
-- generations/docs/platform_architecture.md
+- Describe the capability or artifact without naming repository paths.
 
 ## Metrics To Watch
 - validation_pass_rate
-- loop_completion_time_minutes
-- memory_integrity_check_sum
-- website_build_success_rate
+- loop_closure_latency
+- memory_write_success
+- site_build_duration
 
 ## Risks
-- Over-engineering the platform at the expense of product progress.
-- Validation rules becoming too strict and blocking legitimate work.
-- Delaying game development too long leading to loss of momentum.
-- Observability metrics becoming targets rather than diagnostic signals.
+- Over-engineering validation logic delaying execution.
+- Site styling distractions consuming loop capacity.
+- Memory schema becoming too rigid for future game data.
 
 ## Review Focus
-- Did the validation pipeline actually catch errors during this block?
-- Is the journey page legible and accurate for external observers?
-- Did the memory system retain context correctly across loops?
-- Are we ready to transition to game pillar work in the next block?
+- Does the validation actually protect integrity? Is the journey page honest about failures? Is the memory schema extensible?
