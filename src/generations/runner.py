@@ -262,10 +262,12 @@ class Runner:
         return touched
 
     def _rest_decision(self, loop_counter: int, validation_success: bool) -> tuple[int, bool, str]:
-        if not validation_success:
-            return 0, False, "Stop after validation failure to preserve repository integrity."
         if self.config.test_mode:
             return 0, False, "Test harness mode performs exactly one safe loop for fast verification."
+        if not validation_success:
+            return min(2, self.config.max_rest_seconds), True, (
+                "Validation failed; record the mistake, keep the repository safe via rollback, and continue after a bounded rest."
+            )
         return min(1, self.config.max_rest_seconds), True, "Continue with another small step after a short bounded rest."
 
     def _verification_commands(self) -> list[list[str]]:

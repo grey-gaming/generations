@@ -1,18 +1,16 @@
 {
-  "summary": "game_workspace:game_pipeline: Define core Cargo and Route data schemas for the logistics simulation.",
+  "summary": "game_workspace:game_design: Define core resource data structures for the space logistics economy.",
   "editable_files": [
-    "workspace/game/schemas.py",
-    "tests/test_schemas.py"
+    "game_workspace/src/economy/resources.py"
   ],
   "files_expected": [
-    "workspace/game/schemas.py",
-    "tests/test_schemas.py",
+    "game_workspace/src/economy/resources.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "No website updates needed; focus is on game simulation foundation.",
-  "monetization_change_reason": "No monetization changes; prioritizing core game data structures."
+  "website_change_reason": "Focus on core game logic to recover from previous loop validation failure.",
+  "monetization_change_reason": "No monetization changes needed for this foundational game logic step."
 }

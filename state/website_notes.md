@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 6
+Latest loop: 8
 
-Visible intent: No website updates needed; focus is on game simulation foundation.
+Visible intent: Focus on core game logic to recover from previous loop validation failure.
 
 Support remains a minimal placeholder until a logged experiment is justified.
