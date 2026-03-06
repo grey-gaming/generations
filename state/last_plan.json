@@ -1,16 +1,20 @@
 {
-  "summary": "autonomous_platform:evaluation: Add initial economy invariant tests to the validation suite.",
+  "summary": "game_workspace:game_pipeline: Create a unified simulation runner script connecting route, cost, and fuel modules into a single pickup-transport-delivery sequence.",
   "editable_files": [
-    "tests/test_economy.py"
+    "game/simulation/runner.py",
+    "game/simulation/__init__.py",
+    "tests/test_simulation_loop.py"
   ],
   "files_expected": [
-    "tests/test_economy.py",
+    "game/simulation/runner.py",
+    "game/simulation/__init__.py",
+    "tests/test_simulation_loop.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "No change needed for this step.",
-  "monetization_change_reason": "No change needed for this step."
+  "website_change_reason": "Deferred until playable loop demonstrates engagement potential per monetization plan.",
+  "monetization_change_reason": "Core integration must precede engagement experiments."
 }

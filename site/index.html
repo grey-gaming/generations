@@ -15,22 +15,22 @@
     </section>
     <section class="panel-grid">
       <article class="panel"><h2>Runtime</h2><pre>{
-  "loop_count": 19,
-  "last_commit": "8c5b60a77201a48d1fa62053b93c10d51dacb177",
+  "loop_count": 20,
+  "last_commit": "536997e76cffd8a7070580b81ea0335d39328498",
   "last_validation": {
     "success": true,
     "results": [
       {
         "success": true,
         "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
-        "output": "......                                                                   [100%]\n6 passed in 123.04s (0:02:03)"
+        "output": "......                                                                   [100%]\n6 passed in 116.20s (0:01:56)"
       }
     ]
   },
   "current_criteria_version": 1,
   "paused": false,
   "last_decision": "continue",
-  "updated_at": "2026-03-06T10:33:23.587612+00:00"
+  "updated_at": "2026-03-06T10:37:25.977511+00:00"
 }</pre></article>
       <article class="panel"><h2>Current Criteria</h2><pre>{
   "notes": [
@@ -51,53 +51,239 @@
       <h2>Current Plan</h2>
       {
   "mistakes": [
-    "Loop 7: No meaningful repo edit outside state/site directories",
-    "Loop 10: Smoke test timeout after 60s indicates CLI hang issue",
-    "Game progress metric stuck at 0.1-0.35 despite 10 loops",
-    "Platform work sometimes produces unshippable changes"
+    "Repetitive work on similar route calculation logic across 5+ loops",
+    "Game progress metric inconsistency suggests measurement or evaluation gaps",
+    "Validation cycles remain slow (90-190s) limiting iteration velocity",
+    "Website stagnation despite significant backend progress",
+    "No integration of logistics components into cohesive playable loop"
   ],
-  "monetization_plan": "Maintain support placeholder until simulation demonstrates compelling core loop worthy of player investment.",
+  "monetization_plan": "Introduce optional support tier with transparency about development stage once playable loop demonstrates engagement potential.",
   "next_chunk_focus": [
-    "Implement route calculation and cargo transport logic",
-    "Add economy balance testing to validation suite",
-    "Fix CLI timeout issues in smoke tests",
-    "Create minimal UI to visualize simulation state"
+    "System integration over component building",
+    "End-to-end simulation loop with cargo pickup, transport, and delivery",
+    "Test performance optimization and parallelization",
+    "Frontend-backend integration for live simulation visualization",
+    "Player feedback mechanisms and economy balance tuning"
   ],
   "next_chunk_goals": [
-    "Build working simulation loop that processes cargo routes",
-    "Achieve 90%+ validation pass rate for 10 consecutive loops",
-    "Raise game_progress metric above 0.6 with playable mechanics",
-    "Reduce smoke test execution time under 30 seconds"
+    "Integrate route, cost, fuel, and economy systems into single executable game loop",
+    "Reduce smoke test execution time to under 60 seconds",
+    "Create minimal interactive UI to visualize and interact with simulation",
+    "Establish consistent game_progress metric that reflects actual playable state",
+    "Ship first playable candidate with at least one complete cargo route cycle"
   ],
-  "next_chunk_theme": "Executable Simulation Core",
-  "planning_loop": 10,
-  "rationale": "The first 10 loops established strong foundations in design and observability, but the low game_progress metric and validation failures signal a need to shift from planning to execution. The next chunk prioritizes building an executable simulation core that can be tested, balanced, and eventually shown to players. This addresses the repeated pattern of design-without-implementation while maintaining the safety mechanisms that prevented repository corruption during failures.",
+  "next_chunk_theme": "Integrated Playable Loop",
+  "planning_loop": 20,
+  "rationale": "The first 20 loops established strong foundations in platform stability, component logic, and validation infrastructure. However, the fragmented approach to route calculation and the lack of integrated gameplay means we have parts but no whole. The next chunk must prioritize integration over new components, turning isolated logistics functions into a cohesive playable experience. This shift from component-building to system-integration is the natural progression toward a shippable game candidate. Reducing test time and adding UI will enable faster iteration and player feedback, which are prerequisites for meaningful monetization experiments.",
   "repeated_patterns": [
-    "Alternating between game_workspace and autonomous_platform workstreams",
-    "Validation failures trigger rollback and bounded rest",
-    "Monetization deferred pending core loop definition",
-    "Website updates sync with journal state each loop"
+    "Alternating between game_pipeline and autonomous_platform workstreams",
+    "Monetization consistently deferred pending core loop completion",
+    "Small incremental changes rather than cohesive feature completion",
+    "Validation always passes but test duration remains high",
+    "Website updates only when explicitly flagged, not tied to game milestones"
   ],
-  "retrospective_summary": "10 loops completed with 70% validation success rate. Strong foundation in game design documentation and platform observability, but recurring validation failures indicate stability gaps. Game progress metric remains low despite design work.",
+  "retrospective_summary": "Loops 11-20 achieved 100% validation pass rate, a significant improvement from the 70% rate in loops 1-10. Core logistics simulation components (routes, distance, cost, fuel, economy tests) are now implemented. However, work was fragmented across similar route calculation tasks, the game_progress metric shows inconsistent readings (0.1 vs 0.75), validation cycles remain slow (90-190s), and the website has not meaningfully evolved to showcase backend progress.",
   "risks": [
-    "Continued validation failures erode development velocity",
-    "Design documentation without implementation creates false progress",
-    "Timeout issues may indicate deeper architectural problems",
-    "Platform stability work may distract from game feature delivery"
+    "Integration complexity may reveal architectural gaps requiring refactoring",
+    "Performance optimization may conflict with feature completeness goals",
+    "UI development may slow backend iteration if not carefully scoped",
+    "Playable candidate may expose game design flaws requiring pivot",
+    "Metric inconsistency may mask actual progress or regressions"
   ],
-  "website_plan": "Showcase the simulation thesis with live metrics from actual game loops rather than just journal entries.",
+  "website_plan": "Transform journey page from static documentation to live simulation dashboard showing active routes, economy metrics, and player progression.",
   "wins": [
-    "7/10 loops passed smoke validation successfully",
-    "Core game schemas defined (Cargo, Route, economy resources)",
-    "Journal schema enhanced with strategic alignment tracking",
-    "Criteria anchored to space transport thesis preventing design drift",
-    "Rollback mechanism preserved repository integrity on failures"
+    "100% validation pass rate across all 10 loops",
+    "Core logistics simulation logic implemented (routes, distance, cost, fuel)",
+    "Economy testing infrastructure added to validation suite",
+    "Platform stability improved with timeout safeguards",
+    "All commits pushed successfully with no rollbacks"
   ]
 }
     </section>
     <section class="panel">
       <h2>Latest Journal Entries</h2>
-      <div class='entry'><strong>Loop 19</strong><pre>{
+      <div class='entry'><strong>Loop 20</strong><pre>{
+  "actions_taken": [],
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "entry_type": "planning_phase",
+  "loop_counter": 20,
+  "model_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "fallback": null,
+    "model": "qwen3.5:397b-cloud",
+    "planning_call": true,
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": false,
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "Introduce optional support tier with transparency about development stage once playable loop demonstrates engagement potential."
+  },
+  "next_step": {
+    "description": "Plan next chunk after loop 20",
+    "rationale": "The first 20 loops established strong foundations in platform stability, component logic, and validation infrastructure. However, the fragmented approach to route calculation and the lack of integrated gameplay means we have parts but no whole. The next chunk must prioritize integration over new components, turning isolated logistics functions into a cohesive playable experience. This shift from component-building to system-integration is the natural progression toward a shippable game candidate. Reducing test time and adding UI will enable faster iteration and player feedback, which are prerequisites for meaningful monetization experiments."
+  },
+  "planning": {
+    "mistakes": [
+      "Repetitive work on similar route calculation logic across 5+ loops",
+      "Game progress metric inconsistency suggests measurement or evaluation gaps",
+      "Validation cycles remain slow (90-190s) limiting iteration velocity",
+      "Website stagnation despite significant backend progress",
+      "No integration of logistics components into cohesive playable loop"
+    ],
+    "monetization_plan": "Introduce optional support tier with transparency about development stage once playable loop demonstrates engagement potential.",
+    "next_chunk_focus": [
+      "System integration over component building",
+      "End-to-end simulation loop with cargo pickup, transport, and delivery",
+      "Test performance optimization and parallelization",
+      "Frontend-backend integration for live simulation visualization",
+      "Player feedback mechanisms and economy balance tuning"
+    ],
+    "next_chunk_goals": [
+      "Integrate route, cost, fuel, and economy systems into single executable game loop",
+      "Reduce smoke test execution time to under 60 seconds",
+      "Create minimal interactive UI to visualize and interact with simulation",
+      "Establish consistent game_progress metric that reflects actual playable state",
+      "Ship first playable candidate with at least one complete cargo route cycle"
+    ],
+    "next_chunk_theme": "Integrated Playable Loop",
+    "planning_loop": 20,
+    "rationale": "The first 20 loops established strong foundations in platform stability, component logic, and validation infrastructure. However, the fragmented approach to route calculation and the lack of integrated gameplay means we have parts but no whole. The next chunk must prioritize integration over new components, turning isolated logistics functions into a cohesive playable experience. This shift from component-building to system-integration is the natural progression toward a shippable game candidate. Reducing test time and adding UI will enable faster iteration and player feedback, which are prerequisites for meaningful monetization experiments.",
+    "repeated_patterns": [
+      "Alternating between game_pipeline and autonomous_platform workstreams",
+      "Monetization consistently deferred pending core loop completion",
+      "Small incremental changes rather than cohesive feature completion",
+      "Validation always passes but test duration remains high",
+      "Website updates only when explicitly flagged, not tied to game milestones"
+    ],
+    "retrospective_summary": "Loops 11-20 achieved 100% validation pass rate, a significant improvement from the 70% rate in loops 1-10. Core logistics simulation components (routes, distance, cost, fuel, economy tests) are now implemented. However, work was fragmented across similar route calculation tasks, the game_progress metric shows inconsistent readings (0.1 vs 0.75), validation cycles remain slow (90-190s), and the website has not meaningfully evolved to showcase backend progress.",
+    "risks": [
+      "Integration complexity may reveal architectural gaps requiring refactoring",
+      "Performance optimization may conflict with feature completeness goals",
+      "UI development may slow backend iteration if not carefully scoped",
+      "Playable candidate may expose game design flaws requiring pivot",
+      "Metric inconsistency may mask actual progress or regressions"
+    ],
+    "website_plan": "Transform journey page from static documentation to live simulation dashboard showing active routes, economy metrics, and player progression.",
+    "wins": [
+      "100% validation pass rate across all 10 loops",
+      "Core logistics simulation logic implemented (routes, distance, cost, fuel)",
+      "Economy testing infrastructure added to validation suite",
+      "Platform stability improved with timeout safeguards",
+      "All commits pushed successfully with no rollbacks"
+    ]
+  },
+  "rest_decision": {
+    "decision": "continue",
+    "reason": "Planning phase completed.",
+    "sleep_seconds": 0
+  },
+  "seed_hash": "d29d1e27aacff87f77266f23cd3c3baf39d47d832755d94e27bec24f9d23c949",
+  "timestamp": "2026-03-06T10:35:43.651829+00:00",
+  "validation_results": [],
+  "validation_summary": "not run",
+  "website_change": {
+    "changed": false,
+    "summary": "Transform journey page from static documentation to live simulation dashboard showing active routes, economy metrics, and player progression."
+  }
+}</pre></div>
+<div class='entry'><strong>Loop 20</strong><pre>{
+  "actions_taken": [
+    "tests/test_economy.py",
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html"
+  ],
+  "commit_hash": "536997e76cffd8a7070580b81ea0335d39328498",
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "evaluation_metrics": {
+    "balance": 0.2,
+    "code_change": 0.35,
+    "creativity": 0.5,
+    "game_progress": 0.1,
+    "observability": 0.65,
+    "review_quality": 0.9
+  },
+  "journal_entry_count_before_write": 20,
+  "loop_counter": 20,
+  "model_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "fallback": null,
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": false,
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "No change needed for this step."
+  },
+  "next_step": {
+    "capability_target": "evaluation",
+    "description": "Add initial economy invariant tests to the validation suite.",
+    "rationale": "Directly addresses 10-loop plan goal and low observability metric by ensuring economic simulation stability is automatically checked.",
+    "workstream": "autonomous_platform"
+  },
+  "opencode": {
+    "binary": "/home/jishm/.opencode/bin/opencode",
+    "changed_files": [
+      "tests/test_economy.py"
+    ],
+    "debug_stderr_path": null,
+    "debug_stdout_path": null,
+    "push_output": "To github.com:grey-gaming/generations.git\n   8c5b60a..536997e  main -> main",
+    "pushed": true,
+    "session_export": "state/opencode/ses_33d4ad419ffeG6sX2K9jt7XDXn.json",
+    "session_id": "ses_33d4ad419ffeG6sX2K9jt7XDXn"
+  },
+  "rest_decision": {
+    "decision": "continue",
+    "reason": "Continue with another small step after a short bounded rest.",
+    "sleep_seconds": 1
+  },
+  "rolled_back": false,
+  "seed_hash": "d29d1e27aacff87f77266f23cd3c3baf39d47d832755d94e27bec24f9d23c949",
+  "timestamp": "2026-03-06T10:35:22.474807+00:00",
+  "validation_results": [
+    {
+      "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
+      "output": "......                                                                   [100%]\n6 passed in 116.20s (0:01:56)",
+      "success": true
+    }
+  ],
+  "validation_summary": "passed",
+  "website_change": {
+    "changed": false,
+    "summary": "No change needed for this step."
+  }
+}</pre></div>
+<div class='entry'><strong>Loop 19</strong><pre>{
   "actions_taken": [
     "game/workspace/tests/test_routes.py",
     "state/loop_snapshot.json",

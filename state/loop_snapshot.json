@@ -1,8 +1,8 @@
 {
-  "loop": 20,
-  "workstream": "autonomous_platform",
-  "capability_target": "evaluation",
-  "proposal": "Add initial economy invariant tests to the validation suite.",
+  "loop": 21,
+  "workstream": "game_workspace",
+  "capability_target": "game_pipeline",
+  "proposal": "Create a unified simulation runner script connecting route, cost, and fuel modules into a single pickup-transport-delivery sequence.",
   "model": {
     "provider": "ollama_cloud",
     "model": "qwen3.5:397b-cloud",
@@ -12,5 +12,5 @@
     "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL.",
     "fallback": null
   },
-  "timestamp": "2026-03-06T10:33:23.566281+00:00"
+  "timestamp": "2026-03-06T10:37:25.960087+00:00"
 }
