@@ -15,22 +15,22 @@
     </section>
     <section class="panel-grid">
       <article class="panel"><h2>Runtime</h2><pre>{
-  "loop_count": 24,
-  "last_commit": "5dae7989ca75c8adba104adde9746c2cae243e9b",
+  "loop_count": 25,
+  "last_commit": "626ddc5a898abcb5d157f3de720a0f21ac840484",
   "last_validation": {
     "success": true,
     "results": [
       {
         "success": true,
         "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
-        "output": "......                                                                   [100%]\n6 passed in 46.06s"
+        "output": "......                                                                   [100%]\n6 passed in 181.09s (0:03:01)"
       }
     ]
   },
   "current_criteria_version": 1,
   "paused": false,
   "last_decision": "continue",
-  "updated_at": "2026-03-06T10:52:40.360084+00:00"
+  "updated_at": "2026-03-06T10:57:08.413022+00:00"
 }</pre></article>
       <article class="panel"><h2>Current Criteria</h2><pre>{
   "notes": [
@@ -102,7 +102,94 @@
     </section>
     <section class="panel">
       <h2>Latest Journal Entries</h2>
-      <div class='entry'><strong>Loop 24</strong><pre>{
+      <div class='entry'><strong>Loop 25</strong><pre>{
+  "actions_taken": [
+    "game/simulation/runner.py",
+    "game/state.py",
+    "tests/test_simulation_integration.py",
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html"
+  ],
+  "commit_hash": "626ddc5a898abcb5d157f3de720a0f21ac840484",
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "evaluation_metrics": {
+    "balance": 0.4,
+    "code_change": 1.0,
+    "creativity": 0.9,
+    "game_progress": 0.75,
+    "observability": 0.4,
+    "review_quality": 0.9
+  },
+  "journal_entry_count_before_write": 26,
+  "loop_counter": 25,
+  "model_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "fallback": null,
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": true,
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "Core loop must be playable and stable before monetization experiments are meaningful."
+  },
+  "next_step": {
+    "capability_target": "game_pipeline",
+    "description": "Implement a unified SimulationState dataclass and tick() function to orchestrate route, fuel, and economy updates.",
+    "rationale": "Connects fragmented logistics components into a single executable loop, enabling the 'Integrated Playable Loop' goal and providing a concrete state for consistent progress measurement.",
+    "workstream": "game_workspace"
+  },
+  "opencode": {
+    "binary": "/home/jishm/.opencode/bin/opencode",
+    "changed_files": [
+      "game/simulation/runner.py",
+      "game/state.py",
+      "tests/test_simulation_integration.py"
+    ],
+    "debug_stderr_path": null,
+    "debug_stdout_path": null,
+    "push_output": "To github.com:grey-gaming/generations.git\n   5dae798..626ddc5  main -> main",
+    "pushed": true,
+    "session_export": "state/opencode/ses_33d3ce934ffezynH9kEbx600jU.json",
+    "session_id": "ses_33d3ce934ffezynH9kEbx600jU"
+  },
+  "rest_decision": {
+    "decision": "continue",
+    "reason": "Continue with another small step after a short bounded rest.",
+    "sleep_seconds": 1
+  },
+  "rolled_back": false,
+  "seed_hash": "d29d1e27aacff87f77266f23cd3c3baf39d47d832755d94e27bec24f9d23c949",
+  "timestamp": "2026-03-06T10:55:44.432828+00:00",
+  "validation_results": [
+    {
+      "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
+      "output": "......                                                                   [100%]\n6 passed in 181.09s (0:03:01)",
+      "success": true
+    }
+  ],
+  "validation_summary": "passed",
+  "website_change": {
+    "changed": false,
+    "summary": "Backend integration is a prerequisite for a live simulation dashboard; focus on core loop first."
+  }
+}</pre></div>
+<div class='entry'><strong>Loop 24</strong><pre>{
   "actions_taken": [
     "game/turn.py",
     "state/loop_snapshot.json",

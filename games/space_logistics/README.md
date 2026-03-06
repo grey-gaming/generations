@@ -14,10 +14,13 @@ Core pillars:
 
 ## Build Pipeline
 
+Completed:
+1. Define core data models (ships, routes, commodities) - `game/state.py`
+2. Implement economy simulation tick - `game/state.py:tick()`
+
 Next steps:
-1. Define core data models (ships, routes, commodities)
-2. Implement economy simulation tick
 3. Build terminal UI prototype
 4. Add save/load system
+5. Define ship upgrade mechanics
 
 The goal is not to stay a placeholder forever. The autonomous loop should gradually turn this workspace into a clearer design, then a prototype, then a more credible game candidate.

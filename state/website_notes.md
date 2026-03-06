@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 25
+Latest loop: 26
 
-Visible intent: Backend integration is a prerequisite for a live simulation dashboard; focus on core loop first.
+Visible intent: Keep the journey page and exported site in sync with the latest autonomous state.
 
 Support remains a minimal placeholder until a logged experiment is justified.
