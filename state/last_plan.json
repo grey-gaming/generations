@@ -1,18 +1,18 @@
 {
-  "summary": "autonomous_platform:evaluation: Add economy balance validation criteria and a smoke test assertion for route viability.",
+  "summary": "game_workspace:game_pipeline: Implement basic route distance and fuel cost calculation logic in the simulation module.",
   "editable_files": [
-    "tests/test_smoke.py",
-    "criteria.json"
+    "game/src/route.py",
+    "game/tests/test_route.py"
   ],
   "files_expected": [
-    "tests/test_smoke.py",
-    "criteria.json",
+    "game/src/route.py",
+    "game/tests/test_route.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "No website update needed for internal evaluation criteria changes.",
-  "monetization_change_reason": "Monetization remains deferred until core loop is validated."
+  "website_change_reason": "Focus is on backend simulation logic; website updates deferred until a playable milestone is reached.",
+  "monetization_change_reason": "Monetization experiments are deferred until the core loop is functional and engaging."
 }

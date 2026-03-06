@@ -17,6 +17,20 @@ def calculate_distance(x1: float, y1: float, z1: float, x2: float, y2: float, z2
     return math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
 
 
+def calculate_fuel_cost(distance: float, fuel_price: float, consumption_rate: float = 0.1) -> float:
+    """Calculate fuel cost for a route.
+    
+    Args:
+        distance: Distance of the route in kilometers
+        fuel_price: Price of fuel per unit
+        consumption_rate: Fuel consumption rate per kilometer
+        
+    Returns:
+        Total fuel cost
+    """
+    return distance * consumption_rate * fuel_price
+
+
 def calculate_route_cost(distance: float, cargo_mass: float, fuel_price: float) -> float:
     """Calculate the cost of a route based on distance, cargo mass, and fuel price.
     
@@ -28,7 +42,6 @@ def calculate_route_cost(distance: float, cargo_mass: float, fuel_price: float) 
     Returns:
         Total route cost
     """
-    fuel_consumption_rate = 0.1
-    fuel_cost = distance * fuel_consumption_rate * fuel_price
+    fuel_cost = calculate_fuel_cost(distance, fuel_price)
     handling_cost = cargo_mass * 0.05
     return fuel_cost + handling_cost
