@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 19
+Latest loop: 20
 
-Visible intent: Focus remains on core simulation logic before showcasing metrics.
+Visible intent: No change needed for this step.
 
 Support remains a minimal placeholder until a logged experiment is justified.

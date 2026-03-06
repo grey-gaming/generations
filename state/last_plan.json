@@ -1,18 +1,16 @@
 {
-  "summary": "game_workspace:game_pipeline: Implement basic route cost calculation logic with unit tests.",
+  "summary": "autonomous_platform:evaluation: Add initial economy invariant tests to the validation suite.",
   "editable_files": [
-    "game/routes.py",
-    "tests/test_routes.py"
+    "tests/test_economy.py"
   ],
   "files_expected": [
-    "game/routes.py",
-    "tests/test_routes.py",
+    "tests/test_economy.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Focus remains on core simulation logic before showcasing metrics.",
-  "monetization_change_reason": "Maintain support placeholder until simulation demonstrates compelling core loop."
+  "website_change_reason": "No change needed for this step.",
+  "monetization_change_reason": "No change needed for this step."
 }
