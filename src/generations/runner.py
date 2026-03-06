@@ -82,6 +82,9 @@ class Runner:
         seed_hash = sha256(self.seed.encode("utf-8")).hexdigest()
         proposal, model_metadata = self.model.choose_next_step(self.seed, loop_counter, memory)
         criteria = memory["criteria_history"][-1]
+        if self.config.debug and model_metadata.get("prompt_preview"):
+            print("debug model_prompt_preview:", flush=True)
+            print(str(model_metadata["prompt_preview"]), flush=True)
 
         plan = OpenCodePlan(
             summary=f"{proposal.workstream}:{proposal.capability_target}: {proposal.description}",
@@ -158,6 +161,8 @@ class Runner:
                 "changed_files": result.opencode_changed_files,
                 "pushed": result.pushed,
                 "push_output": result.push_output,
+                "debug_stdout_path": result.debug_stdout_path,
+                "debug_stderr_path": result.debug_stderr_path,
                 "binary": str(self.opencode.binary),
             },
             "model_provider": model_metadata,
@@ -193,7 +198,7 @@ class Runner:
         if rest_seconds > 0 and continue_running and not self.config.test_mode:
             time.sleep(rest_seconds)
 
-        if not continue_running:
+        if not continue_running and validation_success:
             self._journal_done(loop_counter, latest_memory, validation_success)
         return continue_running
 
@@ -349,7 +354,8 @@ class Runner:
     def _log_run_header(self) -> None:
         print(
             f"run start: seed_sha={sha256(self.seed.encode('utf-8')).hexdigest()[:12]} "
-            f"loop_start={self.runtime.loop_count} criteria_v={self.runtime.current_criteria_version}",
+            f"loop_start={self.runtime.loop_count} criteria_v={self.runtime.current_criteria_version} "
+            f"debug={'on' if self.config.debug else 'off'} agent={self.config.opencode_agent}",
             flush=True,
         )
 
@@ -383,6 +389,15 @@ class Runner:
                 flush=True,
             )
         print(f"reason: {reason}", flush=True)
+        if self.config.debug:
+            latest_model = self.memory.latest().get("outcomes", {}).get("last_error")
+            print(
+                f"debug opencode_stdout={result.debug_stdout_path or '-'} "
+                f"opencode_stderr={result.debug_stderr_path or '-'}",
+                flush=True,
+            )
+            if latest_model:
+                print(f"debug last_error={latest_model}", flush=True)
 
     def _log(self, event: str, message: str) -> None:
         print(f"{event}: {message}", flush=True)

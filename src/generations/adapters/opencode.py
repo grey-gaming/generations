@@ -26,6 +26,8 @@ class OpenCodeResult:
     opencode_changed_files: list[str]
     pushed: bool
     push_output: str
+    debug_stdout_path: str | None
+    debug_stderr_path: str | None
 
 
 class OpenCodeAdapter:
@@ -43,7 +45,7 @@ class OpenCodeAdapter:
     ) -> OpenCodeResult:
         backup_dir = self.root / ".generations_tmp_backup"
         backups = self._snapshot_files(plan.files_expected, backup_dir)
-        session_id, opencode_files = self._apply_via_opencode(plan, commit_message)
+        session_id, opencode_files, stdout_path, stderr_path = self._apply_via_opencode(plan, commit_message)
         files_touched = list(dict.fromkeys(opencode_files + apply_fn()))
         meaningful_files = self._meaningful_repo_files(files_touched)
         if not meaningful_files:
@@ -56,17 +58,17 @@ class OpenCodeAdapter:
                     output="No meaningful repository edit was produced outside state/ and site/.",
                 )
             ]
-            return OpenCodeResult(plan, files_touched, validation, None, False, True, session_id, export_path, opencode_files, False, "")
+            return OpenCodeResult(plan, files_touched, validation, None, False, True, session_id, export_path, opencode_files, False, "", stdout_path, stderr_path)
         validation = [self._run_command(cmd) for cmd in verify_commands]
         if not all(item.success for item in validation):
             self._restore_files(backups, backup_dir)
             export_path = self._export_session(session_id) if session_id else None
-            return OpenCodeResult(plan, files_touched, validation, None, False, True, session_id, export_path, opencode_files, False, "")
+            return OpenCodeResult(plan, files_touched, validation, None, False, True, session_id, export_path, opencode_files, False, "", stdout_path, stderr_path)
         commit_hash = self._commit(commit_message)
         pushed, push_output = self._push_current_branch() if commit_hash else (False, "")
         shutil.rmtree(backup_dir, ignore_errors=True)
         export_path = self._export_session(session_id) if session_id else None
-        return OpenCodeResult(plan, files_touched, validation, commit_hash, commit_hash is not None, False, session_id, export_path, opencode_files, pushed, push_output)
+        return OpenCodeResult(plan, files_touched, validation, commit_hash, commit_hash is not None, False, session_id, export_path, opencode_files, pushed, push_output, stdout_path, stderr_path)
 
     def _run_command(self, command: list[str]) -> ValidationResult:
         completed = subprocess.run(
@@ -141,9 +143,9 @@ class OpenCodeAdapter:
     def export_plan(self, plan: OpenCodePlan, path: Path) -> None:
         path.write_text(json.dumps(plan.as_dict(), indent=2) + "\n", encoding="utf-8")
 
-    def _apply_via_opencode(self, plan: OpenCodePlan, commit_message: str) -> tuple[str | None, list[str]]:
+    def _apply_via_opencode(self, plan: OpenCodePlan, commit_message: str) -> tuple[str | None, list[str], str | None, str | None]:
         if not self.binary.exists():
-            return None, []
+            return None, [], None, None
         before = set(self._list_sessions())
         before_diff = set(self._git_changed_files())
         attachments = self._prepare_session_files(plan, commit_message)
@@ -171,15 +173,19 @@ class OpenCodeAdapter:
             f"Generations workflow: {plan.summary[:48]}",
             "--dir",
             str(self.root),
+            "--agent",
+            self.config.opencode_agent,
             "--model",
             f"ollama/{DEFAULT_MODEL}",
         ]
         for attachment in attachments:
-            command.extend(["--file", str(attachment)])
+            command.append(f"--file={attachment}")
+        command.append("--")
         command.append(prompt)
         completed = subprocess.run(command, cwd=self.root, env=self._env(), check=False, capture_output=True, text=True)
+        stdout_path, stderr_path = self._write_debug_outputs(completed.stdout, completed.stderr)
         if completed.returncode != 0:
-            return None, []
+            return None, [], stdout_path, stderr_path
         after = self._list_sessions()
         session_id = None
         for session_id in after:
@@ -189,7 +195,7 @@ class OpenCodeAdapter:
             session_id = after[0] if after else None
         after_diff = set(self._git_changed_files())
         opencode_files = sorted(after_diff - before_diff)
-        return session_id, opencode_files
+        return session_id, opencode_files, stdout_path, stderr_path
 
     def _prepare_session_files(self, plan: OpenCodePlan, commit_message: str) -> list[Path]:
         input_dir = self.config.opencode_state_dir / "input"
@@ -348,3 +354,35 @@ class OpenCodeAdapter:
             },
         }
         config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+
+    def _write_debug_outputs(self, stdout: str, stderr: str) -> tuple[str | None, str | None]:
+        if not self.config.debug:
+            return None, None
+        debug_dir = self.config.opencode_state_dir / "debug"
+        debug_dir.mkdir(parents=True, exist_ok=True)
+        stdout_path = debug_dir / "last_run.stdout.log"
+        stderr_path = debug_dir / "last_run.stderr.log"
+        stdout_path.write_text(stdout or "", encoding="utf-8")
+        stderr_path.write_text(stderr or "", encoding="utf-8")
+        return str(stdout_path.relative_to(self.root)), str(stderr_path.relative_to(self.root))
+
+    def probe_write_access(self) -> tuple[bool, dict[str, object]]:
+        probe_file = self.root / "games" / "space_logistics" / "aica_write_probe.md"
+        probe_file.parent.mkdir(parents=True, exist_ok=True)
+        plan = OpenCodePlan(
+            summary="aica-write-probe",
+            editable_files=[str(probe_file.relative_to(self.root))],
+            files_expected=[str(probe_file.relative_to(self.root))],
+            website_change_reason="none",
+            monetization_change_reason="none",
+        )
+        session_id, changed_files, stdout_path, stderr_path = self._apply_via_opencode(plan, "probe: test OpenCode agent filesystem write access")
+        success = probe_file.exists() or str(probe_file.relative_to(self.root)) in changed_files
+        return success, {
+            "agent": self.config.opencode_agent,
+            "session_id": session_id,
+            "changed_files": changed_files,
+            "probe_file": str(probe_file.relative_to(self.root)),
+            "debug_stdout_path": stdout_path,
+            "debug_stderr_path": stderr_path,
+        }

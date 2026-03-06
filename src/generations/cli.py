@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 from pathlib import Path
 import threading
 import sys
@@ -19,6 +20,7 @@ def build_parser() -> argparse.ArgumentParser:
     run_parser.add_argument("--seed", required=True)
     run_parser.add_argument("--host", default="127.0.0.1")
     run_parser.add_argument("--port", type=int, default=8000)
+    run_parser.add_argument("--debug", action="store_true")
 
     web_parser = subparsers.add_parser("web")
     web_parser.add_argument("--host", default="127.0.0.1")
@@ -26,6 +28,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     export_parser = subparsers.add_parser("export-web")
     export_parser.add_argument("--out", default="./site")
+
+    opencode_test_parser = subparsers.add_parser("opencode-write-test")
+    opencode_test_parser.add_argument("--debug", action="store_true")
 
     subparsers.add_parser("status")
     subparsers.add_parser("pause")
@@ -35,6 +40,8 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if getattr(args, "debug", False):
+        os.environ["GENERATIONS_DEBUG"] = "1"
     root = Path.cwd()
     config = AppConfig.from_root(root)
     init_repo_if_needed(root)
@@ -56,6 +63,13 @@ def main(argv: list[str] | None = None) -> int:
         export_site(root, Path(args.out))
         print(Path(args.out).resolve())
         return 0
+
+    if args.command == "opencode-write-test":
+        from generations.adapters.opencode import OpenCodeAdapter
+
+        success, details = OpenCodeAdapter(root).probe_write_access()
+        print({"success": success, **details})
+        return 0 if success else 1
 
     if args.command == "status":
         runtime = load_runtime_state(config.runtime_path)

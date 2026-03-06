@@ -31,18 +31,23 @@ class OllamaCloudAdapter:
         self.model = os.getenv("GENERATIONS_MODEL", DEFAULT_MODEL)
         self.base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
         self.stubbed = False
+        self.debug = os.getenv("GENERATIONS_DEBUG", "0") == "1"
 
     def choose_next_step(self, seed: str, loop_count: int, memory: dict[str, object]) -> tuple[StepProposal, dict[str, object]]:
         try:
             proposal = self._choose_via_ollama(seed, loop_count, memory)
             metadata = self.metadata()
             metadata["fallback"] = None
+            if self.debug:
+                metadata["prompt_preview"] = self._prompt(seed, loop_count, memory)[:1200]
             return proposal, metadata
         except Exception as exc:
             self.stubbed = True
             proposal = self._fallback_proposal(seed, loop_count, memory)
             metadata = self.metadata()
             metadata["fallback"] = f"{type(exc).__name__}: {exc}"
+            if self.debug:
+                metadata["prompt_preview"] = self._prompt(seed, loop_count, memory)[:1200]
             return proposal, metadata
 
     def _choose_via_ollama(self, seed: str, loop_count: int, memory: dict[str, object]) -> StepProposal:
