@@ -6,7 +6,7 @@ from generations.config import AppConfig
 from generations.journal.store import JournalStore
 from generations.memory.store import MemoryStore
 from generations.state import load_current_loop_plan, load_runtime_state
-from generations.web.presentation import build_dashboard_context, visible_journal_entries
+from generations.web.presentation import build_dashboard_context, entry_body, visible_journal_entries
 
 
 def export_site(
@@ -21,35 +21,45 @@ def export_site(
     output = out_dir or config.web_export_dir
     output.mkdir(parents=True, exist_ok=True)
     all_entries = journal_entries if journal_entries is not None else JournalStore(config.journal_path).read_all()
-    entries = visible_journal_entries(all_entries)
+    visible = visible_journal_entries(all_entries)
     memory_payload = memory if memory is not None else MemoryStore(config.memory_path).latest()
     runtime = load_runtime_state(config.runtime_path).as_dict()
     current_loop_plan = load_current_loop_plan(config.current_loop_plan_path) or memory_payload.get("current_loop_plan") or {}
-    dashboard = build_dashboard_context(runtime, current_loop_plan, memory_payload, entries)
-    html = _render_html(dashboard, entries)
+    dashboard = build_dashboard_context(runtime, current_loop_plan, memory_payload, visible)
+    html = _render_html(dashboard, [{**entry, "body": entry_body(entry)} for entry in visible])
     (output / "index.html").write_text(html, encoding="utf-8")
-    style_source = Path(__file__).resolve().parent / 'static' / 'style.css'
-    (output / 'style.css').write_text(style_source.read_text(encoding='utf-8'), encoding='utf-8')
+    style_source = Path(__file__).resolve().parent / "static" / "style.css"
+    (output / "style.css").write_text(style_source.read_text(encoding="utf-8"), encoding="utf-8")
     return output
 
 
 def _render_html(dashboard: dict[str, object], entries: list[dict[str, object]]) -> str:
+    hero = dashboard["hero"]
     now = dashboard["now"]
-    loop = dashboard["loop"]
-    planning = dashboard["planning"]
+    vision = dashboard["vision"]
+    block = dashboard["block"]
+    current_loop = dashboard["current_loop"]
+    retrospective = dashboard["retrospective"]
     support = dashboard["support"]
     diary = dashboard["diary"]
-    status_strip = dashboard["status_strip"]
-    task_cards = "".join(_task_card_html(task) for task in loop["tasks"]) or "<p>No active task plan.</p>"
-    pillar_cards = "".join(_pillar_card_html(pillar) for pillar in planning["pillars"])
+    task_cards = "".join(_task_card_html(task) for task in current_loop["tasks"]) or "<p>No active execution tasks.</p>"
+    pillar_cards = "".join(_pillar_card_html(pillar) for pillar in dashboard["pillars"])
     metric_cards = "".join(
         f"<article class='metric-card'><span class='metric-name'>{_escape(metric['name'])}</span><strong class='metric-value'>{_escape(metric['value'])}%</strong><p class='muted'>{_escape(metric['hint'])}</p></article>"
-        for metric in status_strip["metrics"]
+        for metric in dashboard["metrics"]
     )
+    vision_cards = "".join(
+        f"<article class='pillar-card'><header><strong>{_escape(pillar['name'])}</strong></header><p>{_escape(pillar['summary'])}</p><p class='muted'>{_escape(pillar['good_end_state'])}</p></article>"
+        for pillar in vision["pillars"]
+    ) or "<p>No long-term vision recorded yet.</p>"
     diary_entries = "".join(_render_entry(entry) for entry in entries) or "<p>No entries yet.</p>"
-    milestones = "".join(f"<li>{item}</li>" for item in planning["milestones_100"]) or "<li>No 100-loop milestones recorded yet.</li>"
-    warning = f"<p class='warning'>Model fallback active: {status_strip['fallback']}</p>" if status_strip.get("fallback") else ""
-    blocking = f"<p class='warning'>{loop['blocking_issue']}</p>" if loop.get("blocking_issue") else ""
+    outcomes = "".join(f"<li>{_escape(item)}</li>" for item in block["outcomes"]) or "<li>No target outcomes recorded yet.</li>"
+    support_work = "".join(f"<li>{_escape(item)}</li>" for item in block["support_work"]) or "<li>No support work recorded yet.</li>"
+    non_goals = "".join(f"<li>{_escape(item)}</li>" for item in block["non_goals"]) or "<li>No non-goals recorded yet.</li>"
+    review_focus = "".join(f"<li>{_escape(item)}</li>" for item in block["review_focus"]) or "<li>No review focus recorded yet.</li>"
+    retro_wins = "".join(f"<li>{_escape(item)}</li>" for item in retrospective["wins"]) or "<li>No wins recorded yet.</li>"
+    retro_stalls = "".join(f"<li>{_escape(item)}</li>" for item in retrospective["stalls"]) or "<li>No stalls recorded yet.</li>"
+    retro_change = "".join(f"<li>{_escape(item)}</li>" for item in retrospective["change_next_time"]) or "<li>No next changes recorded yet.</li>"
     return f"""<!doctype html>
 <html lang='en'>
 <head>
@@ -62,47 +72,47 @@ def _render_html(dashboard: dict[str, object], entries: list[dict[str, object]])
   <main class='page'>
     <section class='hero'>
       <p class='eyebrow'>Generations</p>
-      <h1>{_escape(now['active_game_name']).replace('_', ' ').title()}</h1>
-      <p class='lede'>{_escape(now['active_game_thesis'])}</p>
+      <h1>{_escape(hero['game_name']).replace('_', ' ').title()}</h1>
+      <p class='lede'>{_escape(hero['thesis'])}</p>
       <div class='status-strip'>
-        <span>Loop {_escape(now['loop_count'])}</span>
-        <span>Validation: {_escape(now['last_validation'])}</span>
-        <span>Model: {_escape(status_strip['model'])}</span>
-        <span>Provider: {_escape(status_strip['provider'])}</span>
+        <span>Loop {_escape(hero['loop_count'])}</span>
+        <span>Vision v{_escape(hero['vision_version'])}</span>
+        <span>Validation: {_escape(hero['last_validation'])}</span>
+        <span>Model: {_escape(hero['model'])}</span>
       </div>
-      {warning}
     </section>
 
     <section class='grid top-grid'>
       <article class='card'>
         <h2>Now</h2>
-        <p><strong>Active game:</strong> {_escape(now['active_game_name']).replace('_', ' ').title()}</p>
-        <p><strong>Status:</strong> {_escape(now['active_game_status'])}</p>
-        <p><strong>Last commit:</strong> {_escape(now['last_commit'])}</p>
-        <p><strong>Validation:</strong> {_escape(now['last_validation'])}</p>
+        <p><strong>Current block:</strong> {_escape(now['block_id'])}</p>
+        <p><strong>Primary pillar:</strong> {_escape(now['primary_pillar']).replace('_', ' ')}</p>
+        <p><strong>Execution range:</strong> {_escape(now['execution_range'])}</p>
+        <p>{_escape(now['why_now'])}</p>
         <div class='pill-row'>
           <span class='pill'>Passes {_escape(now['pass_count'])}</span>
           <span class='pill'>Fails {_escape(now['fail_count'])}</span>
+          <span class='pill'>Rests {_escape(now['rest_count'])}</span>
         </div>
       </article>
+
       <article class='card'>
         <h2>Current Loop</h2>
-        <p class='feature-title'>{_escape(loop['theme'])}</p>
-        <p>{_escape(loop['goal'])}</p>
+        <p class='feature-title'>{_escape(current_loop['theme'])}</p>
+        <p>{_escape(current_loop['goal'])}</p>
         <div class='pill-row'>
-          <span class='pill'>Integration {_escape(loop['integration_status'])}</span>
-          <span class='pill'>Validation {_escape(loop['validation_status'])}</span>
+          <span class='pill'>Integration {_escape(current_loop['integration_status'])}</span>
+          <span class='pill'>Validation {_escape(current_loop['validation_status'])}</span>
         </div>
-        <p class='muted'>{_escape(loop['summary'])}</p>
-        {blocking}
+        <p class='muted'>{_escape(current_loop['summary'])}</p>
       </article>
+
       <article class='card'>
-        <h2>Planning</h2>
-        <p><strong>Next 10 loops:</strong> {_escape(planning['theme_10'])}</p>
-        <p><strong>100-loop direction:</strong></p>
-        <ul>{milestones}</ul>
-        <p><strong>250-loop vision:</strong> {_escape(planning['vision_250'])}</p>
+        <h2>Long-Term Vision</h2>
+        <p>{_escape(vision['index_summary'])}</p>
+        <p class='muted'>Last refined loop: {_escape(vision['last_refined_loop'])}</p>
       </article>
+
       <article class='card'>
         <h2>Support</h2>
         <p>{_escape(support['summary'])}</p>
@@ -112,8 +122,24 @@ def _render_html(dashboard: dict[str, object], entries: list[dict[str, object]])
     </section>
 
     <section class='card wide'>
+      <h2>Current Block</h2>
+      <p class='feature-title'>{_escape(block['title'])} focused on {_escape(block['primary_pillar'])}</p>
+      <div class='grid two-up'>
+        <div><h3>Target Outcomes</h3><ul>{outcomes}</ul></div>
+        <div><h3>Allowed Support Work</h3><ul>{support_work}</ul></div>
+        <div><h3>Explicit Non Goals</h3><ul>{non_goals}</ul></div>
+        <div><h3>Review Focus</h3><ul>{review_focus}</ul></div>
+      </div>
+    </section>
+
+    <section class='card wide'>
       <h2>Current Tasks</h2>
       <div class='task-grid'>{task_cards}</div>
+    </section>
+
+    <section class='card wide'>
+      <h2>Pillar Visions</h2>
+      <div class='pillar-grid'>{vision_cards}</div>
     </section>
 
     <section class='card wide'>
@@ -121,8 +147,18 @@ def _render_html(dashboard: dict[str, object], entries: list[dict[str, object]])
       <div class='pillar-grid'>{pillar_cards}</div>
     </section>
 
+    <section class='card wide'>
+      <h2>Retrospective</h2>
+      <p>{_escape(retrospective['summary'])}</p>
+      <div class='grid two-up'>
+        <div><h3>Wins</h3><ul>{retro_wins}</ul></div>
+        <div><h3>Stalls</h3><ul>{retro_stalls}</ul></div>
+        <div><h3>Change Next Time</h3><ul>{retro_change}</ul></div>
+      </div>
+    </section>
+
     <section class='card wide metrics-card'>
-      <h2>Recent Metrics</h2>
+      <h2>Metrics As Signals</h2>
       <div class='metric-grid'>{metric_cards}</div>
     </section>
 
@@ -141,10 +177,10 @@ def _render_html(dashboard: dict[str, object], entries: list[dict[str, object]])
 
 
 def _task_card_html(task: dict[str, object]) -> str:
-    changed = task.get("changed_files") or []
-    changed_html = ""
+    changed = task.get('changed_files') or []
+    changed_html = ''
     if changed:
-        changed_html = "<ul>" + "".join(f"<li>{_escape(path)}</li>" for path in changed) + "</ul>"
+        changed_html = '<ul>' + ''.join(f"<li>{_escape(path)}</li>" for path in changed) + '</ul>'
     return (
         "<article class='task-card'>"
         f"<header><strong>{_escape(task['id'])}</strong><span class='pill'>{_escape(task['scope'])}</span>"
@@ -169,36 +205,9 @@ def _pillar_card_html(pillar: dict[str, object]) -> str:
 
 
 def _render_entry(entry: dict[str, object]) -> str:
-    loop_counter = entry.get("loop_counter", "-")
-    timestamp = entry.get("timestamp", "")
-    body = _entry_body(entry)
-    return f"<article class='entry'><header><strong>Loop {_escape(loop_counter)}</strong> <span>{_escape(timestamp)}</span></header><p>{_escape(body)}</p></article>"
-
-
-def _entry_body(entry: dict[str, object]) -> str:
-    entry_type = entry.get("entry_type")
-    if entry_type == "loop":
-        diary = entry.get("diary") or {}
-        if isinstance(diary, dict) and diary.get("entry"):
-            return str(diary.get("entry"))
-        proposal = entry.get("proposal") or {}
-        if isinstance(proposal, dict):
-            return str(proposal.get("goal") or proposal.get("theme") or "Loop recorded.")
-    if entry_type == "planning_phase":
-        planning = entry.get("planning") or {}
-        if isinstance(planning, dict):
-            horizon_10 = planning.get("horizon_10") or {}
-            if isinstance(horizon_10, dict) and horizon_10.get("theme"):
-                return f"Planning checkpoint: {horizon_10['theme']}"
-        return "Planning checkpoint recorded."
-    return "Entry recorded."
+    return f"<article class='entry'><header><strong>Loop {_escape(entry.get('loop_counter', '-'))}</strong> <span>{_escape(entry.get('timestamp', ''))}</span></header><p>{_escape(entry.get('body', 'Entry recorded.'))}</p></article>"
 
 
 def _escape(value: object) -> str:
     text = str(value)
-    return (
-        text.replace("&", "&amp;")
-        .replace("<", "&lt;")
-        .replace(">", "&gt;")
-        .replace('"', "&quot;")
-    )
+    return text.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')

@@ -10,58 +10,45 @@
   <main class="page">
     <section class="hero">
       <p class="eyebrow">Generations</p>
-      <h1>{{ dashboard.now.active_game_name | replace('_', ' ') | title }}</h1>
-      <p class="lede">{{ dashboard.now.active_game_thesis }}</p>
+      <h1>{{ dashboard.hero.game_name | replace('_', ' ') | title }}</h1>
+      <p class="lede">{{ dashboard.hero.thesis }}</p>
       <div class="status-strip">
-        <span>Loop {{ dashboard.now.loop_count }}</span>
-        <span>Validation: {{ dashboard.now.last_validation }}</span>
-        <span>Model: {{ dashboard.status_strip.model }}</span>
-        <span>Provider: {{ dashboard.status_strip.provider }}</span>
+        <span>Loop {{ dashboard.hero.loop_count }}</span>
+        <span>Vision v{{ dashboard.hero.vision_version }}</span>
+        <span>Validation: {{ dashboard.hero.last_validation }}</span>
+        <span>Model: {{ dashboard.hero.model }}</span>
       </div>
-      {% if dashboard.status_strip.fallback %}
-      <p class="warning">Model fallback active: {{ dashboard.status_strip.fallback }}</p>
-      {% endif %}
     </section>
 
     <section class="grid top-grid">
       <article class="card">
         <h2>Now</h2>
-        <p><strong>Active game:</strong> {{ dashboard.now.active_game_name | replace('_', ' ') | title }}</p>
-        <p><strong>Status:</strong> {{ dashboard.now.active_game_status }}</p>
-        <p><strong>Last commit:</strong> {{ dashboard.now.last_commit }}</p>
-        <p><strong>Validation:</strong> {{ dashboard.now.last_validation }}</p>
+        <p><strong>Current block:</strong> {{ dashboard.now.block_id }}</p>
+        <p><strong>Primary pillar:</strong> {{ dashboard.now.primary_pillar | replace('_', ' ') }}</p>
+        <p><strong>Execution range:</strong> {{ dashboard.now.execution_range }}</p>
+        <p>{{ dashboard.now.why_now }}</p>
         <div class="pill-row">
           <span class="pill">Passes {{ dashboard.now.pass_count }}</span>
           <span class="pill">Fails {{ dashboard.now.fail_count }}</span>
+          <span class="pill">Rests {{ dashboard.now.rest_count }}</span>
         </div>
       </article>
 
       <article class="card">
         <h2>Current Loop</h2>
-        <p class="feature-title">{{ dashboard.loop.theme }}</p>
-        <p>{{ dashboard.loop.goal }}</p>
+        <p class="feature-title">{{ dashboard.current_loop.theme }}</p>
+        <p>{{ dashboard.current_loop.goal }}</p>
         <div class="pill-row">
-          <span class="pill">Integration {{ dashboard.loop.integration_status }}</span>
-          <span class="pill">Validation {{ dashboard.loop.validation_status }}</span>
+          <span class="pill">Integration {{ dashboard.current_loop.integration_status }}</span>
+          <span class="pill">Validation {{ dashboard.current_loop.validation_status }}</span>
         </div>
-        <p class="muted">{{ dashboard.loop.summary }}</p>
-        {% if dashboard.loop.blocking_issue %}
-        <p class="warning">{{ dashboard.loop.blocking_issue }}</p>
-        {% endif %}
+        <p class="muted">{{ dashboard.current_loop.summary }}</p>
       </article>
 
       <article class="card">
-        <h2>Planning</h2>
-        <p><strong>Next 10 loops:</strong> {{ dashboard.planning.theme_10 }}</p>
-        <p><strong>100-loop direction:</strong></p>
-        <ul>
-          {% for milestone in dashboard.planning.milestones_100 %}
-          <li>{{ milestone }}</li>
-          {% else %}
-          <li>No 100-loop milestones recorded yet.</li>
-          {% endfor %}
-        </ul>
-        <p><strong>250-loop vision:</strong> {{ dashboard.planning.vision_250 }}</p>
+        <h2>Long-Term Vision</h2>
+        <p>{{ dashboard.vision.index_summary }}</p>
+        <p class="muted">Last refined loop: {{ dashboard.vision.last_refined_loop }}</p>
       </article>
 
       <article class="card">
@@ -73,9 +60,32 @@
     </section>
 
     <section class="card wide">
+      <h2>Current Block</h2>
+      <p class="feature-title">{{ dashboard.block.title }} focused on {{ dashboard.block.primary_pillar }}</p>
+      <div class="grid two-up">
+        <div>
+          <h3>Target Outcomes</h3>
+          <ul>{% for item in dashboard.block.outcomes %}<li>{{ item }}</li>{% else %}<li>No target outcomes recorded yet.</li>{% endfor %}</ul>
+        </div>
+        <div>
+          <h3>Allowed Support Work</h3>
+          <ul>{% for item in dashboard.block.support_work %}<li>{{ item }}</li>{% else %}<li>No support work recorded yet.</li>{% endfor %}</ul>
+        </div>
+        <div>
+          <h3>Explicit Non Goals</h3>
+          <ul>{% for item in dashboard.block.non_goals %}<li>{{ item }}</li>{% else %}<li>No non-goals recorded yet.</li>{% endfor %}</ul>
+        </div>
+        <div>
+          <h3>Review Focus</h3>
+          <ul>{% for item in dashboard.block.review_focus %}<li>{{ item }}</li>{% else %}<li>No review focus recorded yet.</li>{% endfor %}</ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="card wide">
       <h2>Current Tasks</h2>
       <div class="task-grid">
-        {% for task in dashboard.loop.tasks %}
+        {% for task in dashboard.current_loop.tasks %}
         <article class="task-card">
           <header>
             <strong>{{ task.id }}</strong>
@@ -85,15 +95,26 @@
           <p>{{ task.objective }}</p>
           <p class="muted">{{ task.summary }}</p>
           {% if task.changed_files %}
-          <ul>
-            {% for changed in task.changed_files %}
-            <li>{{ changed }}</li>
-            {% endfor %}
-          </ul>
+          <ul>{% for changed in task.changed_files %}<li>{{ changed }}</li>{% endfor %}</ul>
           {% endif %}
         </article>
         {% else %}
-        <p>No active task plan.</p>
+        <p>No active execution tasks.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card wide">
+      <h2>Pillar Visions</h2>
+      <div class="pillar-grid">
+        {% for pillar in dashboard.vision.pillars %}
+        <article class="pillar-card">
+          <header><strong>{{ pillar.name }}</strong></header>
+          <p>{{ pillar.summary }}</p>
+          <p class="muted">{{ pillar.good_end_state }}</p>
+        </article>
+        {% else %}
+        <p>No long-term vision recorded yet.</p>
         {% endfor %}
       </div>
     </section>
@@ -101,7 +122,7 @@
     <section class="card wide">
       <h2>Pillar Health</h2>
       <div class="pillar-grid">
-        {% for pillar in dashboard.planning.pillars %}
+        {% for pillar in dashboard.pillars %}
         <article class="pillar-card">
           <header>
             <strong>{{ pillar.name }}</strong>
@@ -115,10 +136,20 @@
       </div>
     </section>
 
+    <section class="card wide">
+      <h2>Retrospective</h2>
+      <p>{{ dashboard.retrospective.summary }}</p>
+      <div class="grid two-up">
+        <div><h3>Wins</h3><ul>{% for item in dashboard.retrospective.wins %}<li>{{ item }}</li>{% else %}<li>No wins recorded yet.</li>{% endfor %}</ul></div>
+        <div><h3>Stalls</h3><ul>{% for item in dashboard.retrospective.stalls %}<li>{{ item }}</li>{% else %}<li>No stalls recorded yet.</li>{% endfor %}</ul></div>
+        <div><h3>Change Next Time</h3><ul>{% for item in dashboard.retrospective.change_next_time %}<li>{{ item }}</li>{% else %}<li>No next changes recorded yet.</li>{% endfor %}</ul></div>
+      </div>
+    </section>
+
     <section class="card wide metrics-card">
-      <h2>Recent Metrics</h2>
+      <h2>Metrics As Signals</h2>
       <div class="metric-grid">
-        {% for metric in dashboard.status_strip.metrics %}
+        {% for metric in dashboard.metrics %}
         <article class="metric-card">
           <span class="metric-name">{{ metric.name }}</span>
           <strong class="metric-value">{{ metric.value }}%</strong>
@@ -138,17 +169,7 @@
       {% for entry in entries %}
       <article class="entry">
         <header><strong>Loop {{ entry.loop_counter }}</strong> <span>{{ entry.timestamp }}</span></header>
-        {% if entry.entry_type == 'loop' and entry.diary %}
-        <p>{{ entry.diary.entry }}</p>
-        {% elif entry.entry_type == 'planning_phase' and entry.planning %}
-        <p>Planning checkpoint: {{ entry.planning.horizon_10.theme if entry.planning.horizon_10 else 'next strategic chunk defined.' }}</p>
-        {% elif entry.entry_type == 'rest' %}
-        <p>{{ entry.reason }}</p>
-        {% elif entry.proposal %}
-        <p>{{ entry.proposal.goal if entry.proposal.goal else entry.proposal.theme }}</p>
-        {% else %}
-        <p>Entry recorded.</p>
-        {% endif %}
+        <p>{{ entry.body }}</p>
       </article>
       {% else %}
       <p>No entries yet.</p>

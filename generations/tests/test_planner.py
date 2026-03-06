@@ -5,43 +5,146 @@ from pathlib import Path
 from generations.config import AppConfig
 from generations.journal.store import JournalStore
 from generations.memory.store import MemoryStore
-from generations.models import PlanningRecord
+from generations.models import BlockPlan, LongTermVisionRecord, RetrospectiveRecord
 from generations.planner import Planner
 
 
 class StubModel:
-    def plan_checkpoint(self, seed, runtime_loop_count, memory, recent_entries):
-        record = PlanningRecord(
-            planning_loop=runtime_loop_count,
-            generated_at="2026-03-06T00:00:00Z",
-            good_end_state={
-                "game": "g",
-                "self": "s",
-                "website": "w",
-                "tidiness": "t",
-            },
-            pillar_assessment={
-                "game": "strong direction",
-                "self": {"trajectory": "on_track", "confidence": "0.8"},
-            },
-            horizon_10={"theme": "theme"},
-            horizon_100={"theme": "h100"},
-            horizon_250={"vision": "h250"},
-            retro={"wins": []},
-            planner_rationale="rationale",
+    def plan_long_term_vision(self, seed, loop_counter, memory, recent_entries, *, current_version):
+        return (
+            LongTermVisionRecord(
+                version=current_version + 1,
+                generated_at="2026-03-06T00:00:00Z",
+                refined_at_loop=loop_counter,
+                index_summary="Founding vision.",
+                pillars={
+                    "self": {
+                        "name": "self",
+                        "summary": "Build the autonomous platform.",
+                        "purpose": "Platform purpose.",
+                        "good_end_state": "Reliable autonomous studio.",
+                        "failure_modes": ["drift"],
+                        "relationships": ["supports the game"],
+                        "content": "word " * 500,
+                    },
+                    "game": {
+                        "name": "game",
+                        "summary": "Build the game.",
+                        "purpose": "Game purpose.",
+                        "good_end_state": "Playable prototype.",
+                        "failure_modes": ["stays abstract"],
+                        "relationships": ["proves the platform"],
+                        "content": "word " * 500,
+                    },
+                    "monetization_platform": {
+                        "name": "monetization_platform",
+                        "summary": "Build honest support surfaces.",
+                        "purpose": "Monetization purpose.",
+                        "good_end_state": "Transparent support layer.",
+                        "failure_modes": ["outruns evidence"],
+                        "relationships": ["follows product proof"],
+                        "content": "word " * 500,
+                    },
+                },
+                change_summary="Initial long-term vision created.",
+            ),
+            {"provider": "stub"},
         )
-        return record, {"provider": "stub"}
+
+    def plan_initial_self_block(self, seed, loop_counter, memory, vision):
+        return (
+            BlockPlan(
+                block_id=1,
+                planning_loop=loop_counter,
+                execution_range=(2, 10),
+                primary_pillar="self",
+                why_this_pillar_now="Platform first.",
+                target_outcomes=["Clarify planning"],
+                sub_goals=["Improve planning"],
+                allowed_support_work=["Website visibility"],
+                explicit_non_goals=["Game implementation"],
+                success_signals=["Cleaner plans"],
+                failure_signals=["No-op loops"],
+                expected_artifacts=["Planner changes"],
+                metrics_to_watch=["review_quality"],
+                risks=["Meta drift"],
+                review_focus=["Platform clarity"],
+            ),
+            {"provider": "stub"},
+        )
+
+    def write_retrospective(self, seed, loop_counter, memory, prior_block, block_entries):
+        return (
+            RetrospectiveRecord(
+                block_id=int(prior_block["block_id"]),
+                retrospective_loop=loop_counter,
+                primary_pillar=prior_block["primary_pillar"],
+                execution_range=tuple(prior_block["execution_range"]),
+                intended_outcomes=list(prior_block["target_outcomes"]),
+                actual_outcomes=["Outcome landed"],
+                wins=["Stayed coherent"],
+                failures=[],
+                stalls=[],
+                surprises=[],
+                metric_reflection={"helpful": ["review_quality"], "misleading": []},
+                carry_forward=["Keep the block focus"],
+                change_next_time=["Choose the next pillar deliberately"],
+                summary="The block stayed coherent.",
+            ),
+            {"provider": "stub"},
+        )
+
+    def plan_block(self, seed, loop_counter, memory, vision, latest_retro, *, block_id):
+        return (
+            BlockPlan(
+                block_id=block_id,
+                planning_loop=loop_counter,
+                execution_range=(loop_counter + 1, loop_counter + 9),
+                primary_pillar="game",
+                why_this_pillar_now="The platform is ready for game focus.",
+                target_outcomes=["Start game execution"],
+                sub_goals=["Prototype one system"],
+                allowed_support_work=["Validation support"],
+                explicit_non_goals=["Monetization experiments"],
+                success_signals=["Executable game artifact"],
+                failure_signals=["Only docs"],
+                expected_artifacts=["Game code"],
+                metrics_to_watch=["game_progress"],
+                risks=["Shallow prototype"],
+                review_focus=["Executable proof"],
+            ),
+            {"provider": "stub"},
+        )
 
 
-def test_planner_normalizes_partial_pillar_assessment(tmp_path: Path) -> None:
+def test_planner_writes_vision_and_initial_block(tmp_path: Path) -> None:
     config = AppConfig.from_root(tmp_path)
     journal = JournalStore(config.journal_path)
     memory = MemoryStore(config.memory_path)
     planner = Planner(config, StubModel(), journal, memory)
 
-    record = planner.ensure_checkpoint("seed", 0)
+    vision, _ = planner.ensure_long_term_vision("seed", 0)
+    assert vision is not None
+    assert vision.version == 1
+    assert (tmp_path / "generations" / "vision" / "vision_v001_self.md").exists()
 
-    assert record.pillar_assessment["game"]["trajectory"] == "unclear"
-    assert record.pillar_assessment["game"]["current_state"] == "strong direction"
-    assert record.pillar_assessment["self"]["trajectory"] == "on_track"
-    assert record.pillar_assessment["website"]["trajectory"] == "unclear"
+    plan, retrospective, _ = planner.ensure_block_material("seed", 1)
+    assert retrospective is None
+    assert plan is not None
+    assert plan.primary_pillar == "self"
+    assert (tmp_path / "generations" / "planning_docs" / "block_001_plan.md").exists()
+
+
+def test_planner_writes_retrospective_and_next_block(tmp_path: Path) -> None:
+    config = AppConfig.from_root(tmp_path)
+    journal = JournalStore(config.journal_path)
+    memory = MemoryStore(config.memory_path)
+    planner = Planner(config, StubModel(), journal, memory)
+    planner.ensure_long_term_vision("seed", 0)
+    planner.ensure_block_material("seed", 1)
+
+    plan, retrospective, _ = planner.ensure_block_material("seed", 11)
+    assert retrospective is not None
+    assert plan is not None
+    assert plan.primary_pillar == "game"
+    assert retrospective.summary == "The block stayed coherent."

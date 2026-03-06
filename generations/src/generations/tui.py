@@ -19,22 +19,25 @@ class TUI:
 
     def log_loop_plan(self, plan: LoopPlan) -> None:
         print("", flush=True)
-        print(f"loop {plan.loop_counter} | theme: {plan.theme}", flush=True)
+        print(f"loop {plan.loop_counter} | block={plan.block_id} | pillar={plan.primary_pillar} | theme: {plan.theme}", flush=True)
         print(f"goal    | {plan.goal}", flush=True)
-        print(f"budget  | game={_pct(plan.pillar_budget.get('game'))} self={_pct(plan.pillar_budget.get('self'))} website={_pct(plan.pillar_budget.get('website'))} tidy={_pct(plan.pillar_budget.get('tidiness'))}", flush=True)
+        print(
+            f"budget  | self={_pct(plan.pillar_budget.get('self'))} game={_pct(plan.pillar_budget.get('game'))} money={_pct(plan.pillar_budget.get('monetization_platform'))}",
+            flush=True,
+        )
         print("tasks   |", flush=True)
         for task in plan.tasks:
             print(
-                f"  - {task.task_id:<16} [{task.scope:<13}] p{task.priority}  {_shorten(task.objective, 92)}",
+                f"  - {task.task_id:<16} [{task.scope:<21}] p{task.priority}  {_shorten(task.objective, 84)}",
                 flush=True,
             )
         if self.debug:
-            print(f"debug   | planning_loop={plan.planning_loop} horizon_10={plan.horizon_10_theme}", flush=True)
+            print(f"debug   | block_ref={plan.block_plan_ref} planning_mode={'yes' if plan.planning_mode else 'no'}", flush=True)
 
     def log_task_result(self, task_result: TaskResult) -> None:
         changed = ", ".join(task_result.changed_files[:3]) if task_result.changed_files else "-"
         print(
-            f"task    | {task_result.task_id:<16} status={task_result.status:<9} changed={changed}",
+            f"task    | {task_result.task_id:<24} status={task_result.status:<9} changed={changed}",
             flush=True,
         )
         summary = _task_summary(task_result.summary)

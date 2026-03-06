@@ -20,8 +20,21 @@ ROOT_ITEMS = [
 ]
 
 
+def _run_once(tmp_path: Path) -> None:
+    env = os.environ.copy()
+    env["PYTHONPATH"] = str(tmp_path / "generations" / "src") + os.pathsep + str(tmp_path)
+    env["GENERATIONS_TEST_MODE"] = "1"
+    env["GENERATIONS_DISABLE_WEB"] = "1"
+    subprocess.run(
+        [sys.executable, "-m", "generations.cli", "run", "--seed", "bootstrap a transport game", "--parallel-tasks", "2"],
+        cwd=tmp_path,
+        env=env,
+        check=True,
+    )
+
+
 @pytest.mark.slow
-def test_run_writes_planning_and_journal(tmp_path: Path) -> None:
+def test_run_writes_vision_then_initial_block_plan(tmp_path: Path) -> None:
     for item in ROOT_ITEMS:
         src = Path(item)
         dst = tmp_path / item
@@ -36,24 +49,22 @@ def test_run_writes_planning_and_journal(tmp_path: Path) -> None:
     subprocess.run(["git", "add", "."], cwd=tmp_path, check=True, capture_output=True)
     subprocess.run(["git", "commit", "-m", "baseline"], cwd=tmp_path, check=True, capture_output=True)
 
-    env = os.environ.copy()
-    env["PYTHONPATH"] = str(tmp_path / "generations" / "src") + os.pathsep + str(tmp_path)
-    env["GENERATIONS_TEST_MODE"] = "1"
-    env["GENERATIONS_DISABLE_WEB"] = "1"
-    subprocess.run(
-        [sys.executable, "-m", "generations.cli", "run", "--seed", "bootstrap a transport game", "--parallel-tasks", "2"],
-        cwd=tmp_path,
-        env=env,
-        check=True,
-    )
-
-    journal = (tmp_path / "state" / "journal.jsonl").read_text(encoding="utf-8")
+    _run_once(tmp_path)
     runtime = json.loads((tmp_path / "state" / "runtime.json").read_text(encoding="utf-8"))
-    planning = list((tmp_path / "state" / "planning").glob("planning-*.json"))
-    current_loop_plan = json.loads((tmp_path / "state" / "current_loop_plan.json").read_text(encoding="utf-8"))
+    journal = (tmp_path / "state" / "journal.jsonl").read_text(encoding="utf-8")
+    vision = json.loads((tmp_path / "state" / "current_long_term_vision.json").read_text(encoding="utf-8"))
+    self_vision = (tmp_path / "generations" / "vision" / "vision_v001_self.md").read_text(encoding="utf-8")
     seed_brief = (tmp_path / "games" / "active" / "design" / "seed_brief.md").read_text(encoding="utf-8")
-    assert '"entry_type": "planning_phase"' in journal
     assert runtime["loop_count"] == 1
-    assert planning
-    assert current_loop_plan["theme"]
+    assert '"entry_type": "vision"' in journal
+    assert vision["version"] == 1
+    assert len(self_vision.split()) >= 500
     assert "bootstrap a transport game" in seed_brief
+
+    _run_once(tmp_path)
+    runtime = json.loads((tmp_path / "state" / "runtime.json").read_text(encoding="utf-8"))
+    block_plan = json.loads((tmp_path / "state" / "current_block_plan.json").read_text(encoding="utf-8"))
+    block_doc = (tmp_path / "generations" / "planning_docs" / "block_001_plan.md").read_text(encoding="utf-8")
+    assert runtime["loop_count"] == 2
+    assert block_plan["primary_pillar"] == "self"
+    assert "Block 1 Plan" in block_doc

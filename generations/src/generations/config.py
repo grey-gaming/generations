@@ -12,6 +12,8 @@ DEFAULT_PROVIDER = "ollama_cloud"
 class AppConfig:
     root: Path
     generations_dir: Path
+    generations_vision_dir: Path
+    generations_planning_docs_dir: Path
     games_dir: Path
     active_game_dir: Path
     sample_game_dir: Path
@@ -23,6 +25,9 @@ class AppConfig:
     memory_path: Path
     runtime_path: Path
     current_loop_plan_path: Path
+    current_block_plan_path: Path
+    latest_retrospective_path: Path
+    current_long_term_vision_path: Path
     pause_flag: Path
     web_export_dir: Path
     max_rest_seconds: int
@@ -46,6 +51,8 @@ class AppConfig:
         return cls(
             root=root,
             generations_dir=root / "generations",
+            generations_vision_dir=root / "generations" / "vision",
+            generations_planning_docs_dir=root / "generations" / "planning_docs",
             games_dir=root / "games",
             active_game_dir=root / "games" / "active",
             sample_game_dir=root / "games" / "hello_game",
@@ -57,6 +64,9 @@ class AppConfig:
             memory_path=state_dir / "memory.sqlite3",
             runtime_path=state_dir / "runtime.json",
             current_loop_plan_path=state_dir / "current_loop_plan.json",
+            current_block_plan_path=state_dir / "current_block_plan.json",
+            latest_retrospective_path=state_dir / "latest_retrospective.json",
+            current_long_term_vision_path=state_dir / "current_long_term_vision.json",
             pause_flag=state_dir / "pause.flag",
             web_export_dir=root / "site",
             max_rest_seconds=int(os.getenv("GENERATIONS_MAX_REST_SECONDS", "5")),

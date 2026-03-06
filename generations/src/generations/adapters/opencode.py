@@ -35,11 +35,20 @@ class OpenCodeAdapter:
 
         prompt = json.dumps(
             {
+                "role": "Generations execution agent",
                 "task": task.objective,
                 "theme": theme,
                 "allowed_paths": task.allowed_paths,
                 "success_signal": task.success_signal,
-                "instruction": "Make one coherent diff only inside the allowed paths. Do not commit.",
+                "support_reason": task.support_reason,
+                "instruction": (
+                    "You are operating inside a disposable git worktree. "
+                    "Edit the files directly in this worktree. "
+                    "Stay strictly inside the allowed_paths. "
+                    "Prefer concrete code, test, design, or website edits over commentary. "
+                    "Make the smallest coherent change that satisfies the task and success_signal. "
+                    "Do not commit, do not create unrelated files, and do not explain what you would do instead of doing it."
+                ),
             },
             sort_keys=True,
         )
@@ -96,8 +105,17 @@ class OpenCodeAdapter:
         for line in completed.stdout.splitlines():
             parts = line.split(maxsplit=1)
             if len(parts) == 2:
-                changed.append(parts[1].strip())
-        return changed
+                relative = parts[1].strip()
+                path = cwd / relative
+                if path.is_dir():
+                    changed.extend(
+                        str(child.relative_to(cwd))
+                        for child in sorted(path.rglob("*"))
+                        if child.is_file()
+                    )
+                else:
+                    changed.append(relative)
+        return sorted(set(changed))
 
     def _latest_session_id(self) -> str | None:
         if not self.binary.exists():

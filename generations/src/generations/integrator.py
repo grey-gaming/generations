@@ -32,6 +32,8 @@ class Integrator:
                         break
                     source = self.root / task.worktree / changed
                     target = self.root / changed
+                    if source.is_dir():
+                        continue
                     target.parent.mkdir(parents=True, exist_ok=True)
                     if source.exists():
                         shutil.copy2(source, target)

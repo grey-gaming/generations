@@ -12,42 +12,85 @@ DEFAULT_MEMORY: dict[str, Any] = {
     "criteria_history": [
         {
             "version": 1,
-            "summary": "Advance the game, advance the platform, evolve the website honestly, and keep the workspace tidy.",
+            "summary": "Use long-term vision, 10-loop blocks, retrospectives, and honest metrics-as-signals.",
             "ship_rules": [
                 "Validate before merge.",
                 "One final commit per loop.",
-                "Keep the active game inside games/active/.",
+                "Use block plans and retrospectives rather than ad-hoc direction changes.",
             ],
-            "notes": ["Fresh human-authored scaffold for the major refactor."],
+            "notes": ["Fresh scaffold for the block-driven refactor."],
         }
     ],
     "heuristics": [
-        "Evolve the game toward a stronger, more shippable concept and implementation.",
-        "Evolve the platform when it improves autonomous game-development capability.",
-        "Evolve the website to improve clarity, trust, and honest income potential.",
-        "Keep the workspace coherent and tidy, and commit all intentional loop changes.",
+        "Advance the current block coherently.",
+        "Let metrics inform the next move without dictating it.",
+        "Keep the workspace and public story legible.",
     ],
-    "heuristics_rolling_average": {
-        "Evolve the game toward a stronger, more shippable concept and implementation.": 1.0,
-        "Evolve the platform when it improves autonomous game-development capability.": 1.0,
-        "Evolve the website to improve clarity, trust, and honest income potential.": 1.0,
-        "Keep the workspace coherent and tidy, and commit all intentional loop changes.": 1.0,
+    "active_game": {
+        "root": "games/active",
+        "name": "space_logistics",
+        "status": "visioning",
+        "current_thesis": "Build a transport and logistics game with simulation depth and a plausible commercial trajectory.",
     },
-    "website_heuristics": [
-        "Make the current loop legible to a human observer.",
-        "Keep the journey page readable offline.",
-    ],
-    "website_heuristics_rolling_average": {
-        "Make the current loop legible to a human observer.": 1.0,
-        "Keep the journey page readable offline.": 1.0,
+    "pillars": {
+        "self": {
+            "summary": "The autonomous platform, its website, memory, validation, and operator visibility.",
+            "trajectory": "unclear",
+            "confidence": 0.5,
+            "current_state": "Loop 0 vision has not been written yet.",
+            "biggest_risk": "Platform work may become reactive instead of strategic.",
+        },
+        "game": {
+            "summary": "The active game concept, implementation, tests, and design artifacts.",
+            "trajectory": "unclear",
+            "confidence": 0.5,
+            "current_state": "The active game has only a seed thesis.",
+            "biggest_risk": "Game work may begin before the platform can support it coherently.",
+        },
+        "monetization_platform": {
+            "summary": "The honest commercial, support, and audience-building surfaces around the project.",
+            "trajectory": "unclear",
+            "confidence": 0.5,
+            "current_state": "Only a support placeholder exists.",
+            "biggest_risk": "Monetization could get ahead of product proof.",
+        },
     },
-    "monetization_heuristics": [
-        "Keep monetization honest, minimal, and reversible.",
-        "Do not optimize monetization ahead of product proof.",
-    ],
-    "monetization_heuristics_rolling_average": {
-        "Keep monetization honest, minimal, and reversible.": 1.0,
-        "Do not optimize monetization ahead of product proof.": 1.0,
+    "long_term_vision": {
+        "current_version": 0,
+        "last_refined_loop": None,
+        "current": None,
+        "history": [],
+    },
+    "block_planning": {
+        "current": None,
+        "history": [],
+    },
+    "retrospectives": {
+        "latest": None,
+        "history": [],
+    },
+    "current_loop_plan": None,
+    "execution_history": {
+        "recent_task_success_rate": 0.0,
+        "recent_merge_success_rate": 0.0,
+        "recent_validation_pass_rate": 0.0,
+    },
+    "outcomes": {
+        "pass_count": 0,
+        "fail_count": 0,
+        "rest_count": 0,
+        "last_error": None,
+        "last_successful_loop": None,
+        "last_validation": None,
+    },
+    "evaluation_metrics": {
+        "current": {key: 0.0 for key in ["creativity", "code_change", "review_quality", "game_progress", "observability", "balance"]},
+        "rolling_average": {key: 0.0 for key in ["creativity", "code_change", "review_quality", "game_progress", "observability", "balance"]},
+        "recent_history": [],
+        "notes": [
+            "Metrics are signals, not verdicts.",
+            "Block plans and retrospectives carry the main strategic weight.",
+        ],
     },
     "monetization_experiments": [
         {
@@ -58,38 +101,6 @@ DEFAULT_MEMORY: dict[str, Any] = {
             "outcome": "unknown",
         }
     ],
-    "active_game": {
-        "root": "games/active",
-        "name": "space_logistics",
-        "status": "concept",
-        "current_thesis": "Build a transport and logistics game with simulation depth and a plausible commercial trajectory.",
-    },
-    "pillar_state": {
-        key: {"trajectory": "unclear", "confidence": 0.5} for key in ["game", "self", "website", "tidiness"]
-    },
-    "planning": {"current": None, "history": []},
-    "current_loop_plan": None,
-    "execution_history": {
-        "recent_task_success_rate": 0.0,
-        "recent_merge_success_rate": 0.0,
-        "recent_validation_pass_rate": 0.0,
-    },
-    "outcomes": {
-        "pass_count": 0,
-        "fail_count": 0,
-        "last_error": None,
-        "last_successful_loop": None,
-        "last_validation": None,
-    },
-    "evaluation_metrics": {
-        "current": {key: 0.0 for key in ["creativity", "code_change", "review_quality", "game_progress", "observability", "balance"]},
-        "rolling_average": {key: 0.0 for key in ["creativity", "code_change", "review_quality", "game_progress", "observability", "balance"]},
-        "recent_history": [],
-        "notes": [
-            "Metrics are advisory, not authoritative.",
-            "Planning records determine larger chunks of work.",
-        ],
-    },
 }
 
 

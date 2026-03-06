@@ -48,15 +48,23 @@ def save_runtime_state(path: Path, state: RuntimeSnapshot) -> None:
     save_runtime(path, state)
 
 
-def load_current_loop_plan(path: Path) -> dict[str, Any]:
+def load_json(path: Path, default: Any = None) -> Any:
     if not path.exists():
-        return {}
+        return {} if default is None else default
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def save_json(path: Path, payload: Any) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
+def load_current_loop_plan(path: Path) -> dict[str, Any]:
+    return load_json(path, default={})
 
 
 def save_current_loop_plan(path: Path, plan: CurrentLoopPlan | dict[str, Any]) -> None:
     payload = plan.as_dict() if isinstance(plan, CurrentLoopPlan) else dict(plan)
     if not payload.get("updated_at"):
         payload["updated_at"] = now_iso()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    save_json(path, payload)
