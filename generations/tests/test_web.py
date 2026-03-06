@@ -3,6 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from generations.config import AppConfig
+from generations.journal.store import JournalStore
 from generations.memory.store import MemoryStore
 from generations.web.exporter import export_site
 
@@ -25,3 +26,25 @@ def test_export_site_renders_current_plan(tmp_path: Path) -> None:
     html = (root / "site" / "index.html").read_text(encoding="utf-8")
     assert "Current Loop Plan" in html
     assert "Create the first plan" in html
+
+
+def test_journey_template_tolerates_planning_and_rest_entries(tmp_path: Path) -> None:
+    root = tmp_path
+    config = AppConfig.from_root(root)
+    journal = JournalStore(config.journal_path)
+    journal.append({
+        "timestamp": "2026-03-06T00:00:00Z",
+        "entry_type": "planning_phase",
+        "loop_counter": 0,
+        "planning": {"horizon_10": {"theme": "Bootstrap executable motion"}},
+    })
+    journal.append({
+        "timestamp": "2026-03-06T00:00:01Z",
+        "entry_type": "rest",
+        "loop_counter": 0,
+        "reason": "Continue with another bounded step after a short rest.",
+    })
+    export_site(root, config, journal.read_all(), MemoryStore(config.memory_path).latest(), out_dir=root / "site")
+    html = (root / "site" / "index.html").read_text(encoding="utf-8")
+    assert "Planning checkpoint" in html
+    assert "Continue with another bounded step after a short rest." in html

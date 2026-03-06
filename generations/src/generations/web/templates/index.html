@@ -26,7 +26,17 @@
       {% for entry in entries %}
       <article class="entry">
         <header><strong>Loop {{ entry.loop_counter }}</strong> <span>{{ entry.timestamp }}</span></header>
-        <p>{{ entry.diary.entry if entry.diary else entry.next_step.description }}</p>
+        {% if entry.entry_type == 'loop' and entry.diary %}
+        <p>{{ entry.diary.entry }}</p>
+        {% elif entry.entry_type == 'planning_phase' and entry.planning %}
+        <p>Planning checkpoint: {{ entry.planning.horizon_10.theme if entry.planning.horizon_10 else 'next strategic chunk defined.' }}</p>
+        {% elif entry.entry_type == 'rest' %}
+        <p>{{ entry.reason }}</p>
+        {% elif entry.proposal %}
+        <p>{{ entry.proposal.goal if entry.proposal.goal else entry.proposal.theme }}</p>
+        {% else %}
+        <p>Entry recorded.</p>
+        {% endif %}
       </article>
       {% else %}
       <p>No entries yet.</p>

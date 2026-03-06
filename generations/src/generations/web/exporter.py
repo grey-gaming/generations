@@ -24,6 +24,7 @@ def export_site(
     memory_payload = memory if memory is not None else MemoryStore(config.memory_path).latest()
     runtime = load_runtime_state(config.runtime_path)
     current_loop_plan = load_current_loop_plan(config.current_loop_plan_path) or memory_payload.get("current_loop_plan") or {}
+    diary_html = "".join(_render_entry(entry) for entry in reversed(journal[-10:])) or "<p>No diary entries yet.</p>"
     html = f"""<!doctype html>
 <html lang='en'>
 <head>
@@ -44,9 +45,37 @@ def export_site(
 <article class='panel'><h2>Support</h2><p>Support options may evolve over time. Any monetization experiments will be logged and kept honest.</p></article>
 <article class='panel'><h2>Disclosure</h2><p>Generations changes its own platform, game workspace, and website through recorded autonomous loops.</p></article>
 </section>
-<section class='panel'><h2>Diary</h2>{''.join(f"<article class='entry'><h3>Loop {e.get('loop_counter')}</h3><p>{e.get('diary', {}).get('entry', e.get('next_step', {}).get('description', ''))}</p></article>" for e in reversed(journal[-10:])) or '<p>No diary entries yet.</p>'}</section>
+<section class='panel'><h2>Diary</h2>{diary_html}</section>
 </main>
 </body></html>"""
     (output / "index.html").write_text(html, encoding="utf-8")
-    (output / "style.css").write_text("body{font-family:Georgia,serif;background:#ede8de;color:#1f2822;margin:0}.page{max-width:1100px;margin:0 auto;padding:24px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.panel{background:#fff9ef;border:1px solid #d7ccbb;border-radius:16px;padding:16px;margin-bottom:16px}.entry{border-top:1px solid #d7ccbb;padding-top:12px;margin-top:12px}", encoding="utf-8")
+    (output / "style.css").write_text("body{font-family:Georgia,serif;background:#ede8de;color:#1f2822;margin:0}.page{max-width:1100px;margin:0 auto;padding:24px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.panel{background:#fff9ef;border:1px solid #d7ccbb;border-radius:16px;padding:16px;margin-bottom:16px}.entry{border-top:1px solid #d7ccbb;padding-top:12px;margin-top:12px}", encoding='utf-8')
     return output
+
+
+def _render_entry(entry: dict[str, object]) -> str:
+    loop_counter = entry.get("loop_counter", "-")
+    timestamp = entry.get("timestamp", "")
+    body = _entry_body(entry)
+    return f"<article class='entry'><h3>Loop {loop_counter}</h3><p>{body}</p><small>{timestamp}</small></article>"
+
+
+def _entry_body(entry: dict[str, object]) -> str:
+    entry_type = entry.get("entry_type")
+    if entry_type == "loop":
+        diary = entry.get("diary") or {}
+        if isinstance(diary, dict) and diary.get("entry"):
+            return str(diary.get("entry"))
+        proposal = entry.get("proposal") or {}
+        if isinstance(proposal, dict):
+            return str(proposal.get("goal") or proposal.get("theme") or "Loop recorded.")
+    if entry_type == "planning_phase":
+        planning = entry.get("planning") or {}
+        if isinstance(planning, dict):
+            horizon_10 = planning.get("horizon_10") or {}
+            if isinstance(horizon_10, dict) and horizon_10.get("theme"):
+                return f"Planning checkpoint: {horizon_10['theme']}"
+        return "Planning checkpoint recorded."
+    if entry_type == "rest":
+        return str(entry.get("reason") or "Rest recorded.")
+    return "Entry recorded."
