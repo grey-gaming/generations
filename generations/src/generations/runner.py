@@ -116,15 +116,19 @@ class Runner:
             self.tui.log_task_result(result)
             self.tui.write_debug_json(debug_dir / f"task-{result.task_id}.json", result.as_dict())
 
-        integration = self.integrator.integrate(
-            loop_counter,
-            task_results,
-            f"loop {loop_counter}: {loop_plan.theme}",
-            self.opencode.commit,
-            self.opencode.push_current_branch,
-        )
-        current_loop_plan["integration_status"] = "committed" if integration.commit_hash else "no_commit"
-        current_loop_plan["validation_status"] = "passed" if all(item.success for item in integration.validation) else "failed"
+        try:
+            integration = self.integrator.integrate(
+                loop_counter,
+                task_results,
+                f"loop {loop_counter}: {loop_plan.theme}",
+                self.opencode.commit,
+                self.opencode.push_current_branch,
+            )
+        finally:
+            self.opencode.cleanup_task_results(task_results)
+        validation_passed = bool(integration.validation) and all(item.success for item in integration.validation)
+        current_loop_plan["integration_status"] = "committed" if integration.commit_hash else "stalled"
+        current_loop_plan["validation_status"] = "passed" if validation_passed else "failed"
         current_loop_plan["updated_at"] = now_iso()
         save_current_loop_plan(self.config.current_loop_plan_path, current_loop_plan)
         self.memory.update_current_loop_plan(current_loop_plan)
@@ -172,7 +176,7 @@ class Runner:
 
         runtime["loop_count"] = loop_counter + 1
         runtime["last_commit"] = integration.commit_hash
-        runtime["last_validation"] = "passed" if all(item.success for item in integration.validation) else "failed"
+        runtime["last_validation"] = "passed" if validation_passed else "failed"
         runtime["last_decision"] = "continue"
         save_runtime(self.config.runtime_path, runtime)
 

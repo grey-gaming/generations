@@ -118,10 +118,11 @@
     <section class="card wide metrics-card">
       <h2>Recent Metrics</h2>
       <div class="metric-grid">
-        {% for name, value in dashboard.status_strip.metrics.items() %}
+        {% for metric in dashboard.status_strip.metrics %}
         <article class="metric-card">
-          <span class="metric-name">{{ name }}</span>
-          <strong class="metric-value">{{ value }}%</strong>
+          <span class="metric-name">{{ metric.name }}</span>
+          <strong class="metric-value">{{ metric.value }}%</strong>
+          <p class="muted">{{ metric.hint }}</p>
         </article>
         {% endfor %}
       </div>

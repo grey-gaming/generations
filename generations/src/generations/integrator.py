@@ -22,7 +22,7 @@ class Integrator:
         backups = self._backup_current_files(task.changed_files for task in tasks)
         try:
             for task in sorted(tasks, key=lambda item: item.task_id):
-                if task.status not in {"merged", "no_change"}:
+                if task.status != "merged":
                     rejected.append(task)
                     continue
                 for changed in task.changed_files:
@@ -38,6 +38,10 @@ class Integrator:
                         files_merged.append(changed)
                 else:
                     merged.append(task)
+            if not files_merged:
+                validation = [ValidationResult(False, "policy:no-op-loop", "No repository files were merged from task worktrees.", "policy")]
+                self._restore(backups)
+                return IntegrationResult(merged_tasks=[], rejected_tasks=rejected + merged, files_merged=[], validation=validation, commit_hash=None, pushed=False, push_output="", rolled_back=True)
             plan = build_validation_plan(self.root, files_merged, loop_counter, self.config.test_mode)
             validation = self._run_validation(plan)
             passed = all(item.success for item in validation)

@@ -43,8 +43,8 @@ def _render_html(dashboard: dict[str, object], entries: list[dict[str, object]])
     task_cards = "".join(_task_card_html(task) for task in loop["tasks"]) or "<p>No active task plan.</p>"
     pillar_cards = "".join(_pillar_card_html(pillar) for pillar in planning["pillars"])
     metric_cards = "".join(
-        f"<article class='metric-card'><span class='metric-name'>{name}</span><strong class='metric-value'>{value}%</strong></article>"
-        for name, value in status_strip["metrics"].items()
+        f"<article class='metric-card'><span class='metric-name'>{_escape(metric['name'])}</span><strong class='metric-value'>{_escape(metric['value'])}%</strong><p class='muted'>{_escape(metric['hint'])}</p></article>"
+        for metric in status_strip["metrics"]
     )
     diary_entries = "".join(_render_entry(entry) for entry in entries) or "<p>No entries yet.</p>"
     milestones = "".join(f"<li>{item}</li>" for item in planning["milestones_100"]) or "<li>No 100-loop milestones recorded yet.</li>"

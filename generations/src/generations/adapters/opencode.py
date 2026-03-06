@@ -28,43 +28,45 @@ class OpenCodeAdapter:
 
     def _run_task(self, loop_counter: int, theme: str, task: ExecutionTask, debug_dir: Path) -> TaskResult:
         worktree, branch = self.worktrees.create(loop_counter, task)
-        try:
-            task.status = "running"
-            if self.config.test_mode or not self.binary.exists():
-                changed_files = self._fallback_edit(worktree, task)
-                return TaskResult(task.task_id, task.scope, task.objective, str(worktree.relative_to(self.root)), branch, changed_files, "merged" if changed_files else "no_change", None, None, None, None, "fallback edit")
+        task.status = "running"
+        if self.config.test_mode or not self.binary.exists():
+            changed_files = self._fallback_edit(worktree, task)
+            return TaskResult(task.task_id, task.scope, task.objective, str(worktree.relative_to(self.root)), branch, changed_files, "merged" if changed_files else "no_change", None, None, None, None, "fallback edit")
 
-            prompt = json.dumps(
-                {
-                    "task": task.objective,
-                    "theme": theme,
-                    "allowed_paths": task.allowed_paths,
-                    "success_signal": task.success_signal,
-                    "instruction": "Make one coherent diff only inside the allowed paths. Do not commit.",
-                },
-                sort_keys=True,
-            )
-            before = set(self._git_changed_files(worktree))
-            completed = subprocess.run(
-                [str(self.binary), "run", "--format", "json", "--dir", str(worktree), "--agent", self.config.opencode_agent, "--model", self.model, "--", prompt],
-                cwd=worktree,
-                env=self._env(),
-                capture_output=True,
-                text=True,
-                check=False,
-            )
-            stdout_path = debug_dir / f"task-{task.task_id}.stdout.log"
-            stderr_path = debug_dir / f"task-{task.task_id}.stderr.log"
-            stdout_path.write_text(completed.stdout, encoding="utf-8")
-            stderr_path.write_text(completed.stderr, encoding="utf-8")
-            after = set(self._git_changed_files(worktree))
-            changed = sorted(after - before)
-            session_id = self._latest_session_id()
-            export = self._export_session(session_id) if session_id else None
-            status = "merged" if changed else "no_change"
-            return TaskResult(task.task_id, task.scope, task.objective, str(worktree.relative_to(self.root)), branch, changed, status, session_id, export, str(stdout_path.relative_to(self.root)), str(stderr_path.relative_to(self.root)), completed.stderr.strip() or completed.stdout.strip() or "task completed")
-        finally:
-            self.worktrees.remove(worktree, branch)
+        prompt = json.dumps(
+            {
+                "task": task.objective,
+                "theme": theme,
+                "allowed_paths": task.allowed_paths,
+                "success_signal": task.success_signal,
+                "instruction": "Make one coherent diff only inside the allowed paths. Do not commit.",
+            },
+            sort_keys=True,
+        )
+        before = set(self._git_changed_files(worktree))
+        completed = subprocess.run(
+            [str(self.binary), "run", "--format", "json", "--dir", str(worktree), "--agent", self.config.opencode_agent, "--model", self.model, "--", prompt],
+            cwd=worktree,
+            env=self._env(),
+            capture_output=True,
+            text=True,
+            check=False,
+        )
+        stdout_path = debug_dir / f"task-{task.task_id}.stdout.log"
+        stderr_path = debug_dir / f"task-{task.task_id}.stderr.log"
+        stdout_path.write_text(completed.stdout, encoding="utf-8")
+        stderr_path.write_text(completed.stderr, encoding="utf-8")
+        after = set(self._git_changed_files(worktree))
+        changed = sorted(after - before)
+        session_id = self._latest_session_id()
+        export = self._export_session(session_id) if session_id else None
+        status = "merged" if changed else "no_change"
+        return TaskResult(task.task_id, task.scope, task.objective, str(worktree.relative_to(self.root)), branch, changed, status, session_id, export, str(stdout_path.relative_to(self.root)), str(stderr_path.relative_to(self.root)), completed.stderr.strip() or completed.stdout.strip() or "task completed")
+
+    def cleanup_task_results(self, results: list[TaskResult]) -> None:
+        for result in results:
+            worktree = self.root / result.worktree
+            self.worktrees.remove(worktree, result.branch)
 
     def _fallback_edit(self, worktree: Path, task: ExecutionTask) -> list[str]:
         target_root = self._first_allowed_target(worktree, task.allowed_paths)
@@ -122,7 +124,7 @@ class OpenCodeAdapter:
         subprocess.run(["git", "add", "."], cwd=self.root, check=False, capture_output=True)
         diff = subprocess.run(["git", "diff", "--cached", "--quiet"], cwd=self.root, check=False, capture_output=True)
         if diff.returncode == 0:
-            return self.head_commit()
+            return None
         completed = subprocess.run(["git", "commit", "-m", message], cwd=self.root, capture_output=True, text=True, check=False)
         if completed.returncode != 0:
             return None

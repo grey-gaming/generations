@@ -73,14 +73,14 @@ def build_dashboard_context(
             "model": latest_provider.get("model") or "qwen3.5:397b-cloud",
             "provider": latest_provider.get("provider") or "ollama_cloud",
             "fallback": latest_provider.get("fallback"),
-            "metrics": {
-                "Creativity": _percent(metrics.get("creativity", 0.0)),
-                "Code Change": _percent(metrics.get("code_change", 0.0)),
-                "Review": _percent(metrics.get("review_quality", 0.0)),
-                "Game": _percent(metrics.get("game_progress", 0.0)),
-                "Observability": _percent(metrics.get("observability", 0.0)),
-                "Balance": _percent(metrics.get("balance", 0.0)),
-            },
+            "metrics": [
+                {"name": "Creativity", "value": _percent(metrics.get("creativity", 0.0)), "hint": "Novel direction and useful variation in recent loops."},
+                {"name": "Code Change", "value": _percent(metrics.get("code_change", 0.0)), "hint": "Real repository files merged this loop, especially under generations/ and games/active/."},
+                {"name": "Review", "value": _percent(metrics.get("review_quality", 0.0)), "hint": "How well recent loops passed validation and review gates."},
+                {"name": "Game", "value": _percent(metrics.get("game_progress", 0.0)), "hint": "Progress inside the active game workspace toward a playable build."},
+                {"name": "Observability", "value": _percent(metrics.get("observability", 0.0)), "hint": "How clearly the system reports what it is doing."},
+                {"name": "Balance", "value": _percent(metrics.get("balance", 0.0)), "hint": "Whether progress is spread sensibly across the pillars."},
+            ],
         },
     }
 
