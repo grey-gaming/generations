@@ -134,6 +134,7 @@ class Runner:
             latest_memory,
             loop_counter,
             proposal,
+            result,
             validation_success,
         )
         self.memory.replace(latest_memory, created_at=self._timestamp())
@@ -449,27 +450,34 @@ class Runner:
         memory: dict[str, Any],
         loop_counter: int,
         proposal: Any,
+        result: Any,
         validation_success: bool,
     ) -> dict[str, Any]:
         updated = dict(memory)
         core = list(updated.get("heuristics", []))
         website = list(updated.get("website_heuristics", []))
         monetization = list(updated.get("monetization_heuristics", []))
-        active_core = []
+        core_scores = {item: 0.0 for item in core}
+        meaningful_files = self.opencode._meaningful_repo_files(
+            list(dict.fromkeys(result.files_touched + result.opencode_changed_files))
+        )
         if proposal.workstream == "game_workspace":
-            active_core.append("Evolve the game toward a stronger, more shippable concept and implementation.")
+            core_scores["Evolve the game toward a stronger, more shippable concept and implementation."] = 1.0
         if proposal.workstream == "autonomous_platform":
-            active_core.append("Evolve the platform when it improves autonomous game-development capability.")
+            platform_score = 1.0
+            if proposal.capability_target == "website" and proposal.website_change:
+                platform_score = 0.5
+            core_scores["Evolve the platform when it improves autonomous game-development capability."] = platform_score
         if proposal.website_change:
-            active_core.append("Evolve the website to improve clarity, trust, and honest income potential.")
-        if validation_success:
-            active_core.append("Keep the workspace coherent and tidy, and commit all intentional loop changes.")
+            core_scores["Evolve the website to improve clarity, trust, and honest income potential."] = 1.0
+        if validation_success and meaningful_files:
+            core_scores["Keep the workspace coherent and tidy, and commit all intentional loop changes."] = 1.0
 
         history = list(updated.get("heuristics_recent_history", []))
         history.append(
             {
                 "loop": loop_counter,
-                "core": sorted(set(active_core)),
+                "core": core_scores,
                 "website": website if proposal.website_change else [],
                 "monetization": monetization if proposal.monetization_change else [],
             }
@@ -509,7 +517,17 @@ class Runner:
             return {item: 1.0 for item in heuristics}
         scores: dict[str, float] = {}
         for item in heuristics:
-            activations = [1.0 if item in entry.get(key, []) else 0.0 for entry in history]
+            activations: list[float] = []
+            for entry in history:
+                raw = entry.get(key, [])
+                if isinstance(raw, dict):
+                    value = raw.get(item, 0.0)
+                else:
+                    value = 1.0 if item in raw else 0.0
+                try:
+                    activations.append(float(value))
+                except (TypeError, ValueError):
+                    activations.append(0.0)
             if not activations:
                 scores[item] = 1.0
                 continue
