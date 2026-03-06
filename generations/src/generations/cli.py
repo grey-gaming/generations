@@ -39,11 +39,11 @@ def main() -> int:
     run_parser.add_argument("--debug", action="store_true")
     run_parser.add_argument("--parallel-tasks", type=int, default=3)
     run_parser.add_argument("--host", default="127.0.0.1")
-    run_parser.add_argument("--port", type=int, default=8000)
+    run_parser.add_argument("--port", type=int, default=80)
 
     web_parser = subparsers.add_parser("web")
     web_parser.add_argument("--host", default="127.0.0.1")
-    web_parser.add_argument("--port", type=int, default=8000)
+    web_parser.add_argument("--port", type=int, default=80)
 
     export_parser = subparsers.add_parser("export-web")
     export_parser.add_argument("--out", required=True)
