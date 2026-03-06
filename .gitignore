@@ -1,9 +1,9 @@
-.venv/
 __pycache__/
+*.pyc
 .pytest_cache/
+.venv/
+.worktrees/
 .generations_tmp_backup/
-state/opencode/cache/
-state/opencode/config/
-state/opencode/data/
-state/opencode/state/
-state/opencode/input/
+site/
+state/
+generations/src/generations.egg-info/

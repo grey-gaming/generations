@@ -1,34 +1,32 @@
 [build-system]
-requires = ["setuptools>=68", "wheel"]
+requires = ["setuptools>=69", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "generations"
-version = "0.1.0"
-description = "Autonomous Ubuntu-only self-improving game project seed repo"
+version = "0.2.0"
+description = "Generations autonomous game-development platform"
 readme = "README.md"
 requires-python = ">=3.11"
-authors = [{ name = "Generations" }]
 dependencies = [
-  "fastapi>=0.115,<1.0",
-  "jinja2>=3.1,<4.0",
-  "uvicorn>=0.35,<1.0",
+  "fastapi>=0.115,<1",
+  "jinja2>=3.1,<4",
+  "uvicorn>=0.30,<1",
 ]
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=8.0,<9.0",
+  "pytest>=8.0,<9",
 ]
 
 [project.scripts]
 generations = "generations.cli:main"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = {"" = "generations/src"}
 
 [tool.setuptools.packages.find]
-where = ["src"]
+where = ["generations/src"]
 
 [tool.pytest.ini_options]
-addopts = "-q"
-testpaths = ["tests"]
+testpaths = ["generations/tests"]

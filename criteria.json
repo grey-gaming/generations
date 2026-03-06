@@ -1,22 +1,19 @@
 {
   "ship_rules": [
     {
-      "id": "DATA_SCHEMA_REQUIRED",
-      "description": "All game logic modules must define data schemas for their domain entities before implementation.",
-      "enforcement": "Smoke test validates that game modules include schema definitions.",
-      "rationale": "Data-first design improves clarity, testability, and safer autonomous iteration."
+      "id": "SAMPLE_GAME_RUNS",
+      "description": "The sample hello game must remain runnable and tested.",
+      "enforcement": "Hello game smoke test passes."
     },
     {
-      "id": "SPACE_TRANSPORT_THEISIS",
-      "description": "The game must center on space transport logistics: hauling cargo between stations via route planning and ship management.",
-      "enforcement": "Design document and core gameplay loops must reflect space transport theme.",
-      "rationale": "This constraint preserves the core thesis through autonomous iterations."
+      "id": "ACTIVE_GAME_VALIDATED",
+      "description": "Active game changes must trigger targeted validation before merge.",
+      "enforcement": "Validation registry runs targeted tests for changed active-game paths."
     },
     {
-      "id": "ECONOMY_BALANCE_REQUIRED",
-      "description": "Route viability must be validated against economy balance criteria: cargo value should exceed travel costs for viable routes.",
-      "enforcement": "Smoke test asserts route viability calculation considers economy balance.",
-      "rationale": "Economic viability is essential for meaningful route planning gameplay."
+      "id": "ONE_COMMIT_PER_LOOP",
+      "description": "Each loop may produce at most one final merge commit.",
+      "enforcement": "Integrator is the only code path that commits loop output."
     }
   ]
 }

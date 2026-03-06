@@ -1,0 +1,5 @@
+name = "space_logistics"
+genre = "logistics simulation"
+status = "concept"
+target_platform = "steam"
+thesis = "Build a transport and logistics game with simulation depth and a plausible commercial trajectory."

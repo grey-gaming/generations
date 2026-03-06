@@ -1,0 +1,7 @@
+{
+  "systems": [],
+  "missing_systems": ["cargo contracts", "station routing", "simulation loop", "economy balance", "player progression"],
+  "stubbed_systems": [],
+  "validated_systems": [],
+  "player_visible_state": []
+}

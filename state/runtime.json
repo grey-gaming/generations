@@ -1,18 +1,9 @@
 {
-  "loop_count": 25,
-  "last_commit": "626ddc5a898abcb5d157f3de720a0f21ac840484",
-  "last_validation": {
-    "success": true,
-    "results": [
-      {
-        "success": true,
-        "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
-        "output": "......                                                                   [100%]\n6 passed in 181.09s (0:03:01)"
-      }
-    ]
-  },
+  "loop_count": 0,
+  "last_commit": null,
+  "last_validation": null,
   "current_criteria_version": 1,
   "paused": false,
-  "last_decision": "continue",
-  "updated_at": "2026-03-06T10:55:44.433744+00:00"
+  "last_decision": "idle",
+  "updated_at": "2026-03-06T17:18:45.904356+00:00"
 }
