@@ -1,0 +1,30 @@
+"""Unit tests for route cost calculation."""
+
+import unittest
+from src.routes import calculate_route_cost
+
+
+class TestRouteCostCalculation(unittest.TestCase):
+    """Test cases for the calculate_route_cost function."""
+
+    def test_basic_route_cost(self):
+        """Test basic route cost calculation."""
+        cost = calculate_route_cost(distance=100.0, cargo_mass=50.0, fuel_price=2.0)
+        expected = (100.0 * 0.1 * 2.0) + (50.0 * 0.05)
+        self.assertEqual(cost, expected)
+
+    def test_zero_distance(self):
+        """Test route with zero distance."""
+        cost = calculate_route_cost(distance=0.0, cargo_mass=50.0, fuel_price=2.0)
+        expected = 50.0 * 0.05
+        self.assertEqual(cost, expected)
+
+    def test_zero_cargo(self):
+        """Test route with zero cargo mass."""
+        cost = calculate_route_cost(distance=100.0, cargo_mass=0.0, fuel_price=2.0)
+        expected = 100.0 * 0.1 * 2.0
+        self.assertEqual(cost, expected)
+
+
+if __name__ == '__main__':
+    unittest.main()

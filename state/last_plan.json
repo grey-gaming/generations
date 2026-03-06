@@ -1,18 +1,18 @@
 {
-  "summary": "game_workspace:game_pipeline: Implement basic route cost calculation logic and unit tests for the logistics simulation core.",
+  "summary": "game_workspace:game_pipeline: Implement basic route cost calculation function and unit test.",
   "editable_files": [
-    "game/logistics.py",
-    "tests/test_logistics.py"
+    "game/workspace/src/routes.py",
+    "game/workspace/tests/test_routes.py"
   ],
   "files_expected": [
-    "game/logistics.py",
-    "tests/test_logistics.py",
+    "game/workspace/src/routes.py",
+    "game/workspace/tests/test_routes.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Website stability maintained while focusing on core simulation implementation.",
-  "monetization_change_reason": "Monetization remains deferred until core loop is demonstrably functional and engaging."
+  "website_change_reason": "Focus remains on simulation core stability before public-facing updates.",
+  "monetization_change_reason": "Monetization deferred per 10-loop plan until core loop is compelling."
 }
