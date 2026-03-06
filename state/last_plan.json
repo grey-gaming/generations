@@ -1,16 +1,16 @@
 {
-  "summary": "game_workspace:game_design: Create initial game design document outlining core logistics loop and resource economy.",
+  "summary": "autonomous_platform:evaluation: Persist the space transport game thesis into criteria.json as a hard constraint for future validation.",
   "editable_files": [
-    "docs/game_design.md"
+    "criteria.json"
   ],
   "files_expected": [
-    "docs/game_design.md",
+    "criteria.json",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "No website update needed for internal design documentation.",
-  "monetization_change_reason": "Monetization strategy depends on defined core loop; premature to optimize."
+  "website_change_reason": "No website changes needed for this platform stabilization step.",
+  "monetization_change_reason": "No monetization changes needed; focus is on core autonomy constraints."
 }

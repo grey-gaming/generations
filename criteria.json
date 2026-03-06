@@ -5,6 +5,12 @@
       "description": "All game logic modules must define data schemas for their domain entities before implementation.",
       "enforcement": "Smoke test validates that game modules include schema definitions.",
       "rationale": "Data-first design improves clarity, testability, and safer autonomous iteration."
+    },
+    {
+      "id": "SPACE_TRANSPORT_THEISIS",
+      "description": "The game must center on space transport logistics: hauling cargo between stations via route planning and ship management.",
+      "enforcement": "Design document and core gameplay loops must reflect space transport theme.",
+      "rationale": "This constraint preserves the core thesis through autonomous iterations."
     }
   ]
 }
