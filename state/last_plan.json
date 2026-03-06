@@ -1,18 +1,18 @@
 {
-  "summary": "game_workspace:game_pipeline: Implement basic route distance calculation module and unit test for logistics simulation.",
+  "summary": "autonomous_platform:evaluation: Add economy balance validation criteria and a smoke test assertion for route viability.",
   "editable_files": [
-    "game/logistics.py",
-    "tests/test_logistics.py"
+    "tests/test_smoke.py",
+    "criteria.json"
   ],
   "files_expected": [
-    "game/logistics.py",
-    "tests/test_logistics.py",
+    "tests/test_smoke.py",
+    "criteria.json",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Internal logic change does not yet warrant public journey update.",
-  "monetization_change_reason": "Core simulation loop not yet compelling enough for monetization experiments."
+  "website_change_reason": "No website update needed for internal evaluation criteria changes.",
+  "monetization_change_reason": "Monetization remains deferred until core loop is validated."
 }

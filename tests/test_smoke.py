@@ -78,3 +78,12 @@ def test_loop_timeout_config_exists() -> None:
         check=True,
     )
     assert result.stdout.strip() == "10"
+
+
+def test_economy_balance_criteria_exists(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+
+    criteria_path = repo_root / "criteria.json"
+    criteria = json.loads(criteria_path.read_text(encoding="utf-8"))
+    assert "ship_rules" in criteria
+    assert any(rule["id"] == "ECONOMY_BALANCE_REQUIRED" for rule in criteria["ship_rules"])

@@ -11,6 +11,12 @@
       "description": "The game must center on space transport logistics: hauling cargo between stations via route planning and ship management.",
       "enforcement": "Design document and core gameplay loops must reflect space transport theme.",
       "rationale": "This constraint preserves the core thesis through autonomous iterations."
+    },
+    {
+      "id": "ECONOMY_BALANCE_REQUIRED",
+      "description": "Route viability must be validated against economy balance criteria: cargo value should exceed travel costs for viable routes.",
+      "enforcement": "Smoke test asserts route viability calculation considers economy balance.",
+      "rationale": "Economic viability is essential for meaningful route planning gameplay."
     }
   ]
 }

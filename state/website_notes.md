@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 15
+Latest loop: 16
 
-Visible intent: Internal logic change does not yet warrant public journey update.
+Visible intent: No website update needed for internal evaluation criteria changes.
 
 Support remains a minimal placeholder until a logged experiment is justified.
