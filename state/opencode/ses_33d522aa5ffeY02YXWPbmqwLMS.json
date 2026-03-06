@@ -1,0 +1,1335 @@
+{
+  "info": {
+    "id": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+    "slug": "playful-star",
+    "projectID": "dcab437ad58279a2521db9a5f641845ff0e8695c",
+    "directory": "/home/jishm/code/generations",
+    "title": "Generations workflow: autonomous_platform:tooling: Reduce smoke test s",
+    "version": "1.2.18",
+    "summary": {
+      "additions": 1,
+      "deletions": 0,
+      "files": 1
+    },
+    "permission": [
+      {
+        "permission": "question",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_enter",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_exit",
+        "pattern": "*",
+        "action": "deny"
+      }
+    ],
+    "time": {
+      "created": 1772792698202,
+      "updated": 1772792756443
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1772792698213
+        },
+        "summary": {
+          "diffs": [
+            {
+              "file": "tests/test_smoke.py",
+              "before": "from __future__ import annotations\n\nimport json\nfrom pathlib import Path\nimport subprocess\nimport sys\n\n\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n    env = dict(**__import__(\"os\").environ)\n    env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n    env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n\n    subprocess.run([\"git\", \"init\"], cwd=tmp_path, check=True, capture_output=True)\n    subprocess.run([\"git\", \"config\", \"user.email\", \"test@example.com\"], cwd=tmp_path, check=True, capture_output=True)\n    subprocess.run([\"git\", \"config\", \"user.name\", \"Test User\"], cwd=tmp_path, check=True, capture_output=True)\n\n    for relative in [\"src\", \"games\", \"tests\", \"pyproject.toml\", \"README.md\"]:\n        source = repo_root / relative\n        target = tmp_path / relative\n        if source.is_dir():\n            subprocess.run([\"cp\", \"-R\", str(source), str(target)], check=True)\n        else:\n            subprocess.run([\"cp\", str(source), str(target)], check=True)\n\n    result = subprocess.run(\n        [sys.executable, \"-m\", \"generations.cli\", \"run\", \"--seed\", \"smoke seed\"],\n        cwd=tmp_path,\n        env=env,\n        capture_output=True,\n        text=True,\n        check=False,\n    )\n\n    assert result.returncode == 0, result.stderr\n    journal_path = tmp_path / \"state\" / \"journal.jsonl\"\n    memory_path = tmp_path / \"state\" / \"memory.sqlite3\"\n    site_index = tmp_path / \"site\" / \"index.html\"\n\n    assert journal_path.exists()\n    assert memory_path.exists()\n    assert site_index.exists()\n\n    lines = journal_path.read_text(encoding=\"utf-8\").strip().splitlines()\n    assert len(lines) >= 1\n    first_entry = json.loads(lines[0])\n    assert first_entry[\"model_provider\"][\"selected_default_model\"] == \"qwen3.5:397b-cloud\"\n\n\ndef test_ship_rules_criteria_file_exists(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n\n    criteria_path = repo_root / \"criteria.json\"\n    assert criteria_path.exists(), \"criteria.json must exist for ship rule enforcement\"\n\n    criteria = json.loads(criteria_path.read_text(encoding=\"utf-8\"))\n    assert \"ship_rules\" in criteria\n    assert any(rule[\"id\"] == \"DATA_SCHEMA_REQUIRED\" for rule in criteria[\"ship_rules\"])\n\n\ndef test_loop_timeout_config_exists() -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n    import subprocess\n    import os\n\n    env = dict(**os.environ)\n    env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n    env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n    env[\"GENERATIONS_LOOP_TIMEOUT_SECONDS\"] = \"10\"\n\n    result = subprocess.run(\n        [sys.executable, \"-c\", \"from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)\"],\n        cwd=repo_root,\n        env=env,\n        capture_output=True,\n        text=True,\n        check=True,\n    )\n    assert result.stdout.strip() == \"10\"\n\n\ndef test_economy_balance_criteria_exists(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n\n    criteria_path = repo_root / \"criteria.json\"\n    criteria = json.loads(criteria_path.read_text(encoding=\"utf-8\"))\n    assert \"ship_rules\" in criteria\n    assert any(rule[\"id\"] == \"ECONOMY_BALANCE_REQUIRED\" for rule in criteria[\"ship_rules\"])\n",
+              "after": "from __future__ import annotations\n\nimport json\nfrom pathlib import Path\nimport subprocess\nimport sys\n\n\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n    env = dict(**__import__(\"os\").environ)\n    env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n    env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n    env[\"GENERATIONS_LOOP_TIMEOUT_SECONDS\"] = \"30\"\n\n    subprocess.run([\"git\", \"init\"], cwd=tmp_path, check=True, capture_output=True)\n    subprocess.run([\"git\", \"config\", \"user.email\", \"test@example.com\"], cwd=tmp_path, check=True, capture_output=True)\n    subprocess.run([\"git\", \"config\", \"user.name\", \"Test User\"], cwd=tmp_path, check=True, capture_output=True)\n\n    for relative in [\"src\", \"games\", \"tests\", \"pyproject.toml\", \"README.md\"]:\n        source = repo_root / relative\n        target = tmp_path / relative\n        if source.is_dir():\n            subprocess.run([\"cp\", \"-R\", str(source), str(target)], check=True)\n        else:\n            subprocess.run([\"cp\", str(source), str(target)], check=True)\n\n    result = subprocess.run(\n        [sys.executable, \"-m\", \"generations.cli\", \"run\", \"--seed\", \"smoke seed\"],\n        cwd=tmp_path,\n        env=env,\n        capture_output=True,\n        text=True,\n        check=False,\n    )\n\n    assert result.returncode == 0, result.stderr\n    journal_path = tmp_path / \"state\" / \"journal.jsonl\"\n    memory_path = tmp_path / \"state\" / \"memory.sqlite3\"\n    site_index = tmp_path / \"site\" / \"index.html\"\n\n    assert journal_path.exists()\n    assert memory_path.exists()\n    assert site_index.exists()\n\n    lines = journal_path.read_text(encoding=\"utf-8\").strip().splitlines()\n    assert len(lines) >= 1\n    first_entry = json.loads(lines[0])\n    assert first_entry[\"model_provider\"][\"selected_default_model\"] == \"qwen3.5:397b-cloud\"\n\n\ndef test_ship_rules_criteria_file_exists(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n\n    criteria_path = repo_root / \"criteria.json\"\n    assert criteria_path.exists(), \"criteria.json must exist for ship rule enforcement\"\n\n    criteria = json.loads(criteria_path.read_text(encoding=\"utf-8\"))\n    assert \"ship_rules\" in criteria\n    assert any(rule[\"id\"] == \"DATA_SCHEMA_REQUIRED\" for rule in criteria[\"ship_rules\"])\n\n\ndef test_loop_timeout_config_exists() -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n    import subprocess\n    import os\n\n    env = dict(**os.environ)\n    env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n    env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n    env[\"GENERATIONS_LOOP_TIMEOUT_SECONDS\"] = \"10\"\n\n    result = subprocess.run(\n        [sys.executable, \"-c\", \"from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)\"],\n        cwd=repo_root,\n        env=env,\n        capture_output=True,\n        text=True,\n        check=True,\n    )\n    assert result.stdout.strip() == \"10\"\n\n\ndef test_economy_balance_criteria_exists(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n\n    criteria_path = repo_root / \"criteria.json\"\n    criteria = json.loads(criteria_path.read_text(encoding=\"utf-8\"))\n    assert \"ship_rules\" in criteria\n    assert any(rule[\"id\"] == \"ECONOMY_BALANCE_REQUIRED\" for rule in criteria[\"ship_rules\"])\n",
+              "additions": 1,
+              "deletions": 0,
+              "status": "modified"
+            }
+          ]
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "ollama",
+          "modelID": "qwen3.5:397b-cloud"
+        },
+        "id": "msg_cc2add5650011r85NDRpR8wIae",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/home/jishm/code/generations/state/opencode/input/workflow_plan.json\"}",
+          "synthetic": true,
+          "id": "prt_cc2add5b0001fNwkZHdY2OS0qw",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "text",
+          "text": "<path>/home/jishm/code/generations/state/opencode/input/workflow_plan.json</path>\n<type>file</type>\n<content>1: {\n2:   \"summary\": \"autonomous_platform:tooling: Reduce smoke test simulation ticks to lower execution time from 98s toward 30s target.\",\n3:   \"editable_files\": [\n4:     \"tests/test_smoke.py\",\n5:     \"tests/conftest.py\"\n6:   ],\n7:   \"files_expected\": [\n8:     \"tests/test_smoke.py\",\n9:     \"tests/conftest.py\",\n10:     \"state/loop_snapshot.json\",\n11:     \"state/website_notes.md\",\n12:     \"state/memory.sqlite3\",\n13:     \"site/index.html\",\n14:     \"site/style.css\"\n15:   ],\n16:   \"website_change_reason\": \"Internal tooling optimization does not require public documentation update yet.\",\n17:   \"monetization_change_reason\": \"Monetization remains deferred until core loop is compelling and stable.\"\n18: }\n\n(End of file - total 18 lines)\n</content>",
+          "synthetic": true,
+          "id": "prt_cc2add5b0002dMZG6d8PZdKnpL",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "workflow_plan.json",
+          "url": "file:///home/jishm/code/generations/state/opencode/input/workflow_plan.json",
+          "id": "prt_cc2add5b0003EncCQqKzuAERsT",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/home/jishm/code/generations/state/opencode/input/git_context.json\"}",
+          "synthetic": true,
+          "id": "prt_cc2add5b0004FhQ9vGN6DknKUa",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "text",
+          "text": "<path>/home/jishm/code/generations/state/opencode/input/git_context.json</path>\n<type>file</type>\n<content>1: {\n2:   \"head\": \"fc607fbaf655049eda680930c2dda5b485b59fb3\",\n3:   \"branch\": \"main\",\n4:   \"status_short\": \"M site/index.html\\n M state/journal.jsonl\\n M state/last_plan.json\\n M state/memory.sqlite3\\n M state/runtime.json\\n?? state/opencode/ses_33d55092dffe3KLLXtvWCHnJTc.json\",\n5:   \"recent_commits\": \"fc607fb loop 17: Implement basic route distance and fuel cost calculation logic in th\\nc823f05 loop 16: Add economy balance validation criteria and a smoke test assertion f\\ne85d427 loop 15: Implement basic route distance calculation module and unit test for\\n5481485 loop 14: Implement basic distance calculation function for star system routes\\nc18ed9a Test 10-loop planning phase\",\n6:   \"planned_commit_message\": \"loop 18: Reduce smoke test simulation ticks to lower execution time from 98s \"\n7: }\n\n(End of file - total 7 lines)\n</content>",
+          "synthetic": true,
+          "id": "prt_cc2add5b0005tTa25oyNf5D8a3",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "git_context.json",
+          "url": "file:///home/jishm/code/generations/state/opencode/input/git_context.json",
+          "id": "prt_cc2add5b0006KtvRJOEiCUIXwY",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/home/jishm/code/generations/state/opencode/input/workflow_note.txt\"}",
+          "synthetic": true,
+          "id": "prt_cc2add5b0007livER5tJHZtEGp",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "text",
+          "text": "<path>/home/jishm/code/generations/state/opencode/input/workflow_note.txt</path>\n<type>file</type>\n<content>1: Generations OpenCode session bootstrap.\n2: Attached files provide the planned workflow and current git context.\n3: Use them for repository-aware editing within the allowed editable files only.\n\n(End of file - total 3 lines)\n</content>",
+          "synthetic": true,
+          "id": "prt_cc2add5b0008dKAjbd2ZSOFs3t",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "workflow_note.txt",
+          "url": "file:///home/jishm/code/generations/state/opencode/input/workflow_note.txt",
+          "id": "prt_cc2add5b0009pAfaI55NZDHeVz",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/home/jishm/code/generations/tests/test_smoke.py\"}",
+          "synthetic": true,
+          "id": "prt_cc2add5b000avZII8jSEBK7kxF",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "text",
+          "text": "<path>/home/jishm/code/generations/tests/test_smoke.py</path>\n<type>file</type>\n<content>1: from __future__ import annotations\n2: \n3: import json\n4: from pathlib import Path\n5: import subprocess\n6: import sys\n7: \n8: \n9: def test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\n10:     repo_root = Path(__file__).resolve().parents[1]\n11:     env = dict(**__import__(\"os\").environ)\n12:     env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n13:     env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n14: \n15:     subprocess.run([\"git\", \"init\"], cwd=tmp_path, check=True, capture_output=True)\n16:     subprocess.run([\"git\", \"config\", \"user.email\", \"test@example.com\"], cwd=tmp_path, check=True, capture_output=True)\n17:     subprocess.run([\"git\", \"config\", \"user.name\", \"Test User\"], cwd=tmp_path, check=True, capture_output=True)\n18: \n19:     for relative in [\"src\", \"games\", \"tests\", \"pyproject.toml\", \"README.md\"]:\n20:         source = repo_root / relative\n21:         target = tmp_path / relative\n22:         if source.is_dir():\n23:             subprocess.run([\"cp\", \"-R\", str(source), str(target)], check=True)\n24:         else:\n25:             subprocess.run([\"cp\", str(source), str(target)], check=True)\n26: \n27:     result = subprocess.run(\n28:         [sys.executable, \"-m\", \"generations.cli\", \"run\", \"--seed\", \"smoke seed\"],\n29:         cwd=tmp_path,\n30:         env=env,\n31:         capture_output=True,\n32:         text=True,\n33:         check=False,\n34:     )\n35: \n36:     assert result.returncode == 0, result.stderr\n37:     journal_path = tmp_path / \"state\" / \"journal.jsonl\"\n38:     memory_path = tmp_path / \"state\" / \"memory.sqlite3\"\n39:     site_index = tmp_path / \"site\" / \"index.html\"\n40: \n41:     assert journal_path.exists()\n42:     assert memory_path.exists()\n43:     assert site_index.exists()\n44: \n45:     lines = journal_path.read_text(encoding=\"utf-8\").strip().splitlines()\n46:     assert len(lines) >= 1\n47:     first_entry = json.loads(lines[0])\n48:     assert first_entry[\"model_provider\"][\"selected_default_model\"] == \"qwen3.5:397b-cloud\"\n49: \n50: \n51: def test_ship_rules_criteria_file_exists(tmp_path: Path) -> None:\n52:     repo_root = Path(__file__).resolve().parents[1]\n53: \n54:     criteria_path = repo_root / \"criteria.json\"\n55:     assert criteria_path.exists(), \"criteria.json must exist for ship rule enforcement\"\n56: \n57:     criteria = json.loads(criteria_path.read_text(encoding=\"utf-8\"))\n58:     assert \"ship_rules\" in criteria\n59:     assert any(rule[\"id\"] == \"DATA_SCHEMA_REQUIRED\" for rule in criteria[\"ship_rules\"])\n60: \n61: \n62: def test_loop_timeout_config_exists() -> None:\n63:     repo_root = Path(__file__).resolve().parents[1]\n64:     import subprocess\n65:     import os\n66: \n67:     env = dict(**os.environ)\n68:     env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n69:     env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n70:     env[\"GENERATIONS_LOOP_TIMEOUT_SECONDS\"] = \"10\"\n71: \n72:     result = subprocess.run(\n73:         [sys.executable, \"-c\", \"from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)\"],\n74:         cwd=repo_root,\n75:         env=env,\n76:         capture_output=True,\n77:         text=True,\n78:         check=True,\n79:     )\n80:     assert result.stdout.strip() == \"10\"\n81: \n82: \n83: def test_economy_balance_criteria_exists(tmp_path: Path) -> None:\n84:     repo_root = Path(__file__).resolve().parents[1]\n85: \n86:     criteria_path = repo_root / \"criteria.json\"\n87:     criteria = json.loads(criteria_path.read_text(encoding=\"utf-8\"))\n88:     assert \"ship_rules\" in criteria\n89:     assert any(rule[\"id\"] == \"ECONOMY_BALANCE_REQUIRED\" for rule in criteria[\"ship_rules\"])\n\n(End of file - total 89 lines)\n</content>",
+          "synthetic": true,
+          "id": "prt_cc2add5b000b7WjCpbebyqGCUa",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "test_smoke.py",
+          "url": "file:///home/jishm/code/generations/tests/test_smoke.py",
+          "id": "prt_cc2add5b000c4wPrcZ3Vqpzd1z",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        },
+        {
+          "type": "text",
+          "text": "\"{\\\"commit_message\\\": \\\"loop 18: Reduce smoke test simulation ticks to lower execution time from 98s \\\", \\\"cwd\\\": \\\"/home/jishm/code/generations\\\", \\\"instruction\\\": \\\"Use the attached plan and git context to make a real file edit in this repository. Only edit files listed in editable_files. Keep the change tiny, coherent, and reversible. Do not commit. Do not touch generated state, caches, sqlite files, or logs. Prefer the smallest change that advances the stated workstream and capability target.\\\", \\\"plan\\\": {\\\"editable_files\\\": [\\\"tests/test_smoke.py\\\", \\\"tests/conftest.py\\\"], \\\"files_expected\\\": [\\\"tests/test_smoke.py\\\", \\\"tests/conftest.py\\\", \\\"state/loop_snapshot.json\\\", \\\"state/website_notes.md\\\", \\\"state/memory.sqlite3\\\", \\\"site/index.html\\\", \\\"site/style.css\\\"], \\\"monetization_change_reason\\\": \\\"Monetization remains deferred until core loop is compelling and stable.\\\", \\\"summary\\\": \\\"autonomous_platform:tooling: Reduce smoke test simulation ticks to lower execution time from 98s toward 30s target.\\\", \\\"website_change_reason\\\": \\\"Internal tooling optimization does not require public documentation update yet.\\\"}, \\\"task\\\": \\\"Apply one tiny coherent repository edit for Generations.\\\"}\"",
+          "id": "prt_cc2add5b000dpG0yKFa2QFsHVz",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5650011r85NDRpR8wIae"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792698305,
+          "completed": 1772792701532
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 12956,
+          "input": 12825,
+          "output": 131,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2add5c1001J7qPMXt9uTVUvA",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2addd5f001JDoldHW4Xrz2dL",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5c1001J7qPMXt9uTVUvA"
+        },
+        {
+          "type": "reasoning",
+          "text": "I need to understand what controls the smoke test simulation ticks - let me search for relevant configuration in conftest.py and the codebase.",
+          "time": {
+            "start": 1772792700257,
+            "end": 1772792701508
+          },
+          "id": "prt_cc2addd61001CwawG80r8TKTBs",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5c1001J7qPMXt9uTVUvA"
+        },
+        {
+          "type": "tool",
+          "callID": "call_a33e6e965f42431e82656b7a",
+          "tool": "read",
+          "state": {
+            "status": "error",
+            "input": {
+              "filePath": "/home/jishm/code/generations/tests/conftest.py"
+            },
+            "error": "Error: File not found: /home/jishm/code/generations/tests/conftest.py",
+            "time": {
+              "start": 1772792701326,
+              "end": 1772792701328
+            }
+          },
+          "id": "prt_cc2ade1890013pY17JfF18XEsy",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5c1001J7qPMXt9uTVUvA"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "cost": 0,
+          "tokens": {
+            "total": 12956,
+            "input": 12825,
+            "output": 131,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2ade247001fg0rfOPUsPxrbM",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2add5c1001J7qPMXt9uTVUvA"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792701533,
+          "completed": 1772792703538
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 12957,
+          "input": 12899,
+          "output": 58,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2ade25d001Gj6dux0hAwMft7",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2ade9740012LCZQbSAQYxjKW",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ade25d001Gj6dux0hAwMft7"
+        },
+        {
+          "type": "tool",
+          "callID": "call_eaec3c5b196f4c629bb9121c",
+          "tool": "bash",
+          "state": {
+            "status": "completed",
+            "input": {
+              "command": "ls -la /home/jishm/code/generations/tests/",
+              "description": "List files in tests directory"
+            },
+            "output": "total 32\ndrwxr-xr-x  3 jishm jishm 4096 Mar  6 09:00 .\ndrwxr-xr-x 16 jishm jishm 4096 Mar  6 10:24 ..\ndrwxr-xr-x  2 jishm jishm 4096 Mar  6 10:19 __pycache__\n-rw-r--r--  1 jishm jishm 2616 Mar  6 10:08 test_journal.py\n-rw-r--r--  1 jishm jishm 2560 Mar  6 09:00 test_logistics.py\n-rw-r--r--  1 jishm jishm 7163 Mar  6 08:02 test_schemas.py\n-rw-r--r--  1 jishm jishm 3278 Mar  6 10:19 test_smoke.py\n",
+            "title": "List files in tests directory",
+            "metadata": {
+              "output": "total 32\ndrwxr-xr-x  3 jishm jishm 4096 Mar  6 09:00 .\ndrwxr-xr-x 16 jishm jishm 4096 Mar  6 10:24 ..\ndrwxr-xr-x  2 jishm jishm 4096 Mar  6 10:19 __pycache__\n-rw-r--r--  1 jishm jishm 2616 Mar  6 10:08 test_journal.py\n-rw-r--r--  1 jishm jishm 2560 Mar  6 09:00 test_logistics.py\n-rw-r--r--  1 jishm jishm 7163 Mar  6 08:02 test_schemas.py\n-rw-r--r--  1 jishm jishm 3278 Mar  6 10:19 test_smoke.py\n",
+              "exit": 0,
+              "description": "List files in tests directory",
+              "truncated": false
+            },
+            "time": {
+              "start": 1772792703350,
+              "end": 1772792703378
+            }
+          },
+          "id": "prt_cc2ade976001szlJTyfROvGEUY",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ade25d001Gj6dux0hAwMft7"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "cost": 0,
+          "tokens": {
+            "total": 12957,
+            "input": 12899,
+            "output": 58,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2adea23001R7t6Lex9OsNQfr",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ade25d001Gj6dux0hAwMft7"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792703540,
+          "completed": 1772792706394
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 13343,
+          "input": 13213,
+          "output": 130,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2adea34001D5QXr1nMiqLbqv",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2adf000001BOvMJERWu47t0o",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2adea34001D5QXr1nMiqLbqv"
+        },
+        {
+          "type": "text",
+          "text": "No `conftest.py` exists yet. The goal is to reduce smoke test simulation ticks from 98s toward 30s. Let me search for where simulation ticks are configured:",
+          "time": {
+            "start": 1772792706373,
+            "end": 1772792706373
+          },
+          "id": "prt_cc2adf001001EmMY8BMjzXGc3m",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2adea34001D5QXr1nMiqLbqv"
+        },
+        {
+          "type": "tool",
+          "callID": "call_72f11f2fd4e14a178e029e7f",
+          "tool": "grep",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "simulation.*tick|tick.*simulation|SMOKE.*TICK|TICK.*COUNT"
+            },
+            "output": "Found 1 matches\n/home/jishm/code/generations/state/last_plan.json:\n  Line 2:   \"summary\": \"autonomous_platform:tooling: Reduce smoke test simulation ticks to lower execution time from 98s toward 30s target.\",",
+            "title": "simulation.*tick|tick.*simulation|SMOKE.*TICK|TICK.*COUNT",
+            "metadata": {
+              "matches": 1,
+              "truncated": false
+            },
+            "time": {
+              "start": 1772792706177,
+              "end": 1772792706216
+            }
+          },
+          "id": "prt_cc2adf47d0017eRe7WUFz6i09g",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2adea34001D5QXr1nMiqLbqv"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "cost": 0,
+          "tokens": {
+            "total": 13343,
+            "input": 13213,
+            "output": 130,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2adf546001KkEZwexz1z8PLg",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2adea34001D5QXr1nMiqLbqv"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792706396,
+          "completed": 1772792708287
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 13415,
+          "input": 13373,
+          "output": 42,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2adf55c001ttvOC8H1Fr3FRQ",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2adfc0e001g0XHflhkYLqh9p",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2adf55c001ttvOC8H1Fr3FRQ"
+        },
+        {
+          "type": "tool",
+          "callID": "call_2920f675ef7c47a19270578e",
+          "tool": "grep",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "GENERATIONS_TEST_MODE|simulation_ticks|SIMULATION_TICKS|ticks"
+            },
+            "output": "Found 50 matches\n/home/jishm/code/generations/state/last_plan.json:\n  Line 2:   \"summary\": \"autonomous_platform:tooling: Reduce smoke test simulation ticks to lower execution time from 98s toward 30s target.\",\n\n/home/jishm/code/generations/site/index.html:\n  Line 857:       \"output\": \".F.                                                                      [100%]\\n=================================== FAILURES ===================================\\n_______________ test_single_safe_loop_writes_journal_and_memory ________________\\n\\ntmp_path = PosixPath('/tmp/pytest-of-jishm/pytest-62/test_single_safe_loop_writes_j0')\\n\\n    def test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n        repo_root = Path(__file__).resolve().parents[1]\\n        env = dict(**__import__(\\\"os\\\").environ)\\n        env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n        env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n    \\n        subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n        subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n        subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    \\n        for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n            source = repo_root / relative\\n            target = tmp_path / relative\\n            if source.is_dir():\\n                subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n            else:\\n                subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n    \\n        start_time = time.monotonic()\\n>       result = subprocess.run(\\n            [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n            cwd=tmp_path,\\n            env=env,\\n            capture_output=True,\\n            text=True,\\n            check=False,\\n            timeout=60,\\n        )\\n\\ntests/test_smoke.py:29: \\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \\n/usr/lib/python3.12/subprocess.py:550: in run\\n    stdout, stderr = process.communicate(input, timeout=timeout)\\n                     ^^^^^^...\n\n/home/jishm/code/generations/state/journal.jsonl:\n  Line 10: {\"actions_taken\": [\"tests/test_smoke.py\", \"state/loop_snapshot.json\", \"state/website_notes.md\", \"state/memory.sqlite3\", \"site/index.html\"], \"commit_hash\": null, \"criteria\": {\"notes\": [\"Initial bootstrap criteria seeded from repository creation.\"], \"ship_rules\": [\"Only ship a game candidate after smoke validation passes repeatedly.\", \"Prefer small reversible changes with one commit per loop.\", \"Record all criteria and monetization changes in journal and memory.\"], \"summary\": \"Improve autonomy, preserve safety, and keep website/journal observable.\", \"version\": 1}, \"evaluation_metrics\": {\"balance\": 0.45, \"code_change\": 0.35, \"creativity\": 0.5, \"game_progress\": 0.1, \"observability\": 0.65, \"review_quality\": 0.4}, \"journal_entry_count_before_write\": 9, \"loop_counter\": 10, \"model_provider\": {\"base_url\": \"http://127.0.0.1:11434\", \"fallback\": null, \"model\": \"qwen3.5:397b-cloud\", \"provider\": \"ollama_cloud\", \"selected_default_model\": \"qwen3.5:397b-cloud\", \"stubbed\": false, \"todo\": \"If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL.\"}, \"monetization_change\": {\"changed\": false, \"summary\": \"No monetization changes needed for test stability work.\"}, \"next_step\": {\"capability_target\": \"evaluation\", \"description\": \"Harden smoke tests with explicit timeout assertions to prevent hanging validation loops.\", \"rationale\": \"Recent validation failed due to a hang. Ensuring tests fail fast improves autonomous reliability and review quality.\", \"workstream\": \"autonomous_platform\"}, \"opencode\": {\"binary\": \"/home/jishm/.opencode/bin/opencode\", \"changed_files\": [\"tests/test_smoke.py\"], \"debug_stderr_path\": null, \"debug_stdout_path\": null, \"push_output\": \"\", \"pushed\": false, \"session_export\": \"state/opencode/ses_33daabc08ffeNd66oaw7Ekp3g0.json\", \"session_id\": \"ses_33daabc08ffeNd66oaw7Ekp3g0\"}, \"rest_decision\": {\"decision\": \"continue\", \"reason\": \"Validation failed; record the mistake, keep the repository safe via rollback, and continue after a bou...\n\n/home/jishm/code/generations/state/opencode/ses_33d578ff6ffeK4H6BqSeUXKGfd.json:\n  Line 55:               \"before\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Path)...\n  Line 56:               \"after\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Path) ...\n  Line 157:           \"text\": \"<path>/home/jishm/code/generations/tests/test_smoke.py</path>\\n<type>file</type>\\n<content>1: from __future__ import annotations\\n2: \\n3: import json\\n4: from pathlib import Path\\n5: import subprocess\\n6: import sys\\n7: \\n8: \\n9: def test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n10:     repo_root = Path(__file__).resolve().parents[1]\\n11:     env = dict(**__import__(\\\"os\\\").environ)\\n12:     env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n13:     env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n14: \\n15:     subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n16:     subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n17:     subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n18: \\n19:     for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n20:         source = repo_root / relative\\n21:         target = tmp_path / relative\\n22:         if source.is_dir():\\n23:             subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n24:         else:\\n25:             subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n26: \\n27:     result = subprocess.run(\\n28:         [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n29:         cwd=tmp_path,\\n30:         env=env,\\n31:         capture_output=True,\\n32:         text=True,\\n33:         check=False,\\n34:     )\\n35: \\n36:     assert result.returncode == 0, result.stderr\\n37:     journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n38:     memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n39:     site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n40: \\n41:     assert journal_path.exists()\\n42:     assert memory_path.exists()\\n43:     assert site_index.exists()\\n44: \\n45:     lines = journal_path.read_text(encoding=\\\"u...\n  Line 381:               \"oldString\": \"def test_loop_timeout_config_exists() -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    import subprocess\\n    import os\\n\\n    env = dict(**os.environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n    env[\\\"GENERATIONS_LOOP_TIMEOUT_SECONDS\\\"] = \\\"10\\\"\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-c\\\", \\\"from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)\\\"],\\n        cwd=repo_root,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=True,\\n    )\\n    assert result.stdout.strip() == \\\"10\\\"\",\n  Line 382:               \"newString\": \"def test_loop_timeout_config_exists() -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    import subprocess\\n    import os\\n\\n    env = dict(**os.environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n    env[\\\"GENERATIONS_LOOP_TIMEOUT_SECONDS\\\"] = \\\"10\\\"\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-c\\\", \\\"from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)\\\"],\\n        cwd=repo_root,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=True,\\n    )\\n    assert result.stdout.strip() == \\\"10\\\"\\n\\n\\ndef test_economy_balance_criteria_exists(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n\\n    criteria_path = repo_root / \\\"criteria.json\\\"\\n    criteria = json.loads(criteria_path.read_text(encoding=\\\"utf-8\\\"))\\n    assert \\\"ship_rules\\\" in criteria\\n    assert any(rule[\\\"id\\\"] == \\\"ECONOMY_BALANCE_REQUIRED\\\" for rule in criteria[\\\"ship_rules\\\"])\"\n  Line 393:                 \"before\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Pat...\n  Line 394:                 \"after\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Path...\n\n/home/jishm/code/generations/tests/test_smoke.py:\n  Line 13:     env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n  Line 69:     env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n\n/home/jishm/code/generations/state/opencode/ses_33da903feffeVv1X1oD2d6rxdO.json:\n  Line 55:               \"before\": \"from __future__ import annotations\\n\\nfrom dataclasses import dataclass\\nfrom pathlib import Path\\nimport os\\n\\nDEFAULT_MODEL = \\\"qwen3.5:397b-cloud\\\"\\nDEFAULT_PROVIDER = \\\"ollama_cloud\\\"\\n\\n\\n@dataclass(slots=True)\\nclass AppConfig:\\n    root: Path\\n    state_dir: Path\\n    journal_path: Path\\n    memory_path: Path\\n    status_path: Path\\n    pause_flag: Path\\n    runtime_path: Path\\n    web_export_dir: Path\\n    games_dir: Path\\n    opencode_state_dir: Path\\n    opencode_agent: str\\n    max_rest_seconds: int\\n    debug: bool\\n    disable_web: bool\\n    test_mode: bool\\n    operational_max_loops: int | None\\n\\n    @classmethod\\n    def from_root(cls, root: Path) -> \\\"AppConfig\\\":\\n        state_dir = root / \\\"state\\\"\\n        state_dir.mkdir(parents=True, exist_ok=True)\\n        return cls(\\n            root=root,\\n            state_dir=state_dir,\\n            journal_path=state_dir / \\\"journal.jsonl\\\",\\n            memory_path=state_dir / \\\"memory.sqlite3\\\",\\n            status_path=state_dir / \\\"status.json\\\",\\n            pause_flag=state_dir / \\\"pause.flag\\\",\\n            runtime_path=state_dir / \\\"runtime.json\\\",\\n            web_export_dir=root / \\\"site\\\",\\n            games_dir=root / \\\"games\\\",\\n            opencode_state_dir=state_dir / \\\"opencode\\\",\\n            opencode_agent=os.getenv(\\\"GENERATIONS_OPENCODE_AGENT\\\", \\\"build\\\"),\\n            max_rest_seconds=int(os.getenv(\\\"GENERATIONS_MAX_REST_SECONDS\\\", \\\"5\\\")),\\n            debug=os.getenv(\\\"GENERATIONS_DEBUG\\\", \\\"0\\\") == \\\"1\\\",\\n            disable_web=os.getenv(\\\"GENERATIONS_DISABLE_WEB\\\", \\\"0\\\") == \\\"1\\\",\\n            test_mode=os.getenv(\\\"GENERATIONS_TEST_MODE\\\", \\\"0\\\") == \\\"1\\\",\\n            operational_max_loops=_optional_int(os.getenv(\\\"GENERATIONS_MAX_LOOPS\\\")),\\n        )\\n\\n\\ndef _optional_int(value: str | None) -> int | None:\\n    if value is None or value == \\\"\\\":\\n        return None\\n    return int(value)\\n\",\n  Line 56:               \"after\": \"from __future__ import annotations\\n\\nfrom dataclasses import dataclass\\nfrom pathlib import Path\\nimport os\\n\\nDEFAULT_MODEL = \\\"qwen3.5:397b-cloud\\\"\\nDEFAULT_PROVIDER = \\\"ollama_cloud\\\"\\n\\n\\n@dataclass(slots=True)\\nclass AppConfig:\\n    root: Path\\n    state_dir: Path\\n    journal_path: Path\\n    memory_path: Path\\n    status_path: Path\\n    pause_flag: Path\\n    runtime_path: Path\\n    web_export_dir: Path\\n    games_dir: Path\\n    opencode_state_dir: Path\\n    opencode_agent: str\\n    max_rest_seconds: int\\n    debug: bool\\n    disable_web: bool\\n    test_mode: bool\\n    operational_max_loops: int | None\\n    operational_loop_timeout_seconds: int | None\\n\\n    @classmethod\\n    def from_root(cls, root: Path) -> \\\"AppConfig\\\":\\n        state_dir = root / \\\"state\\\"\\n        state_dir.mkdir(parents=True, exist_ok=True)\\n        return cls(\\n            root=root,\\n            state_dir=state_dir,\\n            journal_path=state_dir / \\\"journal.jsonl\\\",\\n            memory_path=state_dir / \\\"memory.sqlite3\\\",\\n            status_path=state_dir / \\\"status.json\\\",\\n            pause_flag=state_dir / \\\"pause.flag\\\",\\n            runtime_path=state_dir / \\\"runtime.json\\\",\\n            web_export_dir=root / \\\"site\\\",\\n            games_dir=root / \\\"games\\\",\\n            opencode_state_dir=state_dir / \\\"opencode\\\",\\n            opencode_agent=os.getenv(\\\"GENERATIONS_OPENCODE_AGENT\\\", \\\"build\\\"),\\n            max_rest_seconds=int(os.getenv(\\\"GENERATIONS_MAX_REST_SECONDS\\\", \\\"5\\\")),\\n            debug=os.getenv(\\\"GENERATIONS_DEBUG\\\", \\\"0\\\") == \\\"1\\\",\\n            disable_web=os.getenv(\\\"GENERATIONS_DISABLE_WEB\\\", \\\"0\\\") == \\\"1\\\",\\n            test_mode=os.getenv(\\\"GENERATIONS_TEST_MODE\\\", \\\"0\\\") == \\\"1\\\",\\n            operational_max_loops=_optional_int(os.getenv(\\\"GENERATIONS_MAX_LOOPS\\\")),\\n            operational_loop_timeout_seconds=_optional_int(os.getenv(\\\"GENERATIONS_LOOP_TIMEOUT_SECONDS\\\", \\\"300\\\")),\\n        )\\n\\n\\ndef _optional_int(value: s...\n  Line 71:               \"before\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Path)...\n  Line 72:               \"after\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Path) ...\n  Line 198:           \"text\": \"<path>/home/jishm/code/generations/tests/test_smoke.py</path>\\n<type>file</type>\\n<content>1: from __future__ import annotations\\n2: \\n3: import json\\n4: from pathlib import Path\\n5: import subprocess\\n6: import sys\\n7: \\n8: \\n9: def test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n10:     repo_root = Path(__file__).resolve().parents[1]\\n11:     env = dict(**__import__(\\\"os\\\").environ)\\n12:     env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n13:     env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n14: \\n15:     subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n16:     subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n17:     subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n18: \\n19:     for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n20:         source = repo_root / relative\\n21:         target = tmp_path / relative\\n22:         if source.is_dir():\\n23:             subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n24:         else:\\n25:             subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n26: \\n27:     result = subprocess.run(\\n28:         [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n29:         cwd=tmp_path,\\n30:         env=env,\\n31:         capture_output=True,\\n32:         text=True,\\n33:         check=False,\\n34:     )\\n35: \\n36:     assert result.returncode == 0, result.stderr\\n37:     journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n38:     memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n39:     site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n40: \\n41:     assert journal_path.exists()\\n42:     assert memory_path.exists()\\n43:     assert site_index.exists()\\n44: \\n45:     lines = journal_path.read_text(encoding=\\\"u...\n  Line 788:             \"output\": \"<path>/home/jishm/code/generations/src/generations/config.py</path>\\n<type>file</type>\\n<content>1: from __future__ import annotations\\n2: \\n3: from dataclasses import dataclass\\n4: from pathlib import Path\\n5: import os\\n6: \\n7: DEFAULT_MODEL = \\\"qwen3.5:397b-cloud\\\"\\n8: DEFAULT_PROVIDER = \\\"ollama_cloud\\\"\\n9: \\n10: \\n11: @dataclass(slots=True)\\n12: class AppConfig:\\n13:     root: Path\\n14:     state_dir: Path\\n15:     journal_path: Path\\n16:     memory_path: Path\\n17:     status_path: Path\\n18:     pause_flag: Path\\n19:     runtime_path: Path\\n20:     web_export_dir: Path\\n21:     games_dir: Path\\n22:     opencode_state_dir: Path\\n23:     opencode_agent: str\\n24:     max_rest_seconds: int\\n25:     debug: bool\\n26:     disable_web: bool\\n27:     test_mode: bool\\n28:     operational_max_loops: int | None\\n29: \\n30:     @classmethod\\n31:     def from_root(cls, root: Path) -> \\\"AppConfig\\\":\\n32:         state_dir = root / \\\"state\\\"\\n33:         state_dir.mkdir(parents=True, exist_ok=True)\\n34:         return cls(\\n35:             root=root,\\n36:             state_dir=state_dir,\\n37:             journal_path=state_dir / \\\"journal.jsonl\\\",\\n38:             memory_path=state_dir / \\\"memory.sqlite3\\\",\\n39:             status_path=state_dir / \\\"status.json\\\",\\n40:             pause_flag=state_dir / \\\"pause.flag\\\",\\n41:             runtime_path=state_dir / \\\"runtime.json\\\",\\n42:             web_export_dir=root / \\\"site\\\",\\n43:             games_dir=root / \\\"games\\\",\\n44:             opencode_state_dir=state_dir / \\\"opencode\\\",\\n45:             opencode_agent=os.getenv(\\\"GENERATIONS_OPENCODE_AGENT\\\", \\\"build\\\"),\\n46:             max_rest_seconds=int(os.getenv(\\\"GENERATIONS_MAX_REST_SECONDS\\\", \\\"5\\\")),\\n47:             debug=os.getenv(\\\"GENERATIONS_DEBUG\\\", \\\"0\\\") == \\\"1\\\",\\n48:             disable_web=os.getenv(\\\"GENERATIONS_DISABLE_WEB\\\", \\\"0\\\") == \\\"1\\\",\\n49:             test_mode=os.getenv(\\\"GENERATIONS_TEST_MODE\\\", \\\"0\\\") == \\\"1\\\",\\n50:            ...\n  Line 927:                 \"before\": \"from __future__ import annotations\\n\\nfrom dataclasses import dataclass\\nfrom pathlib import Path\\nimport os\\n\\nDEFAULT_MODEL = \\\"qwen3.5:397b-cloud\\\"\\nDEFAULT_PROVIDER = \\\"ollama_cloud\\\"\\n\\n\\n@dataclass(slots=True)\\nclass AppConfig:\\n    root: Path\\n    state_dir: Path\\n    journal_path: Path\\n    memory_path: Path\\n    status_path: Path\\n    pause_flag: Path\\n    runtime_path: Path\\n    web_export_dir: Path\\n    games_dir: Path\\n    opencode_state_dir: Path\\n    opencode_agent: str\\n    max_rest_seconds: int\\n    debug: bool\\n    disable_web: bool\\n    test_mode: bool\\n    operational_max_loops: int | None\\n\\n    @classmethod\\n    def from_root(cls, root: Path) -> \\\"AppConfig\\\":\\n        state_dir = root / \\\"state\\\"\\n        state_dir.mkdir(parents=True, exist_ok=True)\\n        return cls(\\n            root=root,\\n            state_dir=state_dir,\\n            journal_path=state_dir / \\\"journal.jsonl\\\",\\n            memory_path=state_dir / \\\"memory.sqlite3\\\",\\n            status_path=state_dir / \\\"status.json\\\",\\n            pause_flag=state_dir / \\\"pause.flag\\\",\\n            runtime_path=state_dir / \\\"runtime.json\\\",\\n            web_export_dir=root / \\\"site\\\",\\n            games_dir=root / \\\"games\\\",\\n            opencode_state_dir=state_dir / \\\"opencode\\\",\\n            opencode_agent=os.getenv(\\\"GENERATIONS_OPENCODE_AGENT\\\", \\\"build\\\"),\\n            max_rest_seconds=int(os.getenv(\\\"GENERATIONS_MAX_REST_SECONDS\\\", \\\"5\\\")),\\n            debug=os.getenv(\\\"GENERATIONS_DEBUG\\\", \\\"0\\\") == \\\"1\\\",\\n            disable_web=os.getenv(\\\"GENERATIONS_DISABLE_WEB\\\", \\\"0\\\") == \\\"1\\\",\\n            test_mode=os.getenv(\\\"GENERATIONS_TEST_MODE\\\", \\\"0\\\") == \\\"1\\\",\\n            operational_max_loops=_optional_int(os.getenv(\\\"GENERATIONS_MAX_LOOPS\\\")),\\n        )\\n\\n\\ndef _optional_int(value: str | None) -> int | None:\\n    if value is None or value == \\\"\\\":\\n        return None\\n    return int(value)\\n\",\n  Line 928:                 \"after\": \"from __future__ import annotations\\n\\nfrom dataclasses import dataclass\\nfrom pathlib import Path\\nimport os\\n\\nDEFAULT_MODEL = \\\"qwen3.5:397b-cloud\\\"\\nDEFAULT_PROVIDER = \\\"ollama_cloud\\\"\\n\\n\\n@dataclass(slots=True)\\nclass AppConfig:\\n    root: Path\\n    state_dir: Path\\n    journal_path: Path\\n    memory_path: Path\\n    status_path: Path\\n    pause_flag: Path\\n    runtime_path: Path\\n    web_export_dir: Path\\n    games_dir: Path\\n    opencode_state_dir: Path\\n    opencode_agent: str\\n    max_rest_seconds: int\\n    debug: bool\\n    disable_web: bool\\n    test_mode: bool\\n    operational_max_loops: int | None\\n    operational_loop_timeout_seconds: int | None\\n\\n    @classmethod\\n    def from_root(cls, root: Path) -> \\\"AppConfig\\\":\\n        state_dir = root / \\\"state\\\"\\n        state_dir.mkdir(parents=True, exist_ok=True)\\n        return cls(\\n            root=root,\\n            state_dir=state_dir,\\n            journal_path=state_dir / \\\"journal.jsonl\\\",\\n            memory_path=state_dir / \\\"memory.sqlite3\\\",\\n            status_path=state_dir / \\\"status.json\\\",\\n            pause_flag=state_dir / \\\"pause.flag\\\",\\n            runtime_path=state_dir / \\\"runtime.json\\\",\\n            web_export_dir=root / \\\"site\\\",\\n            games_dir=root / \\\"games\\\",\\n            opencode_state_dir=state_dir / \\\"opencode\\\",\\n            opencode_agent=os.getenv(\\\"GENERATIONS_OPENCODE_AGENT\\\", \\\"build\\\"),\\n            max_rest_seconds=int(os.getenv(\\\"GENERATIONS_MAX_REST_SECONDS\\\", \\\"5\\\")),\\n            debug=os.getenv(\\\"GENERATIONS_DEBUG\\\", \\\"0\\\") == \\\"1\\\",\\n            disable_web=os.getenv(\\\"GENERATIONS_DISABLE_WEB\\\", \\\"0\\\") == \\\"1\\\",\\n            test_mode=os.getenv(\\\"GENERATIONS_TEST_MODE\\\", \\\"0\\\") == \\\"1\\\",\\n            operational_max_loops=_optional_int(os.getenv(\\\"GENERATIONS_MAX_LOOPS\\\")),\\n        )\\n\\n\\ndef _optional_int(value: str | None) -> int | None:\\n    if value is None or value == \\\"\\\":\\n        return None\\n    return int(value)\\n\",\n  Line 1011:               \"oldString\": \"        return cls(\\n            root=root,\\n            state_dir=state_dir,\\n            journal_path=state_dir / \\\"journal.jsonl\\\",\\n            memory_path=state_dir / \\\"memory.sqlite3\\\",\\n            status_path=state_dir / \\\"status.json\\\",\\n            pause_flag=state_dir / \\\"pause.flag\\\",\\n            runtime_path=state_dir / \\\"runtime.json\\\",\\n            web_export_dir=root / \\\"site\\\",\\n            games_dir=root / \\\"games\\\",\\n            opencode_state_dir=state_dir / \\\"opencode\\\",\\n            opencode_agent=os.getenv(\\\"GENERATIONS_OPENCODE_AGENT\\\", \\\"build\\\"),\\n            max_rest_seconds=int(os.getenv(\\\"GENERATIONS_MAX_REST_SECONDS\\\", \\\"5\\\")),\\n            debug=os.getenv(\\\"GENERATIONS_DEBUG\\\", \\\"0\\\") == \\\"1\\\",\\n            disable_web=os.getenv(\\\"GENERATIONS_DISABLE_WEB\\\", \\\"0\\\") == \\\"1\\\",\\n            test_mode=os.getenv(\\\"GENERATIONS_TEST_MODE\\\", \\\"0\\\") == \\\"1\\\",\\n            operational_max_loops=_optional_int(os.getenv(\\\"GENERATIONS_MAX_LOOPS\\\")),\\n        )\",\n  Line 1012:               \"newString\": \"        return cls(\\n            root=root,\\n            state_dir=state_dir,\\n            journal_path=state_dir / \\\"journal.jsonl\\\",\\n            memory_path=state_dir / \\\"memory.sqlite3\\\",\\n            status_path=state_dir / \\\"status.json\\\",\\n            pause_flag=state_dir / \\\"pause.flag\\\",\\n            runtime_path=state_dir / \\\"runtime.json\\\",\\n            web_export_dir=root / \\\"site\\\",\\n            games_dir=root / \\\"games\\\",\\n            opencode_state_dir=state_dir / \\\"opencode\\\",\\n            opencode_agent=os.getenv(\\\"GENERATIONS_OPENCODE_AGENT\\\", \\\"build\\\"),\\n            max_rest_seconds=int(os.getenv(\\\"GENERATIONS_MAX_REST_SECONDS\\\", \\\"5\\\")),\\n            debug=os.getenv(\\\"GENERATIONS_DEBUG\\\", \\\"0\\\") == \\\"1\\\",\\n            disable_web=os.getenv(\\\"GENERATIONS_DISABLE_WEB\\\", \\\"0\\\") == \\\"1\\\",\\n            test_mode=os.getenv(\\\"GENERATIONS_TEST_MODE\\\", \\\"0\\\") == \\\"1\\\",\\n            operational_max_loops=_optional_int(os.getenv(\\\"GENERATIONS_MAX_LOOPS\\\")),\\n            operational_loop_timeout_seconds=_optional_int(os.getenv(\\\"GENERATIONS_LOOP_TIMEOUT_SECONDS\\\", \\\"300\\\")),\\n        )\"\n  Line 1023:               \"diff\": \"Index: /home/jishm/code/generations/src/generations/config.py\\n===================================================================\\n--- /home/jishm/code/generations/src/generations/config.py\\n+++ /home/jishm/code/generations/src/generations/config.py\\n@@ -48,8 +48,9 @@\\n             debug=os.getenv(\\\"GENERATIONS_DEBUG\\\", \\\"0\\\") == \\\"1\\\",\\n             disable_web=os.getenv(\\\"GENERATIONS_DISABLE_WEB\\\", \\\"0\\\") == \\\"1\\\",\\n             test_mode=os.getenv(\\\"GENERATIONS_TEST_MODE\\\", \\\"0\\\") == \\\"1\\\",\\n             operational_max_loops=_optional_int(os.getenv(\\\"GENERATIONS_MAX_LOOPS\\\")),\\n+            operational_loop_timeout_seconds=_optional_int(os.getenv(\\\"GENERATIONS_LOOP_TIMEOUT_SECONDS\\\", \\\"300\\\")),\\n         )\\n \\n \\n def _optional_int(value: str | None) -> int | None:\\n\",\n  Line 1026:                 \"before\": \"from __future__ import annotations\\n\\nfrom dataclasses import dataclass\\nfrom pathlib import Path\\nimport os\\n\\nDEFAULT_MODEL = \\\"qwen3.5:397b-cloud\\\"\\nDEFAULT_PROVIDER = \\\"ollama_cloud\\\"\\n\\n\\n@dataclass(slots=True)\\nclass AppConfig:\\n    root: Path\\n    state_dir: Path\\n    journal_path: Path\\n    memory_path: Path\\n    status_path: Path\\n    pause_flag: Path\\n    runtime_path: Path\\n    web_export_dir: Path\\n    games_dir: Path\\n    opencode_state_dir: Path\\n    opencode_agent: str\\n    max_rest_seconds: int\\n    debug: bool\\n    disable_web: bool\\n    test_mode: bool\\n    operational_max_loops: int | None\\n    operational_loop_timeout_seconds: int | None\\n\\n    @classmethod\\n    def from_root(cls, root: Path) -> \\\"AppConfig\\\":\\n        state_dir = root / \\\"state\\\"\\n        state_dir.mkdir(parents=True, exist_ok=True)\\n        return cls(\\n            root=root,\\n            state_dir=state_dir,\\n            journal_path=state_dir / \\\"journal.jsonl\\\",\\n            memory_path=state_dir / \\\"memory.sqlite3\\\",\\n            status_path=state_dir / \\\"status.json\\\",\\n            pause_flag=state_dir / \\\"pause.flag\\\",\\n            runtime_path=state_dir / \\\"runtime.json\\\",\\n            web_export_dir=root / \\\"site\\\",\\n            games_dir=root / \\\"games\\\",\\n            opencode_state_dir=state_dir / \\\"opencode\\\",\\n            opencode_agent=os.getenv(\\\"GENERATIONS_OPENCODE_AGENT\\\", \\\"build\\\"),\\n            max_rest_seconds=int(os.getenv(\\\"GENERATIONS_MAX_REST_SECONDS\\\", \\\"5\\\")),\\n            debug=os.getenv(\\\"GENERATIONS_DEBUG\\\", \\\"0\\\") == \\\"1\\\",\\n            disable_web=os.getenv(\\\"GENERATIONS_DISABLE_WEB\\\", \\\"0\\\") == \\\"1\\\",\\n            test_mode=os.getenv(\\\"GENERATIONS_TEST_MODE\\\", \\\"0\\\") == \\\"1\\\",\\n            operational_max_loops=_optional_int(os.getenv(\\\"GENERATIONS_MAX_LOOPS\\\")),\\n        )\\n\\n\\ndef _optional_int(value: str | None) -> int | None:\\n    if value is None or value == \\\"\\\":\\n        return None\\n    return int(value)\\n\",\n  Line 1027:                 \"after\": \"from __future__ import annotations\\n\\nfrom dataclasses import dataclass\\nfrom pathlib import Path\\nimport os\\n\\nDEFAULT_MODEL = \\\"qwen3.5:397b-cloud\\\"\\nDEFAULT_PROVIDER = \\\"ollama_cloud\\\"\\n\\n\\n@dataclass(slots=True)\\nclass AppConfig:\\n    root: Path\\n    state_dir: Path\\n    journal_path: Path\\n    memory_path: Path\\n    status_path: Path\\n    pause_flag: Path\\n    runtime_path: Path\\n    web_export_dir: Path\\n    games_dir: Path\\n    opencode_state_dir: Path\\n    opencode_agent: str\\n    max_rest_seconds: int\\n    debug: bool\\n    disable_web: bool\\n    test_mode: bool\\n    operational_max_loops: int | None\\n    operational_loop_timeout_seconds: int | None\\n\\n    @classmethod\\n    def from_root(cls, root: Path) -> \\\"AppConfig\\\":\\n        state_dir = root / \\\"state\\\"\\n        state_dir.mkdir(parents=True, exist_ok=True)\\n        return cls(\\n            root=root,\\n            state_dir=state_dir,\\n            journal_path=state_dir / \\\"journal.jsonl\\\",\\n            memory_path=state_dir / \\\"memory.sqlite3\\\",\\n            status_path=state_dir / \\\"status.json\\\",\\n            pause_flag=state_dir / \\\"pause.flag\\\",\\n            runtime_path=state_dir / \\\"runtime.json\\\",\\n            web_export_dir=root / \\\"site\\\",\\n            games_dir=root / \\\"games\\\",\\n            opencode_state_dir=state_dir / \\\"opencode\\\",\\n            opencode_agent=os.getenv(\\\"GENERATIONS_OPENCODE_AGENT\\\", \\\"build\\\"),\\n            max_rest_seconds=int(os.getenv(\\\"GENERATIONS_MAX_REST_SECONDS\\\", \\\"5\\\")),\\n            debug=os.getenv(\\\"GENERATIONS_DEBUG\\\", \\\"0\\\") == \\\"1\\\",\\n            disable_web=os.getenv(\\\"GENERATIONS_DISABLE_WEB\\\", \\\"0\\\") == \\\"1\\\",\\n            test_mode=os.getenv(\\\"GENERATIONS_TEST_MODE\\\", \\\"0\\\") == \\\"1\\\",\\n            operational_max_loops=_optional_int(os.getenv(\\\"GENERATIONS_MAX_LOOPS\\\")),\\n            operational_loop_timeout_seconds=_optional_int(os.getenv(\\\"GENERATIONS_LOOP_TIMEOUT_SECONDS\\\", \\\"300\\\")),\\n        )\\n\\n\\ndef _optional_int(value:...\n  Line 1122:               \"newString\": \"def test_ship_rules_criteria_file_exists(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n\\n    criteria_path = repo_root / \\\"criteria.json\\\"\\n    assert criteria_path.exists(), \\\"criteria.json must exist for ship rule enforcement\\\"\\n\\n    criteria = json.loads(criteria_path.read_text(encoding=\\\"utf-8\\\"))\\n    assert \\\"ship_rules\\\" in criteria\\n    assert any(rule[\\\"id\\\"] == \\\"DATA_SCHEMA_REQUIRED\\\" for rule in criteria[\\\"ship_rules\\\"])\\n\\n\\ndef test_loop_timeout_config_exists() -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    import subprocess\\n    import os\\n\\n    env = dict(**os.environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n    env[\\\"GENERATIONS_LOOP_TIMEOUT_SECONDS\\\"] = \\\"10\\\"\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-c\\\", \\\"from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=True,\\n    )\\n    assert result.stdout.strip() == \\\"10\\\"\"\n  Line 1153:               \"diff\": \"Index: /home/jishm/code/generations/tests/test_smoke.py\\n===================================================================\\n--- /home/jishm/code/generations/tests/test_smoke.py\\n+++ /home/jishm/code/generations/tests/test_smoke.py\\n@@ -56,4 +56,25 @@\\n \\n     criteria = json.loads(criteria_path.read_text(encoding=\\\"utf-8\\\"))\\n     assert \\\"ship_rules\\\" in criteria\\n     assert any(rule[\\\"id\\\"] == \\\"DATA_SCHEMA_REQUIRED\\\" for rule in criteria[\\\"ship_rules\\\"])\\n+\\n+\\n+def test_loop_timeout_config_exists() -> None:\\n+    repo_root = Path(__file__).resolve().parents[1]\\n+    import subprocess\\n+    import os\\n+\\n+    env = dict(**os.environ)\\n+    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n+    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n+    env[\\\"GENERATIONS_LOOP_TIMEOUT_SECONDS\\\"] = \\\"10\\\"\\n+\\n+    result = subprocess.run(\\n+        [sys.executable, \\\"-c\\\", \\\"from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)\\\"],\\n+        cwd=tmp_path,\\n+        env=env,\\n+        capture_output=True,\\n+        text=True,\\n+        check=True,\\n+    )\\n+    assert result.stdout.strip() == \\\"10\\\"\\n\",\n  Line 1156:                 \"before\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Pat...\n  Line 1157:                 \"after\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Path...\n  Line 1250:               \"oldString\": \"def test_loop_timeout_config_exists() -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    import subprocess\\n    import os\\n\\n    env = dict(**os.environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n    env[\\\"GENERATIONS_LOOP_TIMEOUT_SECONDS\\\"] = \\\"10\\\"\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-c\\\", \\\"from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=True,\\n    )\\n    assert result.stdout.strip() == \\\"10\\\"\",\n  Line 1251:               \"newString\": \"def test_loop_timeout_config_exists() -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    import subprocess\\n    import os\\n\\n    env = dict(**os.environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n    env[\\\"GENERATIONS_LOOP_TIMEOUT_SECONDS\\\"] = \\\"10\\\"\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-c\\\", \\\"from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)\\\"],\\n        cwd=repo_root,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=True,\\n    )\\n    assert result.stdout.strip() == \\\"10\\\"\"\n  Line 1265:                 \"before\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Pat...\n  Line 1266:                 \"after\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Path...\n  Line 1362:             \"output\": \"============================= test session starts ==============================\\nplatform linux -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0\\nrootdir: /home/jishm/code/generations\\nconfigfile: pyproject.toml\\nplugins: anyio-4.12.1\\ncollected 3 items\\n\\ntests/test_smoke.py F..                                                  [100%]\\n\\n=================================== FAILURES ===================================\\n_______________ test_single_safe_loop_writes_journal_and_memory ________________\\n\\ntmp_path = PosixPath('/tmp/pytest-of-jishm/pytest-63/test_single_safe_loop_writes_j0')\\n\\n    def test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n        repo_root = Path(__file__).resolve().parents[1]\\n        env = dict(**__import__(\\\"os\\\").environ)\\n        env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n        env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n    \\n        subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n        subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n        subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    \\n        for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n            source = repo_root / relative\\n            target = tmp_path / relative\\n            if source.is_dir():\\n                subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n            else:\\n                subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n    \\n        result = subprocess.run(\\n            [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n            cwd=tmp_path,\\n            env=env,\\n            capture_output=True,\\n            text=True,\\n            check=False,\\n        )\\n    \\n>       assert result.returncode == 0, result....\n  Line 1365:               \"output\": \"============================= test session starts ==============================\\nplatform linux -- Python 3.12.3, pytest-8.4.2, pluggy-1.6.0\\nrootdir: /home/jishm/code/generations\\nconfigfile: pyproject.toml\\nplugins: anyio-4.12.1\\ncollected 3 items\\n\\ntests/test_smoke.py F..                                                  [100%]\\n\\n=================================== FAILURES ===================================\\n_______________ test_single_safe_loop_writes_journal_and_memory ________________\\n\\ntmp_path = PosixPath('/tmp/pytest-of-jishm/pytest-63/test_single_safe_loop_writes_j0')\\n\\n    def test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n        repo_root = Path(__file__).resolve().parents[1]\\n        env = dict(**__import__(\\\"os\\\").environ)\\n        env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n        env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n    \\n        subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n        subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n        subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    \\n        for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n            source = repo_root / relative\\n            target = tmp_path / relative\\n            if source.is_dir():\\n                subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n            else:\\n                subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n    \\n        result = subprocess.run(\\n            [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n            cwd=tmp_path,\\n            env=env,\\n            capture_output=True,\\n            text=True,\\n            check=False,\\n        )\\n    \\n>       assert result.returncode == 0, resul...\n\n/home/jishm/code/generations/src/generations/config.py:\n  Line 50:             test_mode=os.getenv(\"GENERATIONS_TEST_MODE\", \"0\") == \"1\",\n\n/home/jishm/code/generations/state/opencode/ses_33daabc08ffeNd66oaw7Ekp3g0.json:\n  Line 47:               \"before\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Path)...\n  Line 48:               \"after\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\nimport time\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    start_time = time.monotonic()\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n        timeout=60,\\n    )\\n    elapsed = time.monotonic() - start_time\\n\\n    assert result.returncode == 0, result.stderr\\n    assert elapsed < 60, f\\\"Test took {elapsed:.2f}s, expected <60s\\\"\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entr...\n  Line 149:           \"text\": \"<path>/home/jishm/code/generations/tests/test_smoke.py</path>\\n<type>file</type>\\n<content>1: from __future__ import annotations\\n2: \\n3: import json\\n4: from pathlib import Path\\n5: import subprocess\\n6: import sys\\n7: \\n8: \\n9: def test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n10:     repo_root = Path(__file__).resolve().parents[1]\\n11:     env = dict(**__import__(\\\"os\\\").environ)\\n12:     env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n13:     env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n14: \\n15:     subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n16:     subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n17:     subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n18: \\n19:     for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n20:         source = repo_root / relative\\n21:         target = tmp_path / relative\\n22:         if source.is_dir():\\n23:             subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n24:         else:\\n25:             subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n26: \\n27:     result = subprocess.run(\\n28:         [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n29:         cwd=tmp_path,\\n30:         env=env,\\n31:         capture_output=True,\\n32:         text=True,\\n33:         check=False,\\n34:     )\\n35: \\n36:     assert result.returncode == 0, result.stderr\\n37:     journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n38:     memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n39:     site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n40: \\n41:     assert journal_path.exists()\\n42:     assert memory_path.exists()\\n43:     assert site_index.exists()\\n44: \\n45:     lines = journal_path.read_text(encoding=\\\"u...\n  Line 293:                 \"before\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_default_model\\\"] == \\\"qwen3.5:397b-cloud\\\"\\n\\n\\ndef test_ship_rules_criteria_file_exists(tmp_path: Pat...\n  Line 294:                 \"after\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n        timeout=60,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    assert result.elapsed < 60, f\\\"Test took {result.elapsed}s, expected <60s\\\"\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_d...\n  Line 449:                 \"before\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n        timeout=60,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    assert result.elapsed < 60, f\\\"Test took {result.elapsed}s, expected <60s\\\"\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"][\\\"selected_...\n  Line 450:                 \"after\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\nimport time\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n        timeout=60,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    assert result.elapsed < 60, f\\\"Test took {result.elapsed}s, expected <60s\\\"\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"]...\n  Line 555:                 \"before\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\nimport time\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n        timeout=60,\\n    )\\n\\n    assert result.returncode == 0, result.stderr\\n    assert result.elapsed < 60, f\\\"Test took {result.elapsed}s, expected <60s\\\"\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_entry = json.loads(lines[0])\\n    assert first_entry[\\\"model_provider\\\"...\n  Line 556:                 \"after\": \"from __future__ import annotations\\n\\nimport json\\nfrom pathlib import Path\\nimport subprocess\\nimport sys\\nimport time\\n\\n\\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\\n    repo_root = Path(__file__).resolve().parents[1]\\n    env = dict(**__import__(\\\"os\\\").environ)\\n    env[\\\"PYTHONPATH\\\"] = str(repo_root / \\\"src\\\")\\n    env[\\\"GENERATIONS_TEST_MODE\\\"] = \\\"1\\\"\\n\\n    subprocess.run([\\\"git\\\", \\\"init\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.email\\\", \\\"test@example.com\\\"], cwd=tmp_path, check=True, capture_output=True)\\n    subprocess.run([\\\"git\\\", \\\"config\\\", \\\"user.name\\\", \\\"Test User\\\"], cwd=tmp_path, check=True, capture_output=True)\\n\\n    for relative in [\\\"src\\\", \\\"games\\\", \\\"tests\\\", \\\"pyproject.toml\\\", \\\"README.md\\\"]:\\n        source = repo_root / relative\\n        target = tmp_path / relative\\n        if source.is_dir():\\n            subprocess.run([\\\"cp\\\", \\\"-R\\\", str(source), str(target)], check=True)\\n        else:\\n            subprocess.run([\\\"cp\\\", str(source), str(target)], check=True)\\n\\n    start_time = time.monotonic()\\n    result = subprocess.run(\\n        [sys.executable, \\\"-m\\\", \\\"generations.cli\\\", \\\"run\\\", \\\"--seed\\\", \\\"smoke seed\\\"],\\n        cwd=tmp_path,\\n        env=env,\\n        capture_output=True,\\n        text=True,\\n        check=False,\\n        timeout=60,\\n    )\\n    elapsed = time.monotonic() - start_time\\n\\n    assert result.returncode == 0, result.stderr\\n    assert elapsed < 60, f\\\"Test took {elapsed:.2f}s, expected <60s\\\"\\n    journal_path = tmp_path / \\\"state\\\" / \\\"journal.jsonl\\\"\\n    memory_path = tmp_path / \\\"state\\\" / \\\"memory.sqlite3\\\"\\n    site_index = tmp_path / \\\"site\\\" / \\\"index.html\\\"\\n\\n    assert journal_path.exists()\\n    assert memory_path.exists()\\n    assert site_index.exists()\\n\\n    lines = journal_path.read_text(encoding=\\\"utf-8\\\").strip().splitlines()\\n    assert len(lines) >= 1\\n    first_en...\n\n/home/jishm/code/generations/state/opencode/ses_33dae720effeHMlbH6DpTvBf1n.json:\n  Line 157:           \"text\": \"<path>/home/jishm/code/generations/README.md</path>\\n<type>file</type>\\n<content>1: # Generations\\n2: \\n3: Generations is a minimal Ubuntu-first autonomous codebase that can run locally, maintain a visible journal and memory, serve a journey website, and self-modify through a local OpenCode-style workflow.\\n4: \\n5: ## What Exists In This Seed\\n6: \\n7: - Python 3.11+ package under `src/generations`\\n8: - CLI commands:\\n9:   - `generations run --seed \\\"...\\\"`\\n10:   - `generations web --host 127.0.0.1 --port 8000`\\n11:   - `generations status`\\n12:   - `generations pause`\\n13:   - `generations resume`\\n14:   - `generations export-web --out ./site/`\\n15: - Append-only journal in `state/journal.jsonl`\\n16: - Queryable memory snapshots in `state/memory.sqlite3`\\n17: - Local journey website rendered from on-disk artifacts\\n18: - `games/space_logistics/` seed game workspace\\n19: - OpenCode CLI adapter using the installed `opencode` binary for workflow session artifacts\\n20: - Ollama adapter using the local daemon/API with required default model `qwen3.5:397b-cloud`\\n21: \\n22: ## Ubuntu Setup\\n23: \\n24: ```bash\\n25: python -m venv .venv\\n26: source .venv/bin/activate\\n27: pip install -e .[dev]\\n28: pytest\\n29: ```\\n30: \\n31: ## Run The Autonomous Loop\\n32: \\n33: ```bash\\n34: generations run --seed \\\"Build yourself into a capable autonomous game studio\\\"\\n35: ```\\n36: \\n37: Behavior:\\n38: - Runs until Generations decides to stop under its current criteria.\\n39: - Current bootstrap criteria intentionally stop after a few validated tiny loops in normal mode.\\n40: - `Ctrl+C` is handled gracefully: the current step finishes safely, journal and runtime state are flushed, and the process exits.\\n41: - `state/pause.flag` is checked between loops.\\n42: \\n43: Operational-only safety valve:\\n44: - `GENERATIONS_MAX_LOOPS=<n>` limits loop count for operator safety only.\\n45: - This is not the definition of done.\\n46: - Default is no limit.\\n47: \\n48: Test harness only...\n\n/home/jishm/code/generations/state/opencode/ses_33dd27fe7ffelR9OG4lOEil3n2.json:\n  Line 149:           \"text\": \"<path>/home/jishm/code/generations/README.md</path>\\n<type>file</type>\\n<content>1: # Generations\\n2: \\n3: Generations is a minimal Ubuntu-first autonomous codebase that can run locally, maintain a visible journal and memory, serve a journey website, and self-modify through a local OpenCode-style workflow.\\n4: \\n5: ## What Exists In This Seed\\n6: \\n7: - Python 3.11+ package under `src/generations`\\n8: - CLI commands:\\n9:   - `generations run --seed \\\"...\\\"`\\n10:   - `generations web --host 127.0.0.1 --port 8000`\\n11:   - `generations status`\\n12:   - `generations pause`\\n13:   - `generations resume`\\n14:   - `generations export-web --out ./site/`\\n15: - Append-only journal in `state/journal.jsonl`\\n16: - Queryable memory snapshots in `state/memory.sqlite3`\\n17: - Local journey website rendered from on-disk artifacts\\n18: - `games/space_logistics/` seed game workspace\\n19: - OpenCode CLI adapter using the installed `opencode` binary for workflow session artifacts\\n20: - Ollama adapter using the local daemon/API with required default model `qwen3.5:397b-cloud`\\n21: \\n22: ## Ubuntu Setup\\n23: \\n24: ```bash\\n25: python -m venv .venv\\n26: source .venv/bin/activate\\n27: pip install -e .[dev]\\n28: pytest\\n29: ```\\n30: \\n31: ## Run The Autonomous Loop\\n32: \\n33: ```bash\\n34: generations run --seed \\\"Build yourself into a capable autonomous game studio\\\"\\n35: ```\\n36: \\n37: Behavior:\\n38: - Runs until Generations decides to stop under its current criteria.\\n39: - Current bootstrap criteria intentionally stop after a few validated tiny loops in normal mode.\\n40: - `Ctrl+C` is handled gracefully: the current step finishes safely, journal and runtime state are flushed, and the process exits.\\n41: - `state/pause.flag` is checked between loops.\\n42: \\n43: Operational-only safety valve:\\n44: - `GENERATIONS_MAX_LOOPS=<n>` limits loop count for operator safety only.\\n45: - This is not the definition of done.\\n46: - Default is no limit.\\n47: \\n48: Test harness only...\n\n/home/jishm/code/generations/state/opencode/ses_33de3a7d9ffeh62RZsqwU7OcRm.json:\n  Line 149:           \"text\": \"<path>/home/jishm/code/generations/README.md</path>\\n<type>file</type>\\n<content>1: # Generations\\n2: \\n3: Generations is a minimal Ubuntu-first autonomous codebase that can run locally, maintain a visible journal and memory, serve a journey website, and self-modify through a local OpenCode-style workflow.\\n4: \\n5: ## What Exists In This Seed\\n6: \\n7: - Python 3.11+ package under `src/generations`\\n8: - CLI commands:\\n9:   - `generations run --seed \\\"...\\\"`\\n10:   - `generations web --host 127.0.0.1 --port 8000`\\n11:   - `generations status`\\n12:   - `generations pause`\\n13:   - `generations resume`\\n14:   - `generations export-web --out ./site/`\\n15: - Append-only journal in `state/journal.jsonl`\\n16: - Queryable memory snapshots in `state/memory.sqlite3`\\n17: - Local journey website rendered from on-disk artifacts\\n18: - `games/space_logistics/` seed game workspace\\n19: - OpenCode CLI adapter using the installed `opencode` binary for workflow session artifacts\\n20: - Ollama adapter using the local daemon/API with required default model `qwen3.5:397b-cloud`\\n21: \\n22: ## Ubuntu Setup\\n23: \\n24: ```bash\\n25: python -m venv .venv\\n26: source .venv/bin/activate\\n27: pip install -e .[dev]\\n28: pytest\\n29: ```\\n30: \\n31: ## Run The Autonomous Loop\\n32: \\n33: ```bash\\n34: generations run --seed \\\"Build yourself into a capable autonomous game studio\\\"\\n35: ```\\n36: \\n37: Behavior:\\n38: - Runs until Generations decides to stop under its current criteria.\\n39: - Current bootstrap criteria intentionally stop after a few validated tiny loops in normal mode.\\n40: - `Ctrl+C` is handled gracefully: the current step finishes safely, journal and runtime state are flushed, and the process exits.\\n41: - `state/pause.flag` is checked between loops.\\n42: \\n43: Operational-only safety valve:\\n44: - `GENERATIONS_MAX_LOOPS=<n>` limits loop count for operator safety only.\\n45: - This is not the definition of done.\\n46: - Default is no limit.\\n47: \\n48: Test harness only...\n\n/home/jishm/code/generations/README.md:\n  Line 49: - `GENERATIONS_TEST_MODE=1` forces exactly one safe loop, then stop.\n\n/home/jishm/code/generations/src/generations.egg-info/PKG-INFO:\n  Line 62: - `GENERATIONS_TEST_MODE=1` forces exactly one safe loop, then stop.",
+            "title": "GENERATIONS_TEST_MODE|simulation_ticks|SIMULATION_TICKS|ticks",
+            "metadata": {
+              "matches": 50,
+              "truncated": false
+            },
+            "time": {
+              "start": 1772792708111,
+              "end": 1772792708114
+            }
+          },
+          "id": "prt_cc2adfc0f001mNwdVLd5PnM0Sq",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2adf55c001ttvOC8H1Fr3FRQ"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "cost": 0,
+          "tokens": {
+            "total": 13415,
+            "input": 13373,
+            "output": 42,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2adfcb1001GLZ49b499o8lBY",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2adf55c001ttvOC8H1Fr3FRQ"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792708288,
+          "completed": 1772792713362
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 35470,
+          "input": 35411,
+          "output": 59,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2adfcc0001PWUIMMdnygAU5o",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2ae0d3e001s971i5eN9Xhd4U",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2adfcc0001PWUIMMdnygAU5o"
+        },
+        {
+          "type": "text",
+          "text": "Let me search for where the simulation logic might be configured:",
+          "time": {
+            "start": 1772792713349,
+            "end": 1772792713349
+          },
+          "id": "prt_cc2ae0d3f001LFM89Xmtz2in7j",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2adfcc0001PWUIMMdnygAU5o"
+        },
+        {
+          "type": "tool",
+          "callID": "call_d2b152e0ec1847748ebcbef6",
+          "tool": "grep",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "98s|98 second|n_sim_ticks|sim_ticks|TICKS"
+            },
+            "output": "Found 1 matches\n/home/jishm/code/generations/state/last_plan.json:\n  Line 2:   \"summary\": \"autonomous_platform:tooling: Reduce smoke test simulation ticks to lower execution time from 98s toward 30s target.\",",
+            "title": "98s|98 second|n_sim_ticks|sim_ticks|TICKS",
+            "metadata": {
+              "matches": 1,
+              "truncated": false
+            },
+            "time": {
+              "start": 1772792713144,
+              "end": 1772792713152
+            }
+          },
+          "id": "prt_cc2ae0fb5001iOd7j3QmVe0JBe",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2adfcc0001PWUIMMdnygAU5o"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "cost": 0,
+          "tokens": {
+            "total": 35470,
+            "input": 35411,
+            "output": 59,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2ae1087001792jr6Ew4soEa0",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2adfcc0001PWUIMMdnygAU5o"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792713364,
+          "completed": 1772792718423
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 35583,
+          "input": 35542,
+          "output": 41,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2ae1094001q3kqVf0xj7pE6K",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2ae2372001IlIDN4qpyaxkj2",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae1094001q3kqVf0xj7pE6K"
+        },
+        {
+          "type": "tool",
+          "callID": "call_50ec23e067f1466e928f9ea8",
+          "tool": "read",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/home/jishm/code/generations/src/generations/config.py"
+            },
+            "output": "<path>/home/jishm/code/generations/src/generations/config.py</path>\n<type>file</type>\n<content>1: from __future__ import annotations\n2: \n3: from dataclasses import dataclass\n4: from pathlib import Path\n5: import os\n6: \n7: DEFAULT_MODEL = \"qwen3.5:397b-cloud\"\n8: DEFAULT_PROVIDER = \"ollama_cloud\"\n9: \n10: \n11: @dataclass(slots=True)\n12: class AppConfig:\n13:     root: Path\n14:     state_dir: Path\n15:     journal_path: Path\n16:     memory_path: Path\n17:     status_path: Path\n18:     pause_flag: Path\n19:     runtime_path: Path\n20:     web_export_dir: Path\n21:     games_dir: Path\n22:     opencode_state_dir: Path\n23:     opencode_agent: str\n24:     max_rest_seconds: int\n25:     debug: bool\n26:     disable_web: bool\n27:     test_mode: bool\n28:     operational_max_loops: int | None\n29:     operational_loop_timeout_seconds: int | None\n30: \n31:     @classmethod\n32:     def from_root(cls, root: Path) -> \"AppConfig\":\n33:         state_dir = root / \"state\"\n34:         state_dir.mkdir(parents=True, exist_ok=True)\n35:         return cls(\n36:             root=root,\n37:             state_dir=state_dir,\n38:             journal_path=state_dir / \"journal.jsonl\",\n39:             memory_path=state_dir / \"memory.sqlite3\",\n40:             status_path=state_dir / \"status.json\",\n41:             pause_flag=state_dir / \"pause.flag\",\n42:             runtime_path=state_dir / \"runtime.json\",\n43:             web_export_dir=root / \"site\",\n44:             games_dir=root / \"games\",\n45:             opencode_state_dir=state_dir / \"opencode\",\n46:             opencode_agent=os.getenv(\"GENERATIONS_OPENCODE_AGENT\", \"build\"),\n47:             max_rest_seconds=int(os.getenv(\"GENERATIONS_MAX_REST_SECONDS\", \"5\")),\n48:             debug=os.getenv(\"GENERATIONS_DEBUG\", \"0\") == \"1\",\n49:             disable_web=os.getenv(\"GENERATIONS_DISABLE_WEB\", \"0\") == \"1\",\n50:             test_mode=os.getenv(\"GENERATIONS_TEST_MODE\", \"0\") == \"1\",\n51:             operational_max_loops=_optional_int(os.getenv(\"GENERATIONS_MAX_LOOPS\")),\n52:             operational_loop_timeout_seconds=_optional_int(os.getenv(\"GENERATIONS_LOOP_TIMEOUT_SECONDS\", \"300\")),\n53:         )\n54: \n55: \n56: def _optional_int(value: str | None) -> int | None:\n57:     if value is None or value == \"\":\n58:         return None\n59:     return int(value)\n\n(End of file - total 59 lines)\n</content>",
+            "title": "src/generations/config.py",
+            "metadata": {
+              "preview": "from __future__ import annotations\n\nfrom dataclasses import dataclass\nfrom pathlib import Path\nimport os\n\nDEFAULT_MODEL = \"qwen3.5:397b-cloud\"\nDEFAULT_PROVIDER = \"ollama_cloud\"\n\n\n@dataclass(slots=True)\nclass AppConfig:\n    root: Path\n    state_dir: Path\n    journal_path: Path\n    memory_path: Path\n    status_path: Path\n    pause_flag: Path\n    runtime_path: Path\n    web_export_dir: Path",
+              "truncated": false,
+              "loaded": []
+            },
+            "time": {
+              "start": 1772792718195,
+              "end": 1772792718196
+            }
+          },
+          "id": "prt_cc2ae23730010OtSAFUGuYOL4X",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae1094001q3kqVf0xj7pE6K"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "cost": 0,
+          "tokens": {
+            "total": 35583,
+            "input": 35542,
+            "output": 41,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2ae244a001ucNjlaPv1SAvQL",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae1094001q3kqVf0xj7pE6K"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792718426,
+          "completed": 1772792732981
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 36377,
+          "input": 36318,
+          "output": 59,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2ae245a001rQ6on8bPuvhXGC",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2ae5ca5001Depn37n4Yb5jX9",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae245a001rQ6on8bPuvhXGC"
+        },
+        {
+          "type": "tool",
+          "callID": "call_66060929d3f8465e83c2e823",
+          "tool": "grep",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "n_sim_ticks|simulation_tick|run_simulation|def simulate",
+              "path": "/home/jishm/code/generations/src"
+            },
+            "output": "No files found",
+            "title": "n_sim_ticks|simulation_tick|run_simulation|def simulate",
+            "metadata": {
+              "matches": 0,
+              "truncated": false
+            },
+            "time": {
+              "start": 1772792732839,
+              "end": 1772792732840
+            }
+          },
+          "id": "prt_cc2ae5ca6001l0gFYLK9CixaNl",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae245a001rQ6on8bPuvhXGC"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "cost": 0,
+          "tokens": {
+            "total": 36377,
+            "input": 36318,
+            "output": 59,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2ae5d29001Rb6xVRbLbdI7rZ",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae245a001rQ6on8bPuvhXGC"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792732983,
+          "completed": 1772792740338
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 36715,
+          "input": 36668,
+          "output": 47,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2ae5d37001bklJFxEv4h5zgQ",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2ae6c3b001FvKNuxvGsLBJ7G",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae5d37001bklJFxEv4h5zgQ"
+        },
+        {
+          "type": "reasoning",
+          "text": "Let me look at the games directory to find where simulation ticks might be defined:",
+          "time": {
+            "start": 1772792736828,
+            "end": 1772792740322
+          },
+          "id": "prt_cc2ae6c3c001MLLDowfepeZiZV",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae5d37001bklJFxEv4h5zgQ"
+        },
+        {
+          "type": "tool",
+          "callID": "call_e7ekzm7j",
+          "tool": "glob",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "games/**/*.py"
+            },
+            "output": "/home/jishm/code/generations/games/space_logistics/main.py",
+            "title": "",
+            "metadata": {
+              "count": 1,
+              "truncated": false
+            },
+            "time": {
+              "start": 1772792740047,
+              "end": 1772792740054
+            }
+          },
+          "id": "prt_cc2ae78cc001iVhfGtwFk1BtL0",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae5d37001bklJFxEv4h5zgQ"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "cost": 0,
+          "tokens": {
+            "total": 36715,
+            "input": 36668,
+            "output": 47,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2ae79e300152t8t2QrfVRH5Z",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae5d37001bklJFxEv4h5zgQ"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792740340,
+          "completed": 1772792742866
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 36496,
+          "input": 36454,
+          "output": 42,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2ae79f4001BvM2GHkI0CCh2z",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2ae83050019CkKt1mdcPOyEX",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae79f4001BvM2GHkI0CCh2z"
+        },
+        {
+          "type": "tool",
+          "callID": "call_136cd4766f434254bff16b65",
+          "tool": "read",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/home/jishm/code/generations/games/space_logistics/main.py"
+            },
+            "output": "<path>/home/jishm/code/generations/games/space_logistics/main.py</path>\n<type>file</type>\n<content>1: from __future__ import annotations\n2: \n3: \n4: def main() -> None:\n5:     print(\"Hello from Generations. This placeholder game is the current seed workspace.\")\n6: \n7: \n8: if __name__ == \"__main__\":\n9:     main()\n\n(End of file - total 9 lines)\n</content>",
+            "title": "games/space_logistics/main.py",
+            "metadata": {
+              "preview": "from __future__ import annotations\n\n\ndef main() -> None:\n    print(\"Hello from Generations. This placeholder game is the current seed workspace.\")\n\n\nif __name__ == \"__main__\":\n    main()",
+              "truncated": false,
+              "loaded": []
+            },
+            "time": {
+              "start": 1772792742662,
+              "end": 1772792742663
+            }
+          },
+          "id": "prt_cc2ae8306001XfIFQzQhaUTaSH",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae79f4001BvM2GHkI0CCh2z"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "cost": 0,
+          "tokens": {
+            "total": 36496,
+            "input": 36454,
+            "output": 42,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2ae83c0001FkxH7B68ztdEgj",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae79f4001BvM2GHkI0CCh2z"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792742869,
+          "completed": 1772792745499
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 36655,
+          "input": 36624,
+          "output": 31,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2ae83d500113uFDN09wyH96F",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2ae8d89001m2Gk1MGM3kM7oc",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae83d500113uFDN09wyH96F"
+        },
+        {
+          "type": "tool",
+          "callID": "call_2fa5bf70f57247b28e455704",
+          "tool": "glob",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "src/**/*.py"
+            },
+            "output": "/home/jishm/code/generations/src/generations/adapters/ollama_cloud.py\n/home/jishm/code/generations/src/generations/config.py\n/home/jishm/code/generations/src/generations/runner.py\n/home/jishm/code/generations/src/generations/web/exporter.py\n/home/jishm/code/generations/src/generations/memory/store.py\n/home/jishm/code/generations/src/generations/cli.py\n/home/jishm/code/generations/src/generations/adapters/opencode.py\n/home/jishm/code/generations/src/generations/models.py\n/home/jishm/code/generations/src/generations/web/app.py\n/home/jishm/code/generations/src/generations/state.py\n/home/jishm/code/generations/src/generations/git_utils.py\n/home/jishm/code/generations/src/generations/journal/store.py\n/home/jishm/code/generations/src/generations/__init__.py",
+            "title": "",
+            "metadata": {
+              "count": 13,
+              "truncated": false
+            },
+            "time": {
+              "start": 1772792745355,
+              "end": 1772792745357
+            }
+          },
+          "id": "prt_cc2ae8d8b0017iSIeTHPs7Rfid",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae83d500113uFDN09wyH96F"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "cost": 0,
+          "tokens": {
+            "total": 36655,
+            "input": 36624,
+            "output": 31,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2ae8e0d001ukzcJJJ033zU18",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae83d500113uFDN09wyH96F"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792745502,
+          "completed": 1772792747881
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 36923,
+          "input": 36881,
+          "output": 42,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2ae8e1e001n9M5xNu5PkKUwZ",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2ae9714001wlxWFS12S24tKq",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae8e1e001n9M5xNu5PkKUwZ"
+        },
+        {
+          "type": "tool",
+          "callID": "call_81534273b1184311b643de0c",
+          "tool": "read",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/home/jishm/code/generations/src/generations/runner.py"
+            },
+            "output": "<path>/home/jishm/code/generations/src/generations/runner.py</path>\n<type>file</type>\n<content>1: from __future__ import annotations\n2: \n3: from datetime import datetime, timezone\n4: from hashlib import sha256\n5: import importlib.util\n6: from pathlib import Path\n7: import json\n8: import signal\n9: import subprocess\n10: import sys\n11: import time\n12: from typing import Any\n13: \n14: from generations.adapters.ollama_cloud import OllamaCloudAdapter\n15: from generations.adapters.opencode import OpenCodeAdapter\n16: from generations.config import AppConfig\n17: from generations.git_utils import ensure_git_identity\n18: from generations.journal.store import JournalStore\n19: from generations.memory.store import DEFAULT_MEMORY, MemoryStore\n20: from generations.models import OpenCodePlan\n21: from generations.state import RuntimeState, load_runtime_state, save_runtime_state\n22: from generations.web.exporter import export_site\n23: \n24: \n25: class Runner:\n26:     def __init__(self, root: Path, seed: str) -> None:\n27:         self.root = root\n28:         self.seed = seed\n29:         self.config = AppConfig.from_root(root)\n30:         self.journal = JournalStore(self.config.journal_path)\n31:         self.memory = MemoryStore(self.config.memory_path)\n32:         self.model = OllamaCloudAdapter()\n33:         self.opencode = OpenCodeAdapter(root)\n34:         self.runtime = load_runtime_state(self.config.runtime_path)\n35:         self.stop_requested = False\n36:         self._install_signal_handler()\n37:         ensure_git_identity(root)\n38:         self._ensure_bootstrap_files()\n39: \n40:     def _install_signal_handler(self) -> None:\n41:         signal.signal(signal.SIGINT, self._handle_sigint)\n42: \n43:     def _handle_sigint(self, signum: int, frame: Any) -> None:\n44:         self.stop_requested = True\n45: \n46:     def _ensure_bootstrap_files(self) -> None:\n47:         self.config.games_dir.mkdir(parents=True, exist_ok=True)\n48:         if not self.config.runtime_path.exists():\n49:             save_runtime_state(self.config.runtime_path, self.runtime)\n50:         export_site(self.root)\n51: \n52:     def run(self) -> None:\n53:         self._log_run_header()\n54:         while True:\n55:             if self.config.pause_flag.exists():\n56:                 self.runtime.paused = True\n57:                 self.runtime.last_decision = \"paused\"\n58:                 save_runtime_state(self.config.runtime_path, self.runtime)\n59:                 self._log(\"paused\", \"pause flag detected\")\n60:                 break\n61: \n62:             if self.stop_requested:\n63:                 self._journal_shutdown(\"graceful shutdown requested via Ctrl+C\")\n64:                 self._log(\"stop\", \"graceful shutdown requested via Ctrl+C\")\n65:                 break\n66: \n67:             if self.config.operational_max_loops is not None and self.runtime.loop_count >= self.config.operational_max_loops:\n68:                 self._journal_shutdown(\"operational safety valve reached max loop count\")\n69:                 self._log(\"stop\", \"operational max loop limit reached\")\n70:                 break\n71: \n72:             continue_running = self._run_single_loop()\n73:             if not continue_running:\n74:                 break\n75:             if self.config.test_mode:\n76:                 break\n77: \n78:     def _run_single_loop(self) -> bool:\n79:         memory = self._normalize_memory(self.memory.latest())\n80:         self.memory.replace(memory, created_at=self._timestamp())\n81:         loop_counter = self.runtime.loop_count + 1\n82:         seed_hash = sha256(self.seed.encode(\"utf-8\")).hexdigest()\n83:         memory = self._maybe_run_planning_phase(loop_counter, memory, seed_hash)\n84:         proposal, model_metadata = self.model.choose_next_step(self.seed, loop_counter, memory)\n85:         criteria = memory[\"criteria_history\"][-1]\n86:         if self.config.debug and model_metadata.get(\"prompt_preview\"):\n87:             print(\"debug model_prompt_preview:\", flush=True)\n88:             print(str(model_metadata[\"prompt_preview\"]), flush=True)\n89: \n90:         plan = OpenCodePlan(\n91:             summary=f\"{proposal.workstream}:{proposal.capability_target}: {proposal.description}\",\n92:             editable_files=proposal.target_files,\n93:             files_expected=proposal.target_files + [\n94:                 \"state/loop_snapshot.json\",\n95:                 \"state/website_notes.md\",\n96:                 \"state/memory.sqlite3\",\n97:                 \"site/index.html\",\n98:                 \"site/style.css\",\n99:             ],\n100:             website_change_reason=proposal.website_reason,\n101:             monetization_change_reason=proposal.monetization_reason,\n102:         )\n103: \n104:         plan_path = self.config.state_dir / \"last_plan.json\"\n105:         self.opencode.export_plan(plan, plan_path)\n106: \n107:         before_journal_count = len(self.journal.read_all())\n108:         verify_commands = self._verification_commands()\n109: \n110:         loop_start = time.time()\n111:         timeout_seconds = self.config.operational_loop_timeout_seconds or 300\n112:         try:\n113:             result = self.opencode.run_workflow(\n114:                 plan=plan,\n115:                 apply_fn=lambda: self._apply_iteration(loop_counter, proposal, memory, model_metadata),\n116:                 verify_commands=verify_commands,\n117:                 commit_message=f\"loop {loop_counter}: {proposal.description[:68]}\",\n118:             )\n119:         except TimeoutError as exc:\n120:             elapsed = time.time() - loop_start\n121:             self._log(\"timeout\", f\"loop {loop_counter} exceeded {timeout_seconds}s timeout after {elapsed:.1f}s\")\n122:             self.runtime = RuntimeState(\n123:                 loop_count=loop_counter,\n124:                 last_commit=self.runtime.last_commit,\n125:                 last_validation={\"success\": False, \"results\": []},\n126:                 current_criteria_version=self.runtime.current_criteria_version,\n127:                 paused=False,\n128:                 last_decision=\"timeout\",\n129:             )\n130:             save_runtime_state(self.config.runtime_path, self.runtime)\n131:             entry = {\n132:                 \"timestamp\": self._timestamp(),\n133:                 \"loop_counter\": loop_counter,\n134:                 \"seed_hash\": seed_hash,\n135:                 \"criteria\": criteria,\n136:                 \"next_step\": {\n137:                     \"workstream\": proposal.workstream,\n138:                     \"capability_target\": proposal.capability_target,\n139:                     \"description\": proposal.description,\n140:                     \"rationale\": proposal.rationale,\n141:                 },\n142:                 \"actions_taken\": [],\n143:                 \"validation_results\": [],\n144:                 \"validation_summary\": \"timeout\",\n145:                 \"evaluation_metrics\": {},\n146:                 \"commit_hash\": self.runtime.last_commit,\n147:                 \"rolled_back\": False,\n148:                 \"opencode\": {\n149:                     \"session_id\": None,\n150:                     \"session_export\": None,\n151:                     \"changed_files\": [],\n152:                     \"pushed\": False,\n153:                     \"push_output\": None,\n154:                     \"debug_stdout_path\": None,\n155:                     \"debug_stderr_path\": None,\n156:                     \"binary\": str(self.opencode.binary),\n157:                 },\n158:                 \"model_provider\": model_metadata,\n159:                 \"rest_decision\": {\n160:                     \"decision\": \"stop\",\n161:                     \"sleep_seconds\": 0,\n162:                     \"reason\": f\"Loop timed out after {timeout_seconds}s\",\n163:                 },\n164:                 \"website_change\": {\n165:                     \"changed\": False,\n166:                     \"summary\": \"no change\",\n167:                 },\n168:                 \"monetization_change\": {\n169:                     \"changed\": False,\n170:                     \"summary\": \"no change\",\n171:                 },\n172:                 \"journal_entry_count_before_write\": before_journal_count,\n173:                 \"timeout_error\": str(exc),\n174:             }\n175:             self.journal.append(entry)\n176:             return False\n177: \n178:         loop_elapsed = time.time() - loop_start\n179:         self._log(\"timing\", f\"loop {loop_counter} completed in {loop_elapsed:.1f}s (timeout={timeout_seconds}s)\")\n180: \n181:         latest_memory = self.memory.latest()\n182:         validation_success = all(item.success for item in result.validation)\n183:         metrics = self._score_loop(proposal, result, validation_success)\n184:         latest_memory[\"outcomes\"][\"last_validation\"] = [item.as_dict() for item in result.validation]\n185:         if validation_success:\n186:             latest_memory[\"outcomes\"][\"pass_count\"] += 1\n187:             latest_memory[\"outcomes\"][\"last_successful_loop\"] = loop_counter\n188:             latest_memory[\"outcomes\"][\"last_error\"] = None\n189:         else:\n190:             latest_memory[\"outcomes\"][\"fail_count\"] += 1\n191:             latest_memory[\"outcomes\"][\"last_error\"] = result.validation[-1].output if result.validation else \"validation failed\"\n192:         latest_memory[\"evaluation_metrics\"] = self._update_metrics_memory(\n193:             latest_memory.get(\"evaluation_metrics\", {}),\n194:             loop_counter,\n195:             proposal,\n196:             metrics,\n197:         )\n198:         latest_memory = self._update_heuristics_memory(\n199:             latest_memory,\n200:             loop_counter,\n201:             proposal,\n202:             result,\n203:             validation_success,\n204:         )\n205:         self.memory.replace(latest_memory, created_at=self._timestamp())\n206: \n207:         rest_seconds, continue_running, reason = self._rest_decision(loop_counter, validation_success)\n208:         entry = {\n209:             \"timestamp\": self._timestamp(),\n210:             \"loop_counter\": loop_counter,\n211:             \"seed_hash\": seed_hash,\n212:             \"criteria\": criteria,\n213:             \"next_step\": {\n214:                 \"workstream\": proposal.workstream,\n215:                 \"capability_target\": proposal.capability_target,\n216:                 \"description\": proposal.description,\n217:                 \"rationale\": proposal.rationale,\n218:             },\n219:             \"actions_taken\": result.files_touched,\n220:             \"validation_results\": [item.as_dict() for item in result.validation],\n221:             \"validation_summary\": \"passed\" if validation_success else \"failed\",\n222:             \"evaluation_metrics\": metrics,\n223:             \"commit_hash\": result.commit_hash,\n224:             \"rolled_back\": result.rolled_back,\n225:             \"opencode\": {\n226:                 \"session_id\": result.opencode_session_id,\n227:                 \"session_export\": result.opencode_session_export,\n228:                 \"changed_files\": result.opencode_changed_files,\n229:                 \"pushed\": result.pushed,\n230:                 \"push_output\": result.push_output,\n231:                 \"debug_stdout_path\": result.debug_stdout_path,\n232:                 \"debug_stderr_path\": result.debug_stderr_path,\n233:                 \"binary\": str(self.opencode.binary),\n234:             },\n235:             \"model_provider\": model_metadata,\n236:             \"rest_decision\": {\n237:                 \"decision\": \"continue\" if continue_running else \"stop\",\n238:                 \"sleep_seconds\": rest_seconds,\n239:                 \"reason\": reason,\n240:             },\n241:             \"website_change\": {\n242:                 \"changed\": proposal.website_change,\n243:                 \"summary\": proposal.website_reason,\n244:             },\n245:             \"monetization_change\": {\n246:                 \"changed\": proposal.monetization_change,\n247:                 \"summary\": proposal.monetization_reason,\n248:             },\n249:             \"journal_entry_count_before_write\": before_journal_count,\n250:         }\n251:         self.journal.append(entry)\n252:         self._log_loop_result(loop_counter, proposal, result, validation_success, continue_running, reason)\n253: \n254:         self.runtime = RuntimeState(\n255:             loop_count=loop_counter,\n256:             last_commit=result.commit_hash,\n257:             last_validation={\"success\": validation_success, \"results\": [item.as_dict() for item in result.validation]},\n258:             current_criteria_version=latest_memory[\"current_criteria_version\"],\n259:             paused=False,\n260:             last_decision=\"continue\" if continue_running else \"stop\",\n261:         )\n262:         save_runtime_state(self.config.runtime_path, self.runtime)\n263: \n264:         export_site(self.root)\n265:         if rest_seconds > 0 and continue_running and not self.config.test_mode:\n266:             time.sleep(rest_seconds)\n267: \n268:         if not continue_running and validation_success:\n269:             self._journal_done(loop_counter, latest_memory, validation_success)\n270:         return continue_running\n271: \n272:     def _apply_iteration(\n273:         self,\n274:         loop_counter: int,\n275:         proposal: Any,\n276:         memory: dict[str, Any],\n277:         model_metadata: dict[str, object],\n278:     ) -> list[str]:\n279:         touched: list[str] = []\n280:         runtime_note = {\n281:             \"loop\": loop_counter,\n282:             \"workstream\": proposal.workstream,\n283:             \"capability_target\": proposal.capability_target,\n284:             \"proposal\": proposal.description,\n285:             \"model\": model_metadata,\n286:             \"timestamp\": self._timestamp(),\n287:         }\n288:         self.config.state_dir.mkdir(parents=True, exist_ok=True)\n289:         runtime_snapshot_path = self.config.state_dir / \"loop_snapshot.json\"\n290:         runtime_snapshot_path.write_text(json.dumps(runtime_note, indent=2) + \"\\n\", encoding=\"utf-8\")\n291:         touched.append(str(runtime_snapshot_path.relative_to(self.root)))\n292: \n293:         website_notes = self.root / \"state\" / \"website_notes.md\"\n294:         website_notes.write_text(\n295:             \"# Website Notes\\n\\n\"\n296:             f\"Latest loop: {loop_counter}\\n\\n\"\n297:             f\"Visible intent: {proposal.website_reason}\\n\\n\"\n298:             \"Support remains a minimal placeholder until a logged experiment is justified.\\n\",\n299:             encoding=\"utf-8\",\n300:         )\n301:         touched.append(str(website_notes.relative_to(self.root)))\n302: \n303:         updated_memory = memory\n304:         updated_memory[\"tool_routing\"] = {\n305:             \"execution_surface\": f\"OpenCode CLI ({self.opencode.binary}) with local session export and guarded shell execution\",\n306:             \"model_provider\": f\"{model_metadata['provider']}:{model_metadata['model']}\",\n307:         }\n308:         updated_memory[\"last_workstream\"] = proposal.workstream\n309:         updated_memory[\"last_capability_target\"] = proposal.capability_target\n310:         strategic_intent = dict(updated_memory.get(\"strategic_intent\", {}))\n311:         questions = list(strategic_intent.get(\"next_big_questions\", []))\n312:         if proposal.workstream == \"game_workspace\":\n313:             strategic_intent[\"current_game_thesis\"] = (\n314:                 \"Investigate a transport/logistics game with economy, routing, progression, and world simulation.\"\n315:             )\n316:         if proposal.capability_target not in {\"journaling\", \"website\", \"memory\"}:\n317:             question = f\"What larger arc does {proposal.capability_target} unlock for the eventual game or platform?\"\n318:             if question not in questions:\n319:                 questions.append(question)\n320:         strategic_intent[\"next_big_questions\"] = questions[-6:]\n321:         updated_memory[\"strategic_intent\"] = strategic_intent\n322:         self.memory.replace(updated_memory, created_at=self._timestamp())\n323:         touched.append(str(self.config.memory_path.relative_to(self.root)))\n324: \n325:         export_site(self.root)\n326:         touched.append(str((self.root / \"site\" / \"index.html\").relative_to(self.root)))\n327:         return touched\n328: \n329:     def _rest_decision(self, loop_counter: int, validation_success: bool) -> tuple[int, bool, str]:\n330:         if self.config.test_mode:\n331:             return 0, False, \"Test harness mode performs exactly one safe loop for fast verification.\"\n332:         if not validation_success:\n333:             return min(2, self.config.max_rest_seconds), True, (\n334:                 \"Validation failed; record the mistake, keep the repository safe via rollback, and continue after a bounded rest.\"\n335:             )\n336:         return min(1, self.config.max_rest_seconds), True, \"Continue with another small step after a short bounded rest.\"\n337: \n338:     def _verification_commands(self) -> list[list[str]]:\n339:         if importlib.util.find_spec(\"pytest\") is None:\n340:             return [[sys.executable, \"-m\", \"compileall\", \"src\", \"tests\", \"games\"]]\n341:         if self.config.test_mode:\n342:             return [[sys.executable, \"-m\", \"pytest\", \"tests/test_journal.py\"]]\n343:         return [[sys.executable, \"-m\", \"pytest\", \"tests/test_journal.py\", \"tests/test_smoke.py\"]]\n344: \n345:     def _journal_shutdown(self, reason: str) -> None:\n346:         latest_memory = self.memory.latest()\n347:         entry = {\n348:             \"timestamp\": self._timestamp(),\n349:             \"loop_counter\": self.runtime.loop_count,\n350:             \"seed_hash\": sha256(self.seed.encode(\"utf-8\")).hexdigest(),\n351:             \"criteria\": latest_memory[\"criteria_history\"][-1],\n352:             \"next_step\": {\"description\": \"shutdown\", \"rationale\": reason},\n353:             \"actions_taken\": [],\n354:             \"validation_results\": [],\n355:             \"validation_summary\": \"not run\",\n356:             \"commit_hash\": self.runtime.last_commit,\n357:             \"model_provider\": self.model.metadata(),\n358:             \"rest_decision\": {\"decision\": \"stop\", \"sleep_seconds\": 0, \"reason\": reason},\n359:             \"website_change\": {\"changed\": False, \"summary\": \"no change\"},\n360:             \"monetization_change\": {\"changed\": False, \"summary\": \"no change\"},\n361:         }\n362:         self.journal.append(entry)\n363:         self.runtime.last_decision = \"stopped\"\n364:         save_runtime_state(self.config.runtime_path, self.runtime)\n365:         export_site(self.root)\n366: \n367:     def _journal_done(self, loop_counter: int, memory: dict[str, Any], validation_success: bool) -> None:\n368:         final_entry = {\n369:             \"timestamp\": self._timestamp(),\n370:             \"loop_counter\": loop_counter,\n371:             \"seed_hash\": sha256(self.seed.encode(\"utf-8\")).hexdigest(),\n372:             \"criteria\": memory[\"criteria_history\"][-1],\n373:             \"next_step\": {\n374:                 \"description\": \"done\",\n375:                 \"rationale\": \"Generations decided the current bootstrap objective is complete under the active criteria.\",\n376:             },\n377:             \"actions_taken\": [],\n378:             \"validation_results\": memory[\"outcomes\"].get(\"last_validation\") or [],\n379:             \"validation_summary\": \"passed\" if validation_success else \"failed\",\n380:             \"commit_hash\": self.runtime.last_commit,\n381:             \"model_provider\": self.model.metadata(),\n382:             \"rest_decision\": {\n383:                 \"decision\": \"stop\",\n384:                 \"sleep_seconds\": 0,\n385:                 \"reason\": \"Done under current criteria for the bootstrap stage.\",\n386:             },\n387:             \"website_change\": {\n388:                 \"changed\": False,\n389:                 \"summary\": \"Website remains available as the external journey surface.\",\n390:             },\n391:             \"monetization_change\": {\n392:                 \"changed\": False,\n393:                 \"summary\": \"Support placeholder remains active; no new monetization experiment was required.\",\n394:             },\n395:             \"done_summary\": {\n396:                 \"reasons\": [\n397:                     \"Bootstrap observability and self-edit loop are functioning.\",\n398:                     \"Validation passed for the latest loop set.\",\n399:                     \"Website and monetization baseline are active and logged.\",\n400:                 ],\n401:                 \"criteria_version\": memory[\"current_criteria_version\"],\n402:                 \"heuristics_used\": memory[\"heuristics\"],\n403:                 \"project_status\": {\n404:                     \"website\": \"running and exportable\",\n405:                     \"monetization\": \"minimal support placeholder with disclosure\",\n406:                     \"games\": \"space_logistics seed workspace present\",\n407:                 },\n408:                 \"last_known_validation_state\": memory[\"outcomes\"].get(\"last_validation\"),\n409:                 \"would_do_next\": \"Grow the space_logistics workspace from design toward a more credible playable prototype.\",\n410:             },\n411:         }\n412:         self.journal.append(final_entry)\n413:         export_site(self.root)\n414: \n415:     def _timestamp(self) -> str:\n416:         return datetime.now(timezone.utc).isoformat()\n417: \n418:     def _log_run_header(self) -> None:\n419:         print(\n420:             f\"run start: seed_sha={sha256(self.seed.encode('utf-8')).hexdigest()[:12]} \"\n421:             f\"loop_start={self.runtime.loop_count} criteria_v={self.runtime.current_criteria_version} \"\n422:             f\"debug={'on' if self.config.debug else 'off'} agent={self.config.opencode_agent}\",\n423:             flush=True,\n424:         )\n425: \n426:     def _log_loop_result(\n427:         self,\n428:         loop_counter: int,\n429:         proposal: Any,\n430:         result: Any,\n431:         validation_success: bool,\n432:         continue_running: bool,\n433:         reason: str,\n434:     ) -> None:\n435:         changed_files = \",\".join(result.opencode_changed_files[:4]) if result.opencode_changed_files else \"-\"\n436:         commit_hash = result.commit_hash[:10] if result.commit_hash else \"none\"\n437:         print(\n438:             f\"loop={loop_counter} workstream={proposal.workstream} capability={proposal.capability_target} \"\n439:             f\"validation={'pass' if validation_success else 'fail'} commit={commit_hash} \"\n440:             f\"opencode_files={changed_files} decision={'continue' if continue_running else 'stop'}\",\n441:             flush=True,\n442:         )\n443:         latest_metrics = self.memory.latest().get(\"evaluation_metrics\", {}).get(\"current\", {})\n444:         if latest_metrics:\n445:             print(\n446:                 \"metrics: \"\n447:                 f\"creativity={latest_metrics.get('creativity', 0):.2f} \"\n448:                 f\"code_change={latest_metrics.get('code_change', 0):.2f} \"\n449:                 f\"review={latest_metrics.get('review_quality', 0):.2f} \"\n450:                 f\"game={latest_metrics.get('game_progress', 0):.2f} \"\n451:                 f\"obs={latest_metrics.get('observability', 0):.2f} \"\n452:                 f\"balance={latest_metrics.get('balance', 0):.2f}\",\n453:                 flush=True,\n454:             )\n455:         print(f\"reason: {reason}\", flush=True)\n456:         if self.config.debug:\n457:             latest_model = self.memory.latest().get(\"outcomes\", {}).get(\"last_error\")\n458:             print(\n459:                 f\"debug opencode_stdout={result.debug_stdout_path or '-'} \"\n460:                 f\"opencode_stderr={result.debug_stderr_path or '-'}\",\n461:                 flush=True,\n462:             )\n463:             if latest_model:\n464:                 print(f\"debug last_error={latest_model}\", flush=True)\n465: \n466:     def _log(self, event: str, message: str) -> None:\n467:         print(f\"{event}: {message}\", flush=True)\n468: \n469:     def _normalize_memory(self, memory: dict[str, Any]) -> dict[str, Any]:\n470:         normalized = dict(memory)\n471:         heuristics = list(DEFAULT_MEMORY[\"heuristics\"])\n472:         normalized[\"heuristics\"] = heuristics\n473:         normalized[\"heuristics_recent_history\"] = list(normalized.get(\"heuristics_recent_history\", []))\n474:         normalized[\"heuristics_rolling_average\"] = self._normalize_heuristic_scores(\n475:             heuristics,\n476:             normalized.get(\"heuristics_rolling_average\", {}),\n477:         )\n478: \n479:         website_heuristics = list(normalized.get(\"website_heuristics\", DEFAULT_MEMORY[\"website_heuristics\"]))\n480:         normalized[\"website_heuristics\"] = website_heuristics\n481:         normalized[\"website_heuristics_rolling_average\"] = self._normalize_heuristic_scores(\n482:             website_heuristics,\n483:             normalized.get(\"website_heuristics_rolling_average\", {}),\n484:         )\n485: \n486:         monetization_heuristics = list(\n487:             normalized.get(\"monetization_heuristics\", DEFAULT_MEMORY[\"monetization_heuristics\"])\n488:         )\n489:         normalized[\"monetization_heuristics\"] = monetization_heuristics\n490:         normalized[\"monetization_heuristics_rolling_average\"] = self._normalize_heuristic_scores(\n491:             monetization_heuristics,\n492:             normalized.get(\"monetization_heuristics_rolling_average\", {}),\n493:         )\n494: \n495:         if \"strategic_intent\" not in normalized:\n496:             normalized[\"strategic_intent\"] = DEFAULT_MEMORY[\"strategic_intent\"]\n497:         if \"planning\" not in normalized:\n498:             normalized[\"planning\"] = DEFAULT_MEMORY[\"planning\"]\n499:         if \"evaluation_metrics\" not in normalized:\n500:             normalized[\"evaluation_metrics\"] = DEFAULT_MEMORY[\"evaluation_metrics\"]\n501:         return normalized\n502: \n503:     def _maybe_run_planning_phase(\n504:         self,\n505:         loop_counter: int,\n506:         memory: dict[str, Any],\n507:         seed_hash: str,\n508:     ) -> dict[str, Any]:\n509:         completed_loops = self.runtime.loop_count\n510:         if completed_loops == 0 or completed_loops % 10 != 0:\n511:             return memory\n512: \n513:         planning_state = dict(memory.get(\"planning\", {}))\n514:         current_plan = planning_state.get(\"current\")\n515:         if current_plan and current_plan.get(\"planning_loop\") == completed_loops:\n516:             return memory\n517: \n518:         recent_entries = self.journal.read_all()[-10:]\n519:         plan, metadata = self.model.plan_next_arc(self.seed, completed_loops, recent_entries, memory)\n520:         history = list(planning_state.get(\"history\", []))\n521:         history.append(plan)\n522:         planning_state[\"current\"] = plan\n523:         planning_state[\"history\"] = history[-5:]\n524:         updated_memory = dict(memory)\n525:         updated_memory[\"planning\"] = planning_state\n526:         self.memory.replace(updated_memory, created_at=self._timestamp())\n527: \n528:         self.journal.append(\n529:             {\n530:                 \"timestamp\": self._timestamp(),\n531:                 \"loop_counter\": completed_loops,\n532:                 \"seed_hash\": seed_hash,\n533:                 \"entry_type\": \"planning_phase\",\n534:                 \"criteria\": updated_memory[\"criteria_history\"][-1],\n535:                 \"next_step\": {\n536:                     \"description\": f\"Plan next chunk after loop {completed_loops}\",\n537:                     \"rationale\": plan.get(\"rationale\", \"\"),\n538:                 },\n539:                 \"planning\": plan,\n540:                 \"model_provider\": metadata,\n541:                 \"validation_results\": [],\n542:                 \"validation_summary\": \"not run\",\n543:                 \"actions_taken\": [],\n544:                 \"website_change\": {\"changed\": False, \"summary\": plan.get(\"website_plan\", \"no change\")},\n545:                 \"monetization_change\": {\"changed\": False, \"summary\": plan.get(\"monetization_plan\", \"no change\")},\n546:                 \"rest_decision\": {\"decision\": \"continue\", \"sleep_seconds\": 0, \"reason\": \"Planning phase completed.\"},\n547:             }\n548:         )\n549:         export_site(self.root)\n550:         return updated_memory\n551: \n552:     def _normalize_heuristic_scores(\n553:         self,\n554:         heuristics: list[str],\n555:         existing_scores: dict[str, Any],\n556:     ) -> dict[str, float]:\n557:         normalized: dict[str, float] = {}\n558:         for item in heuristics:\n559:             raw = existing_scores.get(item, 1.0)\n560:             try:\n561:                 normalized[item] = round(float(raw), 2)\n562:             except (TypeError, ValueError):\n563:                 normalized[item] = 1.0\n564:         return normalized\n565: \n566:     def _update_heuristics_memory(\n567:         self,\n568:         memory: dict[str, Any],\n569:         loop_counter: int,\n570:         proposal: Any,\n571:         result: Any,\n572:         validation_success: bool,\n573:     ) -> dict[str, Any]:\n574:         updated = dict(memory)\n575:         core = list(updated.get(\"heuristics\", []))\n576:         website = list(updated.get(\"website_heuristics\", []))\n577:         monetization = list(updated.get(\"monetization_heuristics\", []))\n578:         core_scores = {item: 0.0 for item in core}\n579:         meaningful_files = self.opencode._meaningful_repo_files(\n580:             list(dict.fromkeys(result.files_touched + result.opencode_changed_files))\n581:         )\n582:         if proposal.workstream == \"game_workspace\":\n583:             core_scores[\"Evolve the game toward a stronger, more shippable concept and implementation.\"] = 1.0\n584:         if proposal.workstream == \"autonomous_platform\":\n585:             platform_score = 1.0\n586:             if proposal.capability_target == \"website\" and proposal.website_change:\n587:                 platform_score = 0.5\n588:             core_scores[\"Evolve the platform when it improves autonomous game-development capability.\"] = platform_score\n589:         if proposal.website_change:\n590:             core_scores[\"Evolve the website to improve clarity, trust, and honest income potential.\"] = 1.0\n591:         if validation_success and meaningful_files:\n592:             core_scores[\"Keep the workspace coherent and tidy, and commit all intentional loop changes.\"] = 1.0\n593: \n594:         history = list(updated.get(\"heuristics_recent_history\", []))\n595:         history.append(\n596:             {\n597:                 \"loop\": loop_counter,\n598:                 \"core\": core_scores,\n599:                 \"website\": website if proposal.website_change else [],\n600:                 \"monetization\": monetization if proposal.monetization_change else [],\n601:             }\n602:         )\n603:         history = history[-10:]\n604: \n605:         updated[\"heuristics_recent_history\"] = history\n606:         updated[\"heuristics_rolling_average\"] = self._compute_heuristic_rolling_average(core, history, \"core\")\n607:         updated[\"website_heuristics_rolling_average\"] = self._compute_heuristic_rolling_average(\n608:             website,\n609:             history,\n610:             \"website\",\n611:         )\n612:         updated[\"monetization_heuristics_rolling_average\"] = self._compute_heuristic_rolling_average(\n613:             monetization,\n614:             history,\n615:             \"monetization\",\n616:         )\n617:         updated[\"heuristics\"] = self._sort_heuristics_by_score(core, updated[\"heuristics_rolling_average\"])\n618:         updated[\"website_heuristics\"] = self._sort_heuristics_by_score(\n619:             website,\n620:             updated[\"website_heuristics_rolling_average\"],\n621:         )\n622:         updated[\"monetization_heuristics\"] = self._sort_heuristics_by_score(\n623:             monetization,\n624:             updated[\"monetization_heuristics_rolling_average\"],\n625:         )\n626:         return updated\n627: \n628:     def _compute_heuristic_rolling_average(\n629:         self,\n630:         heuristics: list[str],\n631:         history: list[dict[str, Any]],\n632:         key: str,\n633:     ) -> dict[str, float]:\n634:         if not history:\n635:             return {item: 1.0 for item in heuristics}\n636:         scores: dict[str, float] = {}\n637:         for item in heuristics:\n638:             activations: list[float] = []\n639:             for entry in history:\n640:                 raw = entry.get(key, [])\n641:                 if isinstance(raw, dict):\n642:                     value = raw.get(item, 0.0)\n643:                 else:\n644:                     value = 1.0 if item in raw else 0.0\n645:                 try:\n646:                     activations.append(float(value))\n647:                 except (TypeError, ValueError):\n648:                     activations.append(0.0)\n649:             if not activations:\n650:                 scores[item] = 1.0\n651:                 continue\n652:             scores[item] = round(sum(activations) / len(activations), 2)\n653:         return scores\n654: \n655:     def _sort_heuristics_by_score(self, heuristics: list[str], scores: dict[str, float]) -> list[str]:\n656:         seen: set[str] = set()\n657:         ordered = []\n658:         for item in heuristics:\n659:             if item not in seen:\n660:                 seen.add(item)\n661:                 ordered.append(item)\n662:         return sorted(ordered, key=lambda item: (-scores.get(item, 0.0), item))\n663: \n664:     def _score_loop(self, proposal: Any, result: Any, validation_success: bool) -> dict[str, float]:\n665:         changed_files = [\n666:             path for path in result.files_touched\n667:             if not path.startswith(\"state/\") and not path.startswith(\"site/\")\n668:         ]\n669:         opencode_changed = [\n670:             path for path in result.opencode_changed_files\n671:             if not path.startswith(\"state/\") and not path.startswith(\"site/\")\n672:         ]\n673:         all_meaningful = sorted(set(changed_files + opencode_changed))\n674:         creativity = 0.25\n675:         if proposal.capability_target in {\"game_design\", \"game_pipeline\", \"game_prototype\", \"tooling\", \"evaluation\"}:\n676:             creativity += 0.25\n677:         if proposal.workstream == \"game_workspace\":\n678:             creativity += 0.2\n679:         if len(all_meaningful) >= 2:\n680:             creativity += 0.2\n681:         if proposal.website_change and proposal.capability_target == \"website\":\n682:             creativity += 0.1\n683: \n684:         code_change = min(1.0, 0.35 * len(all_meaningful))\n685:         if any(path.startswith(\"src/\") for path in all_meaningful):\n686:             code_change += 0.25\n687:         if any(path.startswith(\"games/\") for path in all_meaningful):\n688:             code_change += 0.25\n689:         code_change = min(1.0, code_change)\n690: \n691:         review_quality = 0.2 if validation_success else 0.0\n692:         if result.validation:\n693:             review_quality += 0.5 if validation_success else 0.1\n694:         if any(\"pytest\" in item.command for item in result.validation):\n695:             review_quality += 0.2\n696:         if result.rolled_back:\n697:             review_quality += 0.1\n698:         review_quality = min(1.0, review_quality)\n699: \n700:         game_progress = 0.1\n701:         if proposal.workstream == \"game_workspace\":\n702:             game_progress += 0.35\n703:         if proposal.capability_target in {\"game_design\", \"game_pipeline\", \"game_prototype\"}:\n704:             game_progress += 0.3\n705:         if any(path.startswith(\"games/\") for path in all_meaningful):\n706:             game_progress += 0.25\n707:         game_progress = min(1.0, game_progress)\n708: \n709:         observability = 0.2\n710:         if proposal.capability_target in {\"journaling\", \"memory\", \"website\", \"evaluation\"}:\n711:             observability += 0.25\n712:         if proposal.website_change:\n713:             observability += 0.15\n714:         if self.config.journal_path.exists() and self.config.runtime_path.exists():\n715:             observability += 0.2\n716:         observability = min(1.0, observability)\n717: \n718:         values = [creativity, code_change, review_quality, game_progress, observability]\n719:         balance = max(0.0, 1.0 - (max(values) - min(values)))\n720:         return {\n721:             \"creativity\": round(creativity, 2),\n722:             \"code_change\": round(code_change, 2),\n723:             \"review_quality\": round(review_quality, 2),\n724:             \"game_progress\": round(game_progress, 2),\n725:             \"observability\": round(observability, 2),\n726:             \"balance\": round(balance, 2),\n727:         }\n728: \n729:     def _update_metrics_memory(\n730:         self,\n731:         metrics_block: dict[str, Any],\n732:         loop_counter: int,\n733:         proposal: Any,\n734:         metrics: dict[str, float],\n735:     ) -> dict[str, Any]:\n736:         history = list(metrics_block.get(\"recent_history\", []))\n737:         history.append(\n738:             {\n739:                 \"loop\": loop_counter,\n740:                 \"workstream\": proposal.workstream,\n741:                 \"capability_target\": proposal.capability_target,\n742:                 \"metrics\": metrics,\n743:             }\n744:         )\n745:         history = history[-10:]\n746:         rolling_average: dict[str, float] = {}\n747:         keys = [\"creativity\", \"code_change\", \"review_quality\", \"game_progress\", \"observability\", \"balance\"]\n748:         for key in keys:\n749:             values = [float(item[\"metrics\"].get(key, 0.0)) for item in history]\n750:             rolling_average[key] = round(sum(values) / len(values), 2) if values else 0.0\n751:         return {\n752:             \"current\": metrics,\n753:             \"rolling_average\": rolling_average,\n754:             \"recent_history\": history,\n755:             \"notes\": metrics_block.get(\"notes\", [\n756:                 \"Metrics guide balancing, but the model still chooses the next step.\",\n757:                 \"Low code_change or game_progress should bias future loops toward meaningful repo edits.\",\n758:             ]),\n759:         }\n760: \n761: \n762: def init_repo_if_needed(root: Path) -> None:\n763:     git_dir = root / \".git\"\n764:     if git_dir.exists():\n765:         return\n766:     subprocess.run([\"git\", \"init\"], cwd=root, check=False, capture_output=True)\n\n(End of file - total 766 lines)\n</content>",
+            "title": "src/generations/runner.py",
+            "metadata": {
+              "preview": "from __future__ import annotations\n\nfrom datetime import datetime, timezone\nfrom hashlib import sha256\nimport importlib.util\nfrom pathlib import Path\nimport json\nimport signal\nimport subprocess\nimport sys\nimport time\nfrom typing import Any\n\nfrom generations.adapters.ollama_cloud import OllamaCloudAdapter\nfrom generations.adapters.opencode import OpenCodeAdapter\nfrom generations.config import AppConfig\nfrom generations.git_utils import ensure_git_identity\nfrom generations.journal.store import JournalStore\nfrom generations.memory.store import DEFAULT_MEMORY, MemoryStore\nfrom generations.models import OpenCodePlan",
+              "truncated": false,
+              "loaded": []
+            },
+            "time": {
+              "start": 1772792747797,
+              "end": 1772792747798
+            }
+          },
+          "id": "prt_cc2ae9715001eeM3SGCKkMAq8b",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae8e1e001n9M5xNu5PkKUwZ"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "cost": 0,
+          "tokens": {
+            "total": 36923,
+            "input": 36881,
+            "output": 42,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2ae97520019Fo03GRtdMRXUF",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae8e1e001n9M5xNu5PkKUwZ"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792747884,
+          "completed": 1772792756423
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 48028,
+          "input": 47632,
+          "output": 396,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc2ae976c001fFaUm9WAC14exQ",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "id": "prt_cc2aea4b8001x6eU4Nj2vDiNIj",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae976c001fFaUm9WAC14exQ"
+        },
+        {
+          "type": "text",
+          "text": "The goal is to reduce smoke test simulation ticks to lower execution time from 98s toward 30s target. The smoke test takes ~98 seconds currently and the target is 30 seconds.\n\nLooking at the test in `test_smoke.py`, it runs a subprocess that executes `generations.cli run --seed \"smoke seed\"`. The test doesn't have a timeout currently (line 27-34), but I can see in the journal/search results that someone attempted to add `timeout=60` to the subprocess call.\n\nThe key is that `GENERATIONS_TEST_MODE=1` is set, which causes the runner to execute exactly one loop and stop (as we can see in `runner.py:340` in `_rest_decision`).\n\nThe issue is likely the loop timeout is too high. Looking at `config.py:52`, the default `operational_loop_timeout_seconds` is 300 (5 minutes). For test mode, we could reduce this significantly.\n\nThe smallest change to reduce execution time would be to add an environment variable in the smoke test to reduce the loop timeout:",
+          "time": {
+            "start": 1772792755991,
+            "end": 1772792755991
+          },
+          "id": "prt_cc2aea4b9001FZ1FIlJxp756Ae",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae976c001fFaUm9WAC14exQ"
+        },
+        {
+          "type": "tool",
+          "callID": "call_8b5e95f64e3a4725a3ddefe2",
+          "tool": "edit",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/home/jishm/code/generations/tests/test_smoke.py",
+              "oldString": "    env = dict(**__import__(\"os\").environ)\n    env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n    env[\"GENERATIONS_TEST_MODE\"] = \"1\"",
+              "newString": "    env = dict(**__import__(\"os\").environ)\n    env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n    env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n    env[\"GENERATIONS_LOOP_TIMEOUT_SECONDS\"] = \"30\""
+            },
+            "output": "Edit applied successfully.",
+            "title": "tests/test_smoke.py",
+            "metadata": {
+              "diagnostics": {
+                "/home/jishm/code/generations/tests/test_smoke.py": [],
+                "/home/jishm/code/generations/src/generations/config.py": [],
+                "/home/jishm/code/generations/games/space_logistics/main.py": [],
+                "/home/jishm/code/generations/src/generations/runner.py": []
+              },
+              "diff": "Index: /home/jishm/code/generations/tests/test_smoke.py\n===================================================================\n--- /home/jishm/code/generations/tests/test_smoke.py\n+++ /home/jishm/code/generations/tests/test_smoke.py\n@@ -10,8 +10,9 @@\n repo_root = Path(__file__).resolve().parents[1]\n env = dict(**__import__(\"os\").environ)\n env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n+env[\"GENERATIONS_LOOP_TIMEOUT_SECONDS\"] = \"30\"\n \n subprocess.run([\"git\", \"init\"], cwd=tmp_path, check=True, capture_output=True)\n subprocess.run([\"git\", \"config\", \"user.email\", \"test@example.com\"], cwd=tmp_path, check=True, capture_output=True)\n subprocess.run([\"git\", \"config\", \"user.name\", \"Test User\"], cwd=tmp_path, check=True, capture_output=True)\n",
+              "filediff": {
+                "file": "/home/jishm/code/generations/tests/test_smoke.py",
+                "before": "from __future__ import annotations\n\nimport json\nfrom pathlib import Path\nimport subprocess\nimport sys\n\n\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n    env = dict(**__import__(\"os\").environ)\n    env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n    env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n\n    subprocess.run([\"git\", \"init\"], cwd=tmp_path, check=True, capture_output=True)\n    subprocess.run([\"git\", \"config\", \"user.email\", \"test@example.com\"], cwd=tmp_path, check=True, capture_output=True)\n    subprocess.run([\"git\", \"config\", \"user.name\", \"Test User\"], cwd=tmp_path, check=True, capture_output=True)\n\n    for relative in [\"src\", \"games\", \"tests\", \"pyproject.toml\", \"README.md\"]:\n        source = repo_root / relative\n        target = tmp_path / relative\n        if source.is_dir():\n            subprocess.run([\"cp\", \"-R\", str(source), str(target)], check=True)\n        else:\n            subprocess.run([\"cp\", str(source), str(target)], check=True)\n\n    result = subprocess.run(\n        [sys.executable, \"-m\", \"generations.cli\", \"run\", \"--seed\", \"smoke seed\"],\n        cwd=tmp_path,\n        env=env,\n        capture_output=True,\n        text=True,\n        check=False,\n    )\n\n    assert result.returncode == 0, result.stderr\n    journal_path = tmp_path / \"state\" / \"journal.jsonl\"\n    memory_path = tmp_path / \"state\" / \"memory.sqlite3\"\n    site_index = tmp_path / \"site\" / \"index.html\"\n\n    assert journal_path.exists()\n    assert memory_path.exists()\n    assert site_index.exists()\n\n    lines = journal_path.read_text(encoding=\"utf-8\").strip().splitlines()\n    assert len(lines) >= 1\n    first_entry = json.loads(lines[0])\n    assert first_entry[\"model_provider\"][\"selected_default_model\"] == \"qwen3.5:397b-cloud\"\n\n\ndef test_ship_rules_criteria_file_exists(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n\n    criteria_path = repo_root / \"criteria.json\"\n    assert criteria_path.exists(), \"criteria.json must exist for ship rule enforcement\"\n\n    criteria = json.loads(criteria_path.read_text(encoding=\"utf-8\"))\n    assert \"ship_rules\" in criteria\n    assert any(rule[\"id\"] == \"DATA_SCHEMA_REQUIRED\" for rule in criteria[\"ship_rules\"])\n\n\ndef test_loop_timeout_config_exists() -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n    import subprocess\n    import os\n\n    env = dict(**os.environ)\n    env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n    env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n    env[\"GENERATIONS_LOOP_TIMEOUT_SECONDS\"] = \"10\"\n\n    result = subprocess.run(\n        [sys.executable, \"-c\", \"from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)\"],\n        cwd=repo_root,\n        env=env,\n        capture_output=True,\n        text=True,\n        check=True,\n    )\n    assert result.stdout.strip() == \"10\"\n\n\ndef test_economy_balance_criteria_exists(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n\n    criteria_path = repo_root / \"criteria.json\"\n    criteria = json.loads(criteria_path.read_text(encoding=\"utf-8\"))\n    assert \"ship_rules\" in criteria\n    assert any(rule[\"id\"] == \"ECONOMY_BALANCE_REQUIRED\" for rule in criteria[\"ship_rules\"])\n",
+                "after": "from __future__ import annotations\n\nimport json\nfrom pathlib import Path\nimport subprocess\nimport sys\n\n\ndef test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n    env = dict(**__import__(\"os\").environ)\n    env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n    env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n    env[\"GENERATIONS_LOOP_TIMEOUT_SECONDS\"] = \"30\"\n\n    subprocess.run([\"git\", \"init\"], cwd=tmp_path, check=True, capture_output=True)\n    subprocess.run([\"git\", \"config\", \"user.email\", \"test@example.com\"], cwd=tmp_path, check=True, capture_output=True)\n    subprocess.run([\"git\", \"config\", \"user.name\", \"Test User\"], cwd=tmp_path, check=True, capture_output=True)\n\n    for relative in [\"src\", \"games\", \"tests\", \"pyproject.toml\", \"README.md\"]:\n        source = repo_root / relative\n        target = tmp_path / relative\n        if source.is_dir():\n            subprocess.run([\"cp\", \"-R\", str(source), str(target)], check=True)\n        else:\n            subprocess.run([\"cp\", str(source), str(target)], check=True)\n\n    result = subprocess.run(\n        [sys.executable, \"-m\", \"generations.cli\", \"run\", \"--seed\", \"smoke seed\"],\n        cwd=tmp_path,\n        env=env,\n        capture_output=True,\n        text=True,\n        check=False,\n    )\n\n    assert result.returncode == 0, result.stderr\n    journal_path = tmp_path / \"state\" / \"journal.jsonl\"\n    memory_path = tmp_path / \"state\" / \"memory.sqlite3\"\n    site_index = tmp_path / \"site\" / \"index.html\"\n\n    assert journal_path.exists()\n    assert memory_path.exists()\n    assert site_index.exists()\n\n    lines = journal_path.read_text(encoding=\"utf-8\").strip().splitlines()\n    assert len(lines) >= 1\n    first_entry = json.loads(lines[0])\n    assert first_entry[\"model_provider\"][\"selected_default_model\"] == \"qwen3.5:397b-cloud\"\n\n\ndef test_ship_rules_criteria_file_exists(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n\n    criteria_path = repo_root / \"criteria.json\"\n    assert criteria_path.exists(), \"criteria.json must exist for ship rule enforcement\"\n\n    criteria = json.loads(criteria_path.read_text(encoding=\"utf-8\"))\n    assert \"ship_rules\" in criteria\n    assert any(rule[\"id\"] == \"DATA_SCHEMA_REQUIRED\" for rule in criteria[\"ship_rules\"])\n\n\ndef test_loop_timeout_config_exists() -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n    import subprocess\n    import os\n\n    env = dict(**os.environ)\n    env[\"PYTHONPATH\"] = str(repo_root / \"src\")\n    env[\"GENERATIONS_TEST_MODE\"] = \"1\"\n    env[\"GENERATIONS_LOOP_TIMEOUT_SECONDS\"] = \"10\"\n\n    result = subprocess.run(\n        [sys.executable, \"-c\", \"from generations.config import AppConfig; from pathlib import Path; c = AppConfig.from_root(Path('.')); print(c.operational_loop_timeout_seconds)\"],\n        cwd=repo_root,\n        env=env,\n        capture_output=True,\n        text=True,\n        check=True,\n    )\n    assert result.stdout.strip() == \"10\"\n\n\ndef test_economy_balance_criteria_exists(tmp_path: Path) -> None:\n    repo_root = Path(__file__).resolve().parents[1]\n\n    criteria_path = repo_root / \"criteria.json\"\n    criteria = json.loads(criteria_path.read_text(encoding=\"utf-8\"))\n    assert \"ship_rules\" in criteria\n    assert any(rule[\"id\"] == \"ECONOMY_BALANCE_REQUIRED\" for rule in criteria[\"ship_rules\"])\n",
+                "additions": 1,
+                "deletions": 0
+              },
+              "truncated": false
+            },
+            "time": {
+              "start": 1772792755804,
+              "end": 1772792756405
+            }
+          },
+          "id": "prt_cc2aeb659001GigsZgvoSY4lr5",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae976c001fFaUm9WAC14exQ"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "a920c51db41dbab8b054e6d46fb7df5357467dc3",
+          "cost": 0,
+          "tokens": {
+            "total": 48028,
+            "input": 47632,
+            "output": 396,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2aeb8b6001QsGfMhhRMeY5He",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae976c001fFaUm9WAC14exQ"
+        },
+        {
+          "type": "patch",
+          "hash": "8c203178ea72575f491365d1b0bb54d44659ed90",
+          "files": [
+            "/home/jishm/code/generations/tests/test_smoke.py"
+          ],
+          "id": "prt_cc2aeb8c4001mHcinDr3wVLYNT",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2ae976c001fFaUm9WAC14exQ"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772792756425,
+          "completed": 1772792759039
+        },
+        "parentID": "msg_cc2add5650011r85NDRpR8wIae",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 48105,
+          "input": 48046,
+          "output": 59,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "stop",
+        "id": "msg_cc2aeb8c9001zc9EntQWn4ZvEO",
+        "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "a920c51db41dbab8b054e6d46fb7df5357467dc3",
+          "id": "prt_cc2aec07d001nY04hb0d3N3sVu",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2aeb8c9001zc9EntQWn4ZvEO"
+        },
+        {
+          "type": "text",
+          "text": "Done. Added `GENERATIONS_LOOP_TIMEOUT_SECONDS=30` to the smoke test environment to reduce the per-loop timeout from 300s to 30s, which should help lower the 98s execution time toward the 30s target.",
+          "time": {
+            "start": 1772792759021,
+            "end": 1772792759021
+          },
+          "id": "prt_cc2aec07e001SPP84oCqwQ6q2p",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2aeb8c9001zc9EntQWn4ZvEO"
+        },
+        {
+          "type": "step-finish",
+          "reason": "stop",
+          "snapshot": "a920c51db41dbab8b054e6d46fb7df5357467dc3",
+          "cost": 0,
+          "tokens": {
+            "total": 48105,
+            "input": 48046,
+            "output": 59,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc2aec2ee0016iWRmCpaFq8uLi",
+          "sessionID": "ses_33d522aa5ffeY02YXWPbmqwLMS",
+          "messageID": "msg_cc2aeb8c9001zc9EntQWn4ZvEO"
+        }
+      ]
+    }
+  ]
+}

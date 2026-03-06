@@ -60,6 +60,14 @@ class TestRouteCostCalculation(unittest.TestCase):
         expected = 100.0 * 0.1 * 2.0
         self.assertEqual(cost, expected)
 
+    def test_full_route_calculation(self):
+        """Test complete route cost calculation from coordinates."""
+        distance = calculate_distance(0.0, 0.0, 0.0, 3.0, 4.0, 0.0)
+        cost = calculate_route_cost(distance=distance, cargo_mass=10.0, fuel_price=1.5)
+        expected_fuel = 5.0 * 0.1 * 1.5
+        expected_handling = 10.0 * 0.05
+        self.assertEqual(cost, expected_fuel + expected_handling)
+
 
 if __name__ == '__main__':
     unittest.main()

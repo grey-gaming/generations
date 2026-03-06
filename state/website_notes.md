@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 18
+Latest loop: 19
 
-Visible intent: Internal tooling optimization does not require public documentation update yet.
+Visible intent: Focus remains on core simulation logic before showcasing metrics.
 
 Support remains a minimal placeholder until a logged experiment is justified.
