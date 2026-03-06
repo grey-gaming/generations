@@ -1,0 +1,16 @@
+{
+  "loop": 1,
+  "workstream": "autonomous_platform",
+  "capability_target": "website",
+  "proposal": "Refresh observability artifacts and keep the website aligned with the latest runtime state",
+  "model": {
+    "provider": "ollama_cloud",
+    "model": "qwen3.5:397b-cloud",
+    "stubbed": true,
+    "base_url": "http://127.0.0.1:11434",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL.",
+    "fallback": "TimeoutError: timed out"
+  },
+  "timestamp": "2026-03-06T07:21:55.413828+00:00"
+}

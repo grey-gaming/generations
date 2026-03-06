@@ -171,3 +171,4 @@ If the local daemon is unreachable, the adapter falls back to the deterministic 
 
 - Ubuntu-only assumptions: bash, git, standard Linux filesystem paths.
 - The initial seed is intentionally conservative: it proves the autonomous operating loop, observability surface, and safe self-edit path before pursuing larger game scope.
+- Active development phase: autonomous loop refreshing observability artifacts and keeping the website in sync with runtime state.
