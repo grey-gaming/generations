@@ -4,7 +4,7 @@
       "id": "DATA_SCHEMA_REQUIRED",
       "description": "All game logic modules must define data schemas for their domain entities before implementation.",
       "enforcement": "Smoke test validates that game modules include schema definitions.",
-      "rationale": "Data-first design ensures clarity, testability, and safe autonomous iteration."
+      "rationale": "Data-first design improves clarity, testability, and safer autonomous iteration."
     }
   ]
 }

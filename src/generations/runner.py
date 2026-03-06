@@ -235,11 +235,6 @@ class Runner:
         touched.append(str(website_notes.relative_to(self.root)))
 
         updated_memory = memory
-        heuristics = list(updated_memory.get("heuristics", []))
-        for item in proposal.heuristics_updates:
-            if item not in heuristics:
-                heuristics.append(item)
-        updated_memory["heuristics"] = heuristics
         updated_memory["tool_routing"] = {
             "execution_surface": f"OpenCode CLI ({self.opencode.binary}) with local session export and guarded shell execution",
             "model_provider": f"{model_metadata['provider']}:{model_metadata['model']}",
@@ -405,16 +400,7 @@ class Runner:
 
     def _normalize_memory(self, memory: dict[str, Any]) -> dict[str, Any]:
         normalized = dict(memory)
-        heuristics = list(normalized.get("heuristics", []))
-        old = "Favor tiny, coherent edits over ambitious rewrites."
-        new = "Favor coherent, reviewable steps inside a larger strategic arc."
-        if old in heuristics:
-            heuristics = [new if item == old else item for item in heuristics]
-        if new not in heuristics:
-            heuristics.insert(0, new)
-        platform_heuristic = "Improve the platform when it increases autonomous game-development capability."
-        if platform_heuristic not in heuristics:
-            heuristics.append(platform_heuristic)
+        heuristics = list(DEFAULT_MEMORY["heuristics"])
         normalized["heuristics"] = heuristics
         normalized["heuristics_recent_history"] = list(normalized.get("heuristics_recent_history", []))
         normalized["heuristics_rolling_average"] = self._normalize_heuristic_scores(
@@ -469,13 +455,15 @@ class Runner:
         core = list(updated.get("heuristics", []))
         website = list(updated.get("website_heuristics", []))
         monetization = list(updated.get("monetization_heuristics", []))
-
-        active_core = [item for item in proposal.heuristics_updates if item in core]
-        if not validation_success:
-            failure_heuristic = "Avoid no-op loops: each successful iteration should produce a meaningful repo edit outside generated state."
-            if failure_heuristic not in core:
-                core.append(failure_heuristic)
-            active_core.append(failure_heuristic)
+        active_core = []
+        if proposal.workstream == "game_workspace":
+            active_core.append("Evolve the game toward a stronger, more shippable concept and implementation.")
+        if proposal.workstream == "autonomous_platform":
+            active_core.append("Evolve the platform when it improves autonomous game-development capability.")
+        if proposal.website_change:
+            active_core.append("Evolve the website to improve clarity, trust, and honest income potential.")
+        if validation_success:
+            active_core.append("Keep the workspace coherent and tidy, and commit all intentional loop changes.")
 
         history = list(updated.get("heuristics_recent_history", []))
         history.append(

@@ -15,22 +15,13 @@
     </section>
     <section class="panel-grid">
       <article class="panel"><h2>Runtime</h2><pre>{
-  "loop_count": 4,
-  "last_commit": "dd4ea208bdb947920ab74fcdccc036cbd35da4d2",
-  "last_validation": {
-    "success": true,
-    "results": [
-      {
-        "success": true,
-        "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
-        "output": "..                                                                       [100%]\n2 passed in 104.17s (0:01:44)"
-      }
-    ]
-  },
+  "loop_count": 0,
+  "last_commit": null,
+  "last_validation": null,
   "current_criteria_version": 1,
   "paused": false,
-  "last_decision": "continue",
-  "updated_at": "2026-03-06T07:39:17.980114+00:00"
+  "last_decision": "idle",
+  "updated_at": "2026-03-06T07:43:51.589612+00:00"
 }</pre></article>
       <article class="panel"><h2>Current Criteria</h2><pre>{
   "notes": [
@@ -49,7 +40,174 @@
     </section>
     <section class="panel">
       <h2>Latest Journal Entries</h2>
-      <div class='entry'><strong>Loop 4</strong><pre>{
+      <div class='entry'><strong>Loop 6</strong><pre>{
+  "actions_taken": [
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html"
+  ],
+  "commit_hash": null,
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "evaluation_metrics": {
+    "balance": 0.25,
+    "code_change": 0.0,
+    "creativity": 0.7,
+    "game_progress": 0.75,
+    "observability": 0.55,
+    "review_quality": 0.2
+  },
+  "journal_entry_count_before_write": 5,
+  "loop_counter": 6,
+  "model_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "fallback": null,
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": true,
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "No change to monetization strategy at this stage."
+  },
+  "next_step": {
+    "capability_target": "game_pipeline",
+    "description": "Define core economy data schemas for resources and trade routes.",
+    "rationale": "Concrete schemas enable autonomous validation of game logic later, bridging design and implementation while maintaining modularity.",
+    "workstream": "game_workspace"
+  },
+  "opencode": {
+    "binary": "/home/jishm/.opencode/bin/opencode",
+    "changed_files": [],
+    "debug_stderr_path": null,
+    "debug_stdout_path": null,
+    "push_output": "",
+    "pushed": false,
+    "session_export": null,
+    "session_id": null
+  },
+  "rest_decision": {
+    "decision": "stop",
+    "reason": "Stop after validation failure to preserve repository integrity.",
+    "sleep_seconds": 0
+  },
+  "rolled_back": true,
+  "seed_hash": "d29d1e27aacff87f77266f23cd3c3baf39d47d832755d94e27bec24f9d23c949",
+  "timestamp": "2026-03-06T07:42:32.741852+00:00",
+  "validation_results": [
+    {
+      "command": "policy:meaningful-repo-edit",
+      "output": "No meaningful repository edit was produced outside state/ and site/.",
+      "success": false
+    }
+  ],
+  "validation_summary": "failed",
+  "website_change": {
+    "changed": true,
+    "summary": "Log the transition from conceptual design to structural definition for transparency."
+  }
+}</pre></div>
+<div class='entry'><strong>Loop 5</strong><pre>{
+  "actions_taken": [
+    "criteria.json",
+    "docs/journal.md",
+    "tests/test_smoke.py",
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html"
+  ],
+  "commit_hash": "02314fd5f575abd8ad733cfb4cf8d35a66f96736",
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "evaluation_metrics": {
+    "balance": 0.1,
+    "code_change": 1.0,
+    "creativity": 0.7,
+    "game_progress": 0.1,
+    "observability": 0.8,
+    "review_quality": 0.9
+  },
+  "journal_entry_count_before_write": 4,
+  "loop_counter": 5,
+  "model_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "fallback": null,
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": true,
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "No change needed; focus on core capability first."
+  },
+  "next_step": {
+    "capability_target": "evaluation",
+    "description": "Add ship rule requiring data schemas for game logic modules and enforce via smoke test.",
+    "rationale": "Strengthens autonomous code quality control by preventing logic implementation without data contracts, reducing refactoring risk for future logistics systems.",
+    "workstream": "autonomous_platform"
+  },
+  "opencode": {
+    "binary": "/home/jishm/.opencode/bin/opencode",
+    "changed_files": [
+      "criteria.json",
+      "docs/journal.md",
+      "tests/test_smoke.py"
+    ],
+    "debug_stderr_path": null,
+    "debug_stdout_path": null,
+    "push_output": "To github.com:grey-gaming/generations.git\n   dd4ea20..02314fd  main -> main",
+    "pushed": true,
+    "session_export": "state/opencode/ses_33dec9808ffeZ8cgkGtHzEOKR2.json",
+    "session_id": "ses_33dec9808ffeZ8cgkGtHzEOKR2"
+  },
+  "rest_decision": {
+    "decision": "continue",
+    "reason": "Continue with another small step after a short bounded rest.",
+    "sleep_seconds": 1
+  },
+  "rolled_back": false,
+  "seed_hash": "d29d1e27aacff87f77266f23cd3c3baf39d47d832755d94e27bec24f9d23c949",
+  "timestamp": "2026-03-06T07:40:55.526960+00:00",
+  "validation_results": [
+    {
+      "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
+      "output": "...                                                                      [100%]\n3 passed in 94.90s (0:01:34)",
+      "success": true
+    }
+  ],
+  "validation_summary": "passed",
+  "website_change": {
+    "changed": true,
+    "summary": "Log new production discipline rule to demonstrate system maturity and safety to audience."
+  }
+}</pre></div>
+<div class='entry'><strong>Loop 4</strong><pre>{
   "actions_taken": [
     "game_workspace/",
     "state/loop_snapshot.json",
