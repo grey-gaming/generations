@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 5
+Latest loop: 6
 
-Visible intent: Render the new strategic alignment field on the public journey page to increase transparency.
+Visible intent: No website updates needed; focus is on game simulation foundation.
 
 Support remains a minimal placeholder until a logged experiment is justified.

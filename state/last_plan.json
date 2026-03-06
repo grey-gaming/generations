@@ -1,20 +1,18 @@
 {
-  "summary": "autonomous_platform:journaling: Add 'strategic_question_addressed' field to journal schema and update journey page to display it.",
+  "summary": "game_workspace:game_pipeline: Define core Cargo and Route data schemas for the logistics simulation.",
   "editable_files": [
-    "src/journal.py",
-    "website/templates/journey.html",
-    "docs/journal_schema.md"
+    "workspace/game/schemas.py",
+    "tests/test_schemas.py"
   ],
   "files_expected": [
-    "src/journal.py",
-    "website/templates/journey.html",
-    "docs/journal_schema.md",
+    "workspace/game/schemas.py",
+    "tests/test_schemas.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Render the new strategic alignment field on the public journey page to increase transparency.",
-  "monetization_change_reason": "No monetization experiments added this loop; focus is on core observability."
+  "website_change_reason": "No website updates needed; focus is on game simulation foundation.",
+  "monetization_change_reason": "No monetization changes; prioritizing core game data structures."
 }
