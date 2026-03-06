@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 13
+Latest loop: 14
 
-Visible intent: Focus remains on simulation core stability before public-facing updates.
+Visible intent: Update journey page to reflect transition from design phase to implementation of simulation core.
 
 Support remains a minimal placeholder until a logged experiment is justified.

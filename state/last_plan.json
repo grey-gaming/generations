@@ -1,18 +1,20 @@
 {
-  "summary": "game_workspace:game_pipeline: Implement basic route cost calculation function and unit test.",
+  "summary": "game_workspace:game_pipeline: Implement basic distance calculation function for star system routes to support cargo transport logic.",
   "editable_files": [
-    "game/workspace/src/routes.py",
-    "game/workspace/tests/test_routes.py"
+    "src/simulation/routes.py",
+    "tests/test_routes.py",
+    "docs/journal/loop_14.md"
   ],
   "files_expected": [
-    "game/workspace/src/routes.py",
-    "game/workspace/tests/test_routes.py",
+    "src/simulation/routes.py",
+    "tests/test_routes.py",
+    "docs/journal/loop_14.md",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Focus remains on simulation core stability before public-facing updates.",
-  "monetization_change_reason": "Monetization deferred per 10-loop plan until core loop is compelling."
+  "website_change_reason": "Update journey page to reflect transition from design phase to implementation of simulation core.",
+  "monetization_change_reason": "Maintain support placeholder until core loop is demonstrably playable per 10-loop plan."
 }

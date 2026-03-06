@@ -1,7 +1,21 @@
 """Unit tests for route cost calculation."""
 
 import unittest
-from src.routes import calculate_route_cost
+from src.routes import calculate_route_cost, calculate_distance
+
+
+class TestDistanceCalculation(unittest.TestCase):
+    """Test cases for the calculate_distance function."""
+
+    def test_distance_same_point(self):
+        """Test distance calculation when both points are the same."""
+        distance = calculate_distance(1.0, 2.0, 3.0, 1.0, 2.0, 3.0)
+        self.assertEqual(distance, 0.0)
+
+    def test_distance_basic(self):
+        """Test basic distance calculation between two points."""
+        distance = calculate_distance(0.0, 0.0, 0.0, 3.0, 4.0, 0.0)
+        self.assertEqual(distance, 5.0)
 
 
 class TestRouteCostCalculation(unittest.TestCase):
