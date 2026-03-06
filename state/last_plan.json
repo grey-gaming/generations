@@ -1,16 +1,16 @@
 {
-  "summary": "game_workspace:game_design: Define the core transport logistics loop in a design document.",
+  "summary": "autonomous_platform:memory: Add a Design Decision Record template to docs for tracking game mechanic rationale.",
   "editable_files": [
-    "docs/design_space_logistics_core.md"
+    "docs/design_decision_record.md"
   ],
   "files_expected": [
-    "docs/design_space_logistics_core.md",
+    "docs/design_decision_record.md",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "No website changes needed for internal design documentation.",
-  "monetization_change_reason": "No monetization changes needed at this design stage."
+  "website_change_reason": "Internal observability improvement first; public journey updates follow validation.",
+  "monetization_change_reason": "No monetization changes in this loop."
 }

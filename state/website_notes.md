@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 2
+Latest loop: 3
 
-Visible intent: No website changes needed for internal design documentation.
+Visible intent: Internal observability improvement first; public journey updates follow validation.
 
 Support remains a minimal placeholder until a logged experiment is justified.
