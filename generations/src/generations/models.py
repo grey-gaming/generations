@@ -40,6 +40,7 @@ class LoopPlan:
     loop_counter: int
     theme: str
     goal: str
+    working_on: str
     primary_pillar: PrimaryPillar
     block_id: int
     planning_mode: bool
@@ -188,6 +189,7 @@ class CurrentLoopPlan:
     loop_counter: int
     theme: str
     goal: str
+    working_on: str = ""
     primary_pillar: str = "self"
     block_id: int = 0
     tasks: list[dict[str, Any]] = field(default_factory=list)

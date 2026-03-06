@@ -42,6 +42,7 @@ def build_dashboard_context(
             "execution_range": _range_text(block_plan.get("execution_range") or []),
             "why_now": block_plan.get("why_this_pillar_now") or "No active block plan yet.",
             "current_goal": current_loop_plan.get("goal") or "No active loop goal.",
+            "working_on": current_loop_plan.get("working_on") or "Not labeled yet.",
             "pass_count": outcomes.get("pass_count", 0),
             "fail_count": outcomes.get("fail_count", 0),
             "rest_count": outcomes.get("rest_count", 0),
@@ -70,6 +71,7 @@ def build_dashboard_context(
         "current_loop": {
             "theme": current_loop_plan.get("theme") or "No active loop theme",
             "goal": current_loop_plan.get("goal") or "No active loop goal",
+            "working_on": current_loop_plan.get("working_on") or "Not labeled yet",
             "integration_status": current_loop_plan.get("integration_status") or "idle",
             "validation_status": current_loop_plan.get("validation_status") or "idle",
             "tasks": [_task_card(task) for task in tasks],

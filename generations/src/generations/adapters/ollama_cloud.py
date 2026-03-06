@@ -154,6 +154,7 @@ class OllamaCloudAdapter:
                 loop_counter=loop_counter,
                 theme=str(parsed["theme"]),
                 goal=str(parsed["goal"]),
+                working_on=self._normalize_working_on(parsed.get("working_on")),
                 primary_pillar=str(parsed.get("primary_pillar") or block_plan["primary_pillar"]),
                 block_id=int(parsed.get("block_id") or block_plan["block_id"]),
                 planning_mode=False,
@@ -287,8 +288,9 @@ class OllamaCloudAdapter:
     def _execution_prompt(self, seed: str, loop_counter: int, memory: dict[str, Any], block_plan: dict[str, Any], vision: dict[str, Any] | None) -> str:
         return (
             "You are Generations. Plan one execution loop inside the active 10-loop block. Return JSON only.\n"
-            "Required keys: status, theme, goal, primary_pillar, block_id, pillar_budget, tasks, integration_policy, rationale.\n"
+            "Required keys: status, theme, goal, working_on, primary_pillar, block_id, pillar_budget, tasks, integration_policy, rationale.\n"
             "status must be ok or rest_required. If rest_required, include reason and an empty tasks list.\n"
+            "working_on must be a short snake_case label naming the main thing this loop is trying to advance, such as validation_pipeline, journey_page, simulation_tick, memory_schema, or support_disclosure.\n"
             "Each task must include task_id, scope, objective, allowed_paths, success_signal, priority, support_reason.\n"
             "At least 2 tasks must directly support the block's primary pillar when multiple tasks are returned.\n"
             "Choose tasks that create or modify real artifacts. Prefer code, tests, design docs, or website sections that materially advance the block.\n"
@@ -460,6 +462,18 @@ class OllamaCloudAdapter:
             return "cross_cutting"
         return scope
 
+    def _normalize_working_on(self, raw_value: Any) -> str:
+        value = (
+            str(raw_value or "current_block")
+            .strip()
+            .lower()
+            .replace("-", "_")
+            .replace(" ", "_")
+            .replace("/", "_")
+        )
+        value = "".join(ch for ch in value if ch.isalnum() or ch == "_").strip("_")
+        return value or "current_block"
+
     def _test_vision(self, seed: str, loop_counter: int, current_version: int) -> LongTermVisionRecord:
         version = current_version + 1
         pillars = {
@@ -584,6 +598,7 @@ class OllamaCloudAdapter:
             loop_counter=loop_counter,
             theme=f"Block {block_plan['block_id']} execution",
             goal=f"Advance the {primary} pillar coherently inside the active 9-loop block.",
+            working_on="current_block",
             primary_pillar=primary,
             block_id=int(block_plan["block_id"]),
             planning_mode=False,

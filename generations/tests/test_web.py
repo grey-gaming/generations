@@ -40,6 +40,7 @@ def test_export_site_renders_vision_and_block_sections(tmp_path: Path) -> None:
         "loop_counter": 1,
         "theme": "Block 1 planning",
         "goal": "Plan the first self block",
+        "working_on": "block_001_planning",
         "primary_pillar": "self",
         "block_id": 1,
         "tasks": [],
@@ -52,6 +53,7 @@ def test_export_site_renders_vision_and_block_sections(tmp_path: Path) -> None:
     assert "Long-Term Vision" in html
     assert "Current Block" in html
     assert "Metrics As Signals" in html
+    assert "Working on:" in html
 
 
 def test_export_site_hides_rest_entries_from_diary(tmp_path: Path) -> None:

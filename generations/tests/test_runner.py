@@ -13,6 +13,7 @@ def test_runner_rejects_invalid_task_scopes(tmp_path: Path) -> None:
         loop_counter=2,
         theme="Bad plan",
         goal="Should be rejected",
+        working_on="bad_plan",
         primary_pillar="self",
         block_id=1,
         planning_mode=False,
@@ -45,3 +46,9 @@ def test_ollama_adapter_normalizes_semantic_task_scopes() -> None:
     assert adapter._normalize_scope("journey_page") == "website"
     assert adapter._normalize_scope("simulation") == "active_game"
     assert adapter._normalize_scope("support") == "monetization_platform"
+
+
+def test_ollama_adapter_normalizes_working_on_label() -> None:
+    adapter = OllamaCloudAdapter(debug=False)
+    assert adapter._normalize_working_on("Validation Pipeline") == "validation_pipeline"
+    assert adapter._normalize_working_on("ci/cd infrastructure") == "ci_cd_infrastructure"

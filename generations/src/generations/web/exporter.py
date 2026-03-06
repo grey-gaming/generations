@@ -100,6 +100,7 @@ def _render_html(dashboard: dict[str, object], entries: list[dict[str, object]])
         <h2>Current Loop</h2>
         <p class='feature-title'>{_escape(current_loop['theme'])}</p>
         <p>{_escape(current_loop['goal'])}</p>
+        <p><strong>Working on:</strong> {_escape(current_loop['working_on'])}</p>
         <div class='pill-row'>
           <span class='pill'>Integration {_escape(current_loop['integration_status'])}</span>
           <span class='pill'>Validation {_escape(current_loop['validation_status'])}</span>

@@ -77,6 +77,7 @@ class TUI:
         print("", flush=True)
         print(f"loop {plan.loop_counter} | block={plan.block_id} | pillar={plan.primary_pillar} | theme: {plan.theme}", flush=True)
         print(f"goal    | {plan.goal}", flush=True)
+        print(f"focus   | {plan.working_on}", flush=True)
         print(
             f"budget  | self={_pct(plan.pillar_budget.get('self'))} game={_pct(plan.pillar_budget.get('game'))} money={_pct(plan.pillar_budget.get('monetization_platform'))}",
             flush=True,

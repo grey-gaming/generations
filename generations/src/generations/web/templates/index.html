@@ -38,6 +38,7 @@
         <h2>Current Loop</h2>
         <p class="feature-title">{{ dashboard.current_loop.theme }}</p>
         <p>{{ dashboard.current_loop.goal }}</p>
+        <p><strong>Working on:</strong> {{ dashboard.current_loop.working_on }}</p>
         <div class="pill-row">
           <span class="pill">Integration {{ dashboard.current_loop.integration_status }}</span>
           <span class="pill">Validation {{ dashboard.current_loop.validation_status }}</span>
