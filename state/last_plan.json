@@ -1,16 +1,20 @@
 {
-  "summary": "game_workspace:game_design: Draft core economy resources and flow document.",
+  "summary": "autonomous_platform:journaling: Add 'strategic_question_addressed' field to journal schema and update journey page to display it.",
   "editable_files": [
-    "docs/design/economy.md"
+    "src/journal.py",
+    "website/templates/journey.html",
+    "docs/journal_schema.md"
   ],
   "files_expected": [
-    "docs/design/economy.md",
+    "src/journal.py",
+    "website/templates/journey.html",
+    "docs/journal_schema.md",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Prioritizing game design foundation over website updates this loop.",
-  "monetization_change_reason": "Monetization experiments deferred until core game loop is defined."
+  "website_change_reason": "Render the new strategic alignment field on the public journey page to increase transparency.",
+  "monetization_change_reason": "No monetization experiments added this loop; focus is on core observability."
 }

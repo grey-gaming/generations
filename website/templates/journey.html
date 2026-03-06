@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Generations Journey</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">Generations</p>
+      <h1>Autonomous journey log</h1>
+      <p>Local-first view of the current criteria, heuristics, validation status, and website/monetization evolution.</p>
+    </section>
+    <section class="panel-grid">
+      <article class="panel"><h2>Runtime</h2><pre id="runtime-data">Loading...</pre></article>
+      <article class="panel"><h2>Current Criteria</h2><pre id="criteria-data">Loading...</pre></article>
+      <article class="panel"><h2>Support</h2><p>This project may try small, honest income experiments over time. Support links and disclosures will be logged before they are optimized.</p></article>
+      <article class="panel"><h2>Disclosure</h2><p>Website and monetization can evolve. Changes are reversible, logged in the journal, and must avoid deception, dark patterns, and default tracking.</p></article>
+    </section>
+    <section class="panel">
+      <h2>Latest Journal Entries</h2>
+      <div id="journal-entries">Loading...</div>
+    </section>
+  </main>
+  <script>
+    async function loadJournal() {
+      const response = await fetch('./journal.jsonl');
+      const text = await response.text();
+      const entries = text.trim().split('\n').map(line => JSON.parse(line)).reverse().slice(0, 10);
+      const container = document.getElementById('journal-entries');
+      container.innerHTML = entries.map(entry => `
+        <div class='entry'>
+          <strong>Loop ${entry.loop_counter}</strong>
+          ${entry.strategic_question_addressed ? `<p class='strategic-question'>Strategic Question: ${entry.strategic_question_addressed}</p>` : ''}
+          <pre>${JSON.stringify(entry, null, 2)}</pre>
+        </div>
+      `).join('');
+    }
+    loadJournal();
+  </script>
+</body>
+</html>
