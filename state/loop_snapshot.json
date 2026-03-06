@@ -1,8 +1,8 @@
 {
-  "loop": 2,
-  "workstream": "game_workspace",
-  "capability_target": "game_design",
-  "proposal": "Create a core loop design document defining the primary resource transport mechanics for the space logistics concept.",
+  "loop": 3,
+  "workstream": "autonomous_platform",
+  "capability_target": "evaluation",
+  "proposal": "Add design-validation requirement to ship rules in criteria",
   "model": {
     "provider": "ollama_cloud",
     "model": "qwen3.5:397b-cloud",
@@ -12,5 +12,5 @@
     "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL.",
     "fallback": null
   },
-  "timestamp": "2026-03-06T06:58:48.153584+00:00"
+  "timestamp": "2026-03-06T07:01:56.313104+00:00"
 }

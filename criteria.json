@@ -1,0 +1,10 @@
+{
+  "design_validation": {
+    "requirement": "ship rules must be validated against design constraints before deployment",
+    "checks": [
+      "rules conform to space logistics domain model",
+      "rules do not conflict with existing criteria",
+      "rules are reversible"
+    ]
+  }
+}

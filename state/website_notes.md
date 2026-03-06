@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 2
+Latest loop: 3
 
-Visible intent: Focus shifted to internal game definition to boost game_progress metrics before next public update.
+Visible intent: No website changes needed for backend criteria update.
 
 Support remains a minimal placeholder until a logged experiment is justified.

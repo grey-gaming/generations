@@ -1,16 +1,16 @@
 {
-  "summary": "game_workspace:game_design: Create a core loop design document defining the primary resource transport mechanics for the space logistics concept.",
+  "summary": "autonomous_platform:evaluation: Add design-validation requirement to ship rules in criteria",
   "editable_files": [
-    "game_workspace/design/core_loop.md"
+    "criteria.json"
   ],
   "files_expected": [
-    "game_workspace/design/core_loop.md",
+    "criteria.json",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Focus shifted to internal game definition to boost game_progress metrics before next public update.",
-  "monetization_change_reason": "Core loop must be defined before monetization vectors can be honestly evaluated."
+  "website_change_reason": "No website changes needed for backend criteria update.",
+  "monetization_change_reason": "No monetization changes required for evaluation criteria update."
 }
