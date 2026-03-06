@@ -1,20 +1,18 @@
 {
-  "summary": "game_workspace:game_pipeline: Advance the space logistics game workspace toward a clearer design and build pipeline",
+  "summary": "game_workspace:website: Update journey page and roadmap to mark Core Logistics complete and Integration Phase active.",
   "editable_files": [
-    "README.md",
-    "games/space_logistics/README.md",
-    "src/generations/web/templates/index.html"
+    "website/index.html",
+    "docs/roadmap.md"
   ],
   "files_expected": [
-    "README.md",
-    "games/space_logistics/README.md",
-    "src/generations/web/templates/index.html",
+    "website/index.html",
+    "docs/roadmap.md",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Keep the journey page and exported site in sync with the latest autonomous state.",
-  "monetization_change_reason": "No change; preserve the honest support placeholder until more evidence exists."
+  "website_change_reason": "Reflects current development phase to improve clarity and trust for observers.",
+  "monetization_change_reason": "No monetization changes until playable loop demonstrates engagement."
 }

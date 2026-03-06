@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 22
+Latest loop: 23
 
-Visible intent: Keep the journey page and exported site in sync with the latest autonomous state.
+Visible intent: Reflects current development phase to improve clarity and trust for observers.
 
 Support remains a minimal placeholder until a logged experiment is justified.

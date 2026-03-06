@@ -15,22 +15,22 @@
     </section>
     <section class="panel-grid">
       <article class="panel"><h2>Runtime</h2><pre>{
-  "loop_count": 21,
-  "last_commit": "df983920f661f39532686bbfa3b2e6cc950601c5",
+  "loop_count": 22,
+  "last_commit": "b635d3758cb4218e3f9aebaf000f273218bf176d",
   "last_validation": {
     "success": true,
     "results": [
       {
         "success": true,
         "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
-        "output": "......                                                                   [100%]\n6 passed in 72.46s (0:01:12)"
+        "output": "......                                                                   [100%]\n6 passed in 54.83s"
       }
     ]
   },
   "current_criteria_version": 1,
   "paused": false,
   "last_decision": "continue",
-  "updated_at": "2026-03-06T10:40:24.310684+00:00"
+  "updated_at": "2026-03-06T10:43:28.920811+00:00"
 }</pre></article>
       <article class="panel"><h2>Current Criteria</h2><pre>{
   "notes": [
@@ -102,7 +102,90 @@
     </section>
     <section class="panel">
       <h2>Latest Journal Entries</h2>
-      <div class='entry'><strong>Loop 21</strong><pre>{
+      <div class='entry'><strong>Loop 22</strong><pre>{
+  "actions_taken": [
+    "games/space_logistics/README.md",
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html"
+  ],
+  "commit_hash": "b635d3758cb4218e3f9aebaf000f273218bf176d",
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "evaluation_metrics": {
+    "balance": 0.55,
+    "code_change": 0.6,
+    "creativity": 0.7,
+    "game_progress": 1.0,
+    "observability": 0.55,
+    "review_quality": 0.9
+  },
+  "journal_entry_count_before_write": 23,
+  "loop_counter": 22,
+  "model_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "fallback": "TimeoutError: timed out",
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": true,
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "No change; preserve the honest support placeholder until more evidence exists."
+  },
+  "next_step": {
+    "capability_target": "game_pipeline",
+    "description": "Advance the space logistics game workspace toward a clearer design and build pipeline",
+    "rationale": "Deterministic fallback derived from seed digest 550dc83ed5d0 and current heuristics count 4. The chosen step prioritizes a larger development arc while keeping the individual change small and reversible.",
+    "workstream": "game_workspace"
+  },
+  "opencode": {
+    "binary": "/home/jishm/.opencode/bin/opencode",
+    "changed_files": [
+      "games/space_logistics/README.md"
+    ],
+    "debug_stderr_path": null,
+    "debug_stdout_path": null,
+    "push_output": "To github.com:grey-gaming/generations.git\n   df98392..b635d37  main -> main",
+    "pushed": true,
+    "session_export": "state/opencode/ses_33d44a6deffeQbol64xFi3QP3K.json",
+    "session_id": "ses_33d44a6deffeQbol64xFi3QP3K"
+  },
+  "rest_decision": {
+    "decision": "continue",
+    "reason": "Continue with another small step after a short bounded rest.",
+    "sleep_seconds": 1
+  },
+  "rolled_back": false,
+  "seed_hash": "d29d1e27aacff87f77266f23cd3c3baf39d47d832755d94e27bec24f9d23c949",
+  "timestamp": "2026-03-06T10:41:21.612038+00:00",
+  "validation_results": [
+    {
+      "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
+      "output": "......                                                                   [100%]\n6 passed in 54.83s",
+      "success": true
+    }
+  ],
+  "validation_summary": "passed",
+  "website_change": {
+    "changed": true,
+    "summary": "Keep the journey page and exported site in sync with the latest autonomous state."
+  }
+}</pre></div>
+<div class='entry'><strong>Loop 21</strong><pre>{
   "actions_taken": [
     "game/simulation/",
     "tests/test_simulation_loop.py",

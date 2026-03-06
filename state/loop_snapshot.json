@@ -1,8 +1,8 @@
 {
-  "loop": 22,
+  "loop": 23,
   "workstream": "game_workspace",
-  "capability_target": "game_pipeline",
-  "proposal": "Advance the space logistics game workspace toward a clearer design and build pipeline",
+  "capability_target": "website",
+  "proposal": "Update journey page and roadmap to mark Core Logistics complete and Integration Phase active.",
   "model": {
     "provider": "ollama_cloud",
     "model": "qwen3.5:397b-cloud",
@@ -10,7 +10,7 @@
     "base_url": "http://127.0.0.1:11434",
     "selected_default_model": "qwen3.5:397b-cloud",
     "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL.",
-    "fallback": "TimeoutError: timed out"
+    "fallback": null
   },
-  "timestamp": "2026-03-06T10:40:24.297925+00:00"
+  "timestamp": "2026-03-06T10:43:28.899104+00:00"
 }
