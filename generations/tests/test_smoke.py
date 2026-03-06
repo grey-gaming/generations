@@ -51,7 +51,9 @@ def test_run_writes_planning_and_journal(tmp_path: Path) -> None:
     runtime = json.loads((tmp_path / "state" / "runtime.json").read_text(encoding="utf-8"))
     planning = list((tmp_path / "state" / "planning").glob("planning-*.json"))
     current_loop_plan = json.loads((tmp_path / "state" / "current_loop_plan.json").read_text(encoding="utf-8"))
+    seed_brief = (tmp_path / "games" / "active" / "design" / "seed_brief.md").read_text(encoding="utf-8")
     assert '"entry_type": "planning_phase"' in journal
     assert runtime["loop_count"] == 1
     assert planning
     assert current_loop_plan["theme"]
+    assert "bootstrap a transport game" in seed_brief

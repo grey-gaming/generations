@@ -69,6 +69,7 @@ class Runner:
 
     def _run_single_loop(self, runtime: dict[str, Any]) -> None:
         loop_counter = int(runtime.get("loop_count", 0))
+        self._ensure_seed_baseline(loop_counter)
         memory = self.memory.latest()
         planning_record = self.planner.ensure_checkpoint(self.seed, loop_counter)
         loop_plan, planner_meta = self.ollama.plan_loop(self.seed, loop_counter, memory)
@@ -205,3 +206,25 @@ class Runner:
 
     def _seed_hash(self) -> str:
         return hashlib.sha256(self.seed.encode("utf-8")).hexdigest()[:12]
+
+    def _ensure_seed_baseline(self, loop_counter: int) -> None:
+        if loop_counter != 0:
+            return
+        seed_file = self.config.active_game_dir / "design" / "seed_brief.md"
+        if seed_file.exists():
+            return
+        seed_file.parent.mkdir(parents=True, exist_ok=True)
+        seed_file.write_text(
+            "\n".join(
+                [
+                    "# Seed Brief",
+                    "",
+                    f"- Seed prompt: {self.seed}",
+                    f"- Seed hash: {self._seed_hash()}",
+                    "- Intent: give the active game workspace a concrete starting point before autonomous iteration begins.",
+                    "- Initial expectation: turn this seed into a coherent game concept, implementation path, and public journey.",
+                    "",
+                ]
+            ),
+            encoding="utf-8",
+        )
