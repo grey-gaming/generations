@@ -20,6 +20,9 @@ class OpenCodeAdapter:
         self.binary = Path(os.getenv("OPENCODE_BIN", str(Path.home() / ".opencode" / "bin" / "opencode")))
         self.model = os.getenv("GENERATIONS_OPENCODE_MODEL", f"ollama/{DEFAULT_MODEL}")
         self.worktrees = WorktreeManager(self.config)
+        self._workspace_config_home = self.config.opencode_state_dir / "config"
+        self._workspace_config_path = self._workspace_config_home / "opencode" / "opencode.json"
+        self._ensure_workspace_config()
 
     def run_parallel_tasks(self, loop_counter: int, theme: str, tasks: list[ExecutionTask], debug_dir: Path) -> list[TaskResult]:
         with ThreadPoolExecutor(max_workers=min(len(tasks), self.config.parallel_tasks)) as pool:
@@ -136,7 +139,32 @@ class OpenCodeAdapter:
 
     def _env(self) -> dict[str, str]:
         env = os.environ.copy()
+        env["XDG_CONFIG_HOME"] = str(self._workspace_config_home)
         return env
+
+    def _ensure_workspace_config(self) -> None:
+        self._workspace_config_path.parent.mkdir(parents=True, exist_ok=True)
+        if self._workspace_config_path.exists():
+            try:
+                config = json.loads(self._workspace_config_path.read_text(encoding="utf-8"))
+            except json.JSONDecodeError:
+                config = {}
+        else:
+            config = {}
+        config.setdefault("$schema", "https://opencode.ai/config.json")
+        provider = config.setdefault("provider", {})
+        ollama = provider.setdefault("ollama", {})
+        ollama["npm"] = "@ai-sdk/openai-compatible"
+        ollama["name"] = "Local Ollama"
+        options = ollama.setdefault("options", {})
+        base = os.getenv("OLLAMA_OPENCODE_BASE_URL") or os.getenv("OLLAMA_BASE_URL") or "http://127.0.0.1:11434"
+        if not base.endswith("/v1"):
+            base = base.rstrip("/") + "/v1"
+        options["baseURL"] = base
+        models = ollama.setdefault("models", {})
+        model_name = self.model.split("/", 1)[1] if self.model.startswith("ollama/") else self.model
+        models[model_name] = {"name": f"Ollama {model_name}"}
+        self._workspace_config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
 
     def commit(self, message: str) -> str | None:
         subprocess.run(["git", "add", "."], cwd=self.root, check=False, capture_output=True)

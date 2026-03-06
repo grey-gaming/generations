@@ -59,7 +59,8 @@ def test_run_writes_vision_then_initial_block_plan(tmp_path: Path) -> None:
     assert '"entry_type": "vision"' in journal
     assert vision["version"] == 1
     assert len(self_vision.split()) >= 500
-    assert "bootstrap a transport game" in seed_brief
+    assert "# Seed Brief" in seed_brief
+    assert "Seed prompt:" in seed_brief
 
     _run_once(tmp_path)
     runtime = json.loads((tmp_path / "state" / "runtime.json").read_text(encoding="utf-8"))

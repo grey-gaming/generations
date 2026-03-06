@@ -15,6 +15,7 @@ class OllamaCloudAdapter:
         self.provider = os.getenv("GENERATIONS_MODEL_PROVIDER", DEFAULT_PROVIDER)
         self.model = os.getenv("GENERATIONS_MODEL", DEFAULT_MODEL)
         self.base_url = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434")
+        self.timeout_seconds = int(os.getenv("GENERATIONS_MODEL_TIMEOUT_SECONDS", "600"))
         self.debug = os.getenv("GENERATIONS_DEBUG", "0") == "1"
         self.test_mode = os.getenv("GENERATIONS_TEST_MODE", "0") == "1"
         self.stubbed = False
@@ -200,7 +201,7 @@ class OllamaCloudAdapter:
     def _post_generate(self, prompt: str) -> str:
         body = json.dumps({"model": self.model, "prompt": prompt, "stream": False, "options": {"temperature": 0}}).encode("utf-8")
         req = request.Request(f"{self.base_url}/api/generate", data=body, headers={"Content-Type": "application/json"}, method="POST")
-        with request.urlopen(req, timeout=90) as response:
+        with request.urlopen(req, timeout=self.timeout_seconds) as response:
             payload = json.loads(response.read().decode("utf-8"))
         return str(payload.get("response", "")).strip()
 
@@ -340,9 +341,12 @@ class OllamaCloudAdapter:
         )
 
     def _normalize_task(self, task: dict[str, Any]) -> dict[str, Any]:
+        scope = str(task.get("scope") or "platform")
+        if scope not in {"platform", "active_game", "website", "cross_cutting", "monetization_platform"}:
+            raise ValueError(f"Invalid task scope from planner: {scope}")
         return {
             "task_id": str(task.get("task_id") or "A"),
-            "scope": str(task.get("scope") or "platform"),
+            "scope": scope,
             "objective": str(task.get("objective") or "Advance the active block with one coherent change."),
             "allowed_paths": [str(item) for item in (task.get("allowed_paths") or ["generations/"])],
             "success_signal": str(task.get("success_signal") or "A coherent repository change lands."),

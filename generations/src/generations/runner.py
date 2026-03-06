@@ -85,7 +85,7 @@ class Runner:
         memory = self.memory.latest()
         record, meta = self.planner.ensure_long_term_vision(self.seed, loop_counter)
         if record is None:
-            self._record_rest_cycle(runtime, loop_counter, meta.get("fallback") or "No long-term vision could be produced.", meta)
+            self._record_rest_cycle(runtime, loop_counter, meta.get("fallback") or "No long-term vision could be produced.", meta, advance_loop=False)
             return
         current_loop_plan = {
             "loop_counter": loop_counter,
@@ -186,6 +186,10 @@ class Runner:
         loop_plan, planner_meta = self.ollama.plan_execution_loop(self.seed, loop_counter, memory, block_plan, vision)
         if loop_plan is None:
             self._record_rest_cycle(runtime, loop_counter, planner_meta.get("rest_required") or planner_meta.get("fallback") or "Planner requested neutral rest.", planner_meta)
+            return
+        invalid_reason = self._validate_loop_plan(loop_plan)
+        if invalid_reason:
+            self._record_rest_cycle(runtime, loop_counter, invalid_reason, {"provider": "runner", "fallback": invalid_reason})
             return
 
         debug_dir = self.config.runs_dir / f"loop-{loop_counter:04d}"
@@ -291,7 +295,7 @@ class Runner:
         )
         self._finalize_loop(runtime, loop_counter, integration.commit_hash, integration.validation, "continue")
 
-    def _record_rest_cycle(self, runtime: dict[str, Any], loop_counter: int, reason: str, provider: dict[str, Any]) -> None:
+    def _record_rest_cycle(self, runtime: dict[str, Any], loop_counter: int, reason: str, provider: dict[str, Any], *, advance_loop: bool = True) -> None:
         memory = self.memory.latest()
         outcomes = dict(memory.get("outcomes") or {})
         outcomes["rest_count"] = outcomes.get("rest_count", 0) + 1
@@ -318,9 +322,10 @@ class Runner:
                 "loop_counter": loop_counter,
                 "reason": reason,
                 "model_provider": provider,
+                "advance_loop": advance_loop,
             }
         )
-        runtime["loop_count"] = loop_counter + 1
+        runtime["loop_count"] = loop_counter + 1 if advance_loop else loop_counter
         runtime["last_decision"] = "rest_cycle"
         save_runtime(self.config.runtime_path, runtime)
         export_site(self.root, self.config, self.journal.tail(40), self.memory.latest())
@@ -407,3 +412,10 @@ class Runner:
             if len(parts) == 2:
                 changed.append(parts[1].strip().rstrip("/"))
         return sorted(set(path for path in changed if not path.startswith("state/") and not path.startswith("site/")))
+
+    def _validate_loop_plan(self, loop_plan: Any) -> str | None:
+        valid_scopes = {"platform", "active_game", "website", "cross_cutting", "monetization_platform"}
+        invalid = [task.task_id for task in loop_plan.tasks if task.scope not in valid_scopes]
+        if invalid:
+            return f"Planner produced invalid task scopes for task(s): {', '.join(invalid)}."
+        return None
