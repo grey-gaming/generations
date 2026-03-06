@@ -1,16 +1,20 @@
 {
-  "summary": "game_workspace:game_design: Create a design document defining the core cargo and route data structures for the logistics simulation.",
+  "summary": "autonomous_platform:evaluation: Add ship rule requiring data schemas for game logic modules and enforce via smoke test.",
   "editable_files": [
-    "game_workspace/design/cargo_routing.md"
+    "criteria.json",
+    "tests/test_smoke.py",
+    "docs/journal.md"
   ],
   "files_expected": [
-    "game_workspace/design/cargo_routing.md",
+    "criteria.json",
+    "tests/test_smoke.py",
+    "docs/journal.md",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Focus is on game foundation, not audience facing content this loop.",
-  "monetization_change_reason": "Premature to optimize monetization before core mechanic is defined."
+  "website_change_reason": "Log new production discipline rule to demonstrate system maturity and safety to audience.",
+  "monetization_change_reason": "No change needed; focus on core capability first."
 }

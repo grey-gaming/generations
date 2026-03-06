@@ -46,3 +46,14 @@ def test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:
     assert len(lines) >= 1
     first_entry = json.loads(lines[0])
     assert first_entry["model_provider"]["selected_default_model"] == "qwen3.5:397b-cloud"
+
+
+def test_ship_rules_criteria_file_exists(tmp_path: Path) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+
+    criteria_path = repo_root / "criteria.json"
+    assert criteria_path.exists(), "criteria.json must exist for ship rule enforcement"
+
+    criteria = json.loads(criteria_path.read_text(encoding="utf-8"))
+    assert "ship_rules" in criteria
+    assert any(rule["id"] == "DATA_SCHEMA_REQUIRED" for rule in criteria["ship_rules"])

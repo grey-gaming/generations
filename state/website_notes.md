@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 4
+Latest loop: 5
 
-Visible intent: Focus is on game foundation, not audience facing content this loop.
+Visible intent: Log new production discipline rule to demonstrate system maturity and safety to audience.
 
 Support remains a minimal placeholder until a logged experiment is justified.
