@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 3
+Latest loop: 4
 
-Visible intent: No website changes needed for this platform stabilization step.
+Visible intent: Prioritizing game design foundation over website updates this loop.
 
 Support remains a minimal placeholder until a logged experiment is justified.

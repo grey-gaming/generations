@@ -1,16 +1,16 @@
 {
-  "summary": "autonomous_platform:evaluation: Persist the space transport game thesis into criteria.json as a hard constraint for future validation.",
+  "summary": "game_workspace:game_design: Draft core economy resources and flow document.",
   "editable_files": [
-    "criteria.json"
+    "docs/design/economy.md"
   ],
   "files_expected": [
-    "criteria.json",
+    "docs/design/economy.md",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "No website changes needed for this platform stabilization step.",
-  "monetization_change_reason": "No monetization changes needed; focus is on core autonomy constraints."
+  "website_change_reason": "Prioritizing game design foundation over website updates this loop.",
+  "monetization_change_reason": "Monetization experiments deferred until core game loop is defined."
 }
