@@ -24,3 +24,9 @@ source .venv/bin/activate
 pip install -e .[dev]
 pytest
 ```
+
+
+Run the slower end-to-end smoke test explicitly:
+```bash
+pytest -m slow generations/tests/test_smoke.py
+```

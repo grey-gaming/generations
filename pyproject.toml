@@ -30,3 +30,7 @@ where = ["generations/src"]
 
 [tool.pytest.ini_options]
 testpaths = ["generations/tests"]
+addopts = "-m 'not slow'"
+markers = [
+  "slow: end-to-end integration tests that exercise a full autonomous loop",
+]

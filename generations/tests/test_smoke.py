@@ -7,6 +7,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 
 ROOT_ITEMS = [
     ".gitignore",
@@ -18,6 +20,7 @@ ROOT_ITEMS = [
 ]
 
 
+@pytest.mark.slow
 def test_run_writes_planning_and_journal(tmp_path: Path) -> None:
     for item in ROOT_ITEMS:
         src = Path(item)
