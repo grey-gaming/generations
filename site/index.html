@@ -15,22 +15,22 @@
     </section>
     <section class="panel-grid">
       <article class="panel"><h2>Runtime</h2><pre>{
-  "loop_count": 23,
-  "last_commit": "0818089794fb3de05507dd03db7f52cae8a0ca65",
+  "loop_count": 24,
+  "last_commit": "5dae7989ca75c8adba104adde9746c2cae243e9b",
   "last_validation": {
     "success": true,
     "results": [
       {
         "success": true,
         "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
-        "output": "......                                                                   [100%]\n6 passed in 103.97s (0:01:43)"
+        "output": "......                                                                   [100%]\n6 passed in 46.06s"
       }
     ]
   },
   "current_criteria_version": 1,
   "paused": false,
   "last_decision": "continue",
-  "updated_at": "2026-03-06T10:46:29.391249+00:00"
+  "updated_at": "2026-03-06T10:52:40.360084+00:00"
 }</pre></article>
       <article class="panel"><h2>Current Criteria</h2><pre>{
   "notes": [
@@ -102,7 +102,90 @@
     </section>
     <section class="panel">
       <h2>Latest Journal Entries</h2>
-      <div class='entry'><strong>Loop 23</strong><pre>{
+      <div class='entry'><strong>Loop 24</strong><pre>{
+  "actions_taken": [
+    "game/turn.py",
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html"
+  ],
+  "commit_hash": "5dae7989ca75c8adba104adde9746c2cae243e9b",
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "evaluation_metrics": {
+    "balance": 0.45,
+    "code_change": 0.35,
+    "creativity": 0.7,
+    "game_progress": 0.75,
+    "observability": 0.4,
+    "review_quality": 0.9
+  },
+  "journal_entry_count_before_write": 25,
+  "loop_counter": 24,
+  "model_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "fallback": null,
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": true,
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "Monetization plan requires a playable loop demonstrating engagement; integration must precede monetization experiments."
+  },
+  "next_step": {
+    "capability_target": "game_pipeline",
+    "description": "Define a unified Turn dataclass to encapsulate one cycle of logistics (pickup, transit, delivery) and economy updates.",
+    "rationale": "Connects fragmented logistics components into a single executable unit, directly addressing the low game_progress metric and the 10-loop plan's integration goal without requiring full UI implementation yet.",
+    "workstream": "game_workspace"
+  },
+  "opencode": {
+    "binary": "/home/jishm/.opencode/bin/opencode",
+    "changed_files": [
+      "game/turn.py"
+    ],
+    "debug_stderr_path": null,
+    "debug_stdout_path": null,
+    "push_output": "To github.com:grey-gaming/generations.git\n   0818089..5dae798  main -> main",
+    "pushed": true,
+    "session_export": "state/opencode/ses_33d3edc05ffeBzpy4rQ9hQqmkq.json",
+    "session_id": "ses_33d3edc05ffeBzpy4rQ9hQqmkq"
+  },
+  "rest_decision": {
+    "decision": "continue",
+    "reason": "Continue with another small step after a short bounded rest.",
+    "sleep_seconds": 1
+  },
+  "rolled_back": false,
+  "seed_hash": "d29d1e27aacff87f77266f23cd3c3baf39d47d832755d94e27bec24f9d23c949",
+  "timestamp": "2026-03-06T10:47:18.128402+00:00",
+  "validation_results": [
+    {
+      "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
+      "output": "......                                                                   [100%]\n6 passed in 46.06s",
+      "success": true
+    }
+  ],
+  "validation_summary": "passed",
+  "website_change": {
+    "changed": false,
+    "summary": "Loop 23 focused on website; this loop prioritizes code integration to improve game_progress metric."
+  }
+}</pre></div>
+<div class='entry'><strong>Loop 23</strong><pre>{
   "actions_taken": [
     "docs/roadmap.md",
     "state/loop_snapshot.json",

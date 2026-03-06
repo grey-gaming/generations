@@ -1,18 +1,20 @@
 {
-  "summary": "game_workspace:game_pipeline: Define a unified Turn dataclass to encapsulate one cycle of logistics (pickup, transit, delivery) and economy updates.",
+  "summary": "game_workspace:game_pipeline: Implement a unified SimulationState dataclass and tick() function to orchestrate route, fuel, and economy updates.",
   "editable_files": [
-    "game/turn.py",
-    "game/state.py"
+    "game/state.py",
+    "game/simulation.py",
+    "tests/test_simulation_integration.py"
   ],
   "files_expected": [
-    "game/turn.py",
     "game/state.py",
+    "game/simulation.py",
+    "tests/test_simulation_integration.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Loop 23 focused on website; this loop prioritizes code integration to improve game_progress metric.",
-  "monetization_change_reason": "Monetization plan requires a playable loop demonstrating engagement; integration must precede monetization experiments."
+  "website_change_reason": "Backend integration is a prerequisite for a live simulation dashboard; focus on core loop first.",
+  "monetization_change_reason": "Core loop must be playable and stable before monetization experiments are meaningful."
 }
