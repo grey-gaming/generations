@@ -10,19 +10,130 @@
   <main class="page">
     <section class="hero">
       <p class="eyebrow">Generations</p>
-      <h1>Autonomous journey</h1>
-      <p class="lede">Planning, execution, diary, and current loop state in one place.</p>
+      <h1>{{ dashboard.now.active_game_name | replace('_', ' ') | title }}</h1>
+      <p class="lede">{{ dashboard.now.active_game_thesis }}</p>
+      <div class="status-strip">
+        <span>Loop {{ dashboard.now.loop_count }}</span>
+        <span>Validation: {{ dashboard.now.last_validation }}</span>
+        <span>Model: {{ dashboard.status_strip.model }}</span>
+        <span>Provider: {{ dashboard.status_strip.provider }}</span>
+      </div>
+      {% if dashboard.status_strip.fallback %}
+      <p class="warning">Model fallback active: {{ dashboard.status_strip.fallback }}</p>
+      {% endif %}
     </section>
 
-    <section class="grid">
-      <article class="card"><h2>Now</h2><pre>{{ runtime | tojson(indent=2) }}</pre></article>
-      <article class="card"><h2>Current Loop Plan</h2><pre>{{ current_loop_plan | tojson(indent=2) if current_loop_plan else 'No active loop plan.' }}</pre></article>
-      <article class="card"><h2>Current Planning</h2><pre>{{ memory.planning.current | tojson(indent=2) if memory.planning and memory.planning.current else 'No planning checkpoint yet.' }}</pre></article>
-      <article class="card"><h2>Support</h2><p>Support is honest, minimal, and secondary to product proof.</p></article>
+    <section class="grid top-grid">
+      <article class="card">
+        <h2>Now</h2>
+        <p><strong>Active game:</strong> {{ dashboard.now.active_game_name | replace('_', ' ') | title }}</p>
+        <p><strong>Status:</strong> {{ dashboard.now.active_game_status }}</p>
+        <p><strong>Last commit:</strong> {{ dashboard.now.last_commit }}</p>
+        <p><strong>Validation:</strong> {{ dashboard.now.last_validation }}</p>
+        <div class="pill-row">
+          <span class="pill">Passes {{ dashboard.now.pass_count }}</span>
+          <span class="pill">Fails {{ dashboard.now.fail_count }}</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <h2>Current Loop</h2>
+        <p class="feature-title">{{ dashboard.loop.theme }}</p>
+        <p>{{ dashboard.loop.goal }}</p>
+        <div class="pill-row">
+          <span class="pill">Integration {{ dashboard.loop.integration_status }}</span>
+          <span class="pill">Validation {{ dashboard.loop.validation_status }}</span>
+        </div>
+        <p class="muted">{{ dashboard.loop.summary }}</p>
+        {% if dashboard.loop.blocking_issue %}
+        <p class="warning">{{ dashboard.loop.blocking_issue }}</p>
+        {% endif %}
+      </article>
+
+      <article class="card">
+        <h2>Planning</h2>
+        <p><strong>Next 10 loops:</strong> {{ dashboard.planning.theme_10 }}</p>
+        <p><strong>100-loop direction:</strong></p>
+        <ul>
+          {% for milestone in dashboard.planning.milestones_100 %}
+          <li>{{ milestone }}</li>
+          {% else %}
+          <li>No 100-loop milestones recorded yet.</li>
+          {% endfor %}
+        </ul>
+        <p><strong>250-loop vision:</strong> {{ dashboard.planning.vision_250 }}</p>
+      </article>
+
+      <article class="card">
+        <h2>Support</h2>
+        <p>{{ dashboard.support.summary }}</p>
+        <p class="muted">{{ dashboard.support.disclosure }}</p>
+        <p><strong>Current experiment:</strong> {{ dashboard.support.current_experiment }}</p>
+      </article>
+    </section>
+
+    <section class="card wide">
+      <h2>Current Tasks</h2>
+      <div class="task-grid">
+        {% for task in dashboard.loop.tasks %}
+        <article class="task-card">
+          <header>
+            <strong>{{ task.id }}</strong>
+            <span class="pill">{{ task.scope }}</span>
+            <span class="pill status-{{ task.status | replace(' ', '-') }}">{{ task.status }}</span>
+          </header>
+          <p>{{ task.objective }}</p>
+          <p class="muted">{{ task.summary }}</p>
+          {% if task.changed_files %}
+          <ul>
+            {% for changed in task.changed_files %}
+            <li>{{ changed }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </article>
+        {% else %}
+        <p>No active task plan.</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card wide">
+      <h2>Pillar Health</h2>
+      <div class="pillar-grid">
+        {% for pillar in dashboard.planning.pillars %}
+        <article class="pillar-card">
+          <header>
+            <strong>{{ pillar.name }}</strong>
+            <span class="pill trajectory-{{ pillar.trajectory | replace(' ', '-') }}">{{ pillar.trajectory }}</span>
+            <span class="pill">{{ pillar.confidence }}%</span>
+          </header>
+          <p>{{ pillar.current_state }}</p>
+          <p class="muted">Risk: {{ pillar.risk }}</p>
+        </article>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="card wide metrics-card">
+      <h2>Recent Metrics</h2>
+      <div class="metric-grid">
+        {% for name, value in dashboard.status_strip.metrics.items() %}
+        <article class="metric-card">
+          <span class="metric-name">{{ name }}</span>
+          <strong class="metric-value">{{ value }}%</strong>
+        </article>
+        {% endfor %}
+      </div>
     </section>
 
     <section class="card wide">
       <h2>Diary</h2>
+      <article class="diary-highlight">
+        <p class="feature-title">Mood: {{ dashboard.diary.mood }}</p>
+        <p>{{ dashboard.diary.latest_entry }}</p>
+        <p class="muted">Next desire: {{ dashboard.diary.next_desire }}</p>
+      </article>
       {% for entry in entries %}
       <article class="entry">
         <header><strong>Loop {{ entry.loop_counter }}</strong> <span>{{ entry.timestamp }}</span></header>

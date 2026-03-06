@@ -1,1 +1,196 @@
-body{margin:0;font-family:Georgia,serif;background:linear-gradient(180deg,#efe6d6,#d7e3d7);color:#18221d}.page{max-width:1120px;margin:0 auto;padding:24px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}.card{background:#fffaf1;border:1px solid #d2c5b5;border-radius:18px;padding:18px;box-shadow:0 10px 24px rgba(24,34,29,.08)}.wide{margin-top:16px}.entry{padding-top:12px;border-top:1px solid #d2c5b5;margin-top:12px}.eyebrow{text-transform:uppercase;letter-spacing:.16em;font-size:.75rem;color:#546256}.lede{max-width:58ch}pre{white-space:pre-wrap;word-break:break-word}
+:root {
+  --bg-top: #f1e4cf;
+  --bg-bottom: #d7e3d7;
+  --panel: rgba(255, 251, 244, 0.92);
+  --panel-strong: #fff7eb;
+  --ink: #18221d;
+  --muted: #55645c;
+  --line: #d2c5b5;
+  --accent: #bb5a2a;
+  --accent-soft: #f1d5b8;
+  --ok: #2d6a4f;
+  --warn: #9a3412;
+  --shadow: 0 18px 40px rgba(24, 34, 29, 0.09);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(255,255,255,0.55), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(187,90,42,0.12), transparent 24%),
+    linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+}
+
+.page {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 20px 56px;
+}
+
+.hero {
+  padding: 28px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(24,34,29,0.08);
+  border-radius: 28px;
+  background: linear-gradient(135deg, rgba(255,247,235,0.95), rgba(245,252,246,0.88));
+  box-shadow: var(--shadow);
+}
+
+.eyebrow {
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+h1, h2, h3, .feature-title {
+  font-family: "Georgia", serif;
+}
+
+h1 {
+  margin: 0 0 10px;
+  font-size: clamp(2rem, 4vw, 3.6rem);
+  line-height: 0.95;
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.lede {
+  max-width: 68ch;
+  font-size: 1.05rem;
+  line-height: 1.5;
+}
+
+.status-strip,
+.pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.grid,
+.task-grid,
+.pillar-grid,
+.metric-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.top-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.task-grid { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.pillar-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.metric-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+
+.card,
+.task-card,
+.pillar-card,
+.metric-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+
+.wide {
+  margin-top: 18px;
+}
+
+.task-card header,
+.pillar-card header,
+.entry header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-size: 0.82rem;
+}
+
+.trajectory-on-track,
+.status-merged { background: rgba(45,106,79,0.18); }
+.trajectory-off-track,
+.status-failed,
+.status-no-change { background: rgba(154,52,18,0.16); }
+.trajectory-unclear,
+.status-planned,
+.status-running { background: rgba(85,100,92,0.15); }
+
+.feature-title {
+  display: block;
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+
+.muted,
+.entry span,
+small {
+  color: var(--muted);
+}
+
+.warning {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-left: 4px solid var(--warn);
+  background: rgba(154, 52, 18, 0.08);
+  border-radius: 10px;
+}
+
+.entry {
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  margin-top: 14px;
+}
+
+.diary-highlight {
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(255,247,235,0.95), rgba(255,255,255,0.72));
+  border: 1px solid var(--line);
+  margin-bottom: 14px;
+}
+
+.metric-name {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+}
+
+ul {
+  padding-left: 18px;
+  margin: 10px 0 0;
+}
+
+p {
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .page { padding: 18px 14px 36px; }
+  .hero, .card, .task-card, .pillar-card, .metric-card { padding: 16px; }
+}
