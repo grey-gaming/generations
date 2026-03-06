@@ -412,6 +412,9 @@ class Runner:
             heuristics = [new if item == old else item for item in heuristics]
         if new not in heuristics:
             heuristics.insert(0, new)
+        platform_heuristic = "Improve the platform when it increases autonomous game-development capability."
+        if platform_heuristic not in heuristics:
+            heuristics.append(platform_heuristic)
         normalized["heuristics"] = heuristics
         normalized["heuristics_recent_history"] = list(normalized.get("heuristics_recent_history", []))
         normalized["heuristics_rolling_average"] = self._normalize_heuristic_scores(
