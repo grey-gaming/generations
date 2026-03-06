@@ -40,6 +40,8 @@ def test_runner_rejects_invalid_task_scopes(tmp_path: Path) -> None:
 def test_ollama_adapter_normalizes_semantic_task_scopes() -> None:
     adapter = OllamaCloudAdapter(debug=False)
     assert adapter._normalize_scope("validation_hooks") == "platform"
+    assert adapter._normalize_scope("ci/cd_infrastructure") == "platform"
+    assert adapter._normalize_scope("developer-experience") == "platform"
     assert adapter._normalize_scope("journey_page") == "website"
     assert adapter._normalize_scope("simulation") == "active_game"
     assert adapter._normalize_scope("support") == "monetization_platform"

@@ -359,7 +359,14 @@ class OllamaCloudAdapter:
         }
 
     def _normalize_scope(self, raw_scope: Any) -> str:
-        scope = str(raw_scope or "platform").strip().lower().replace("-", "_").replace(" ", "_")
+        scope = (
+            str(raw_scope or "platform")
+            .strip()
+            .lower()
+            .replace("-", "_")
+            .replace(" ", "_")
+            .replace("/", "_")
+        )
         canonical = {
             "platform": "platform",
             "self": "platform",
@@ -387,7 +394,71 @@ class OllamaCloudAdapter:
             "support": "monetization_platform",
             "commercial": "monetization_platform",
         }
-        return canonical.get(scope, scope)
+        if scope in canonical:
+            return canonical[scope]
+
+        platform_keywords = (
+            "platform",
+            "validation",
+            "test",
+            "qa",
+            "planner",
+            "planning",
+            "memory",
+            "state",
+            "observability",
+            "instrument",
+            "debug",
+            "ci",
+            "cd",
+            "release_engineering",
+            "developer_experience",
+            "tooling",
+            "infrastructure",
+        )
+        website_keywords = (
+            "website",
+            "web",
+            "journey",
+            "public",
+            "landing",
+            "copy",
+            "content",
+        )
+        game_keywords = (
+            "game",
+            "simulation",
+            "economy",
+            "route",
+            "cargo",
+            "station",
+            "prototype",
+            "mechanic",
+            "design",
+        )
+        monetization_keywords = (
+            "monetization",
+            "support",
+            "commercial",
+            "sponsor",
+            "donation",
+            "pricing",
+            "affiliate",
+            "revenue",
+        )
+        cross_cutting_keywords = ("integration", "cross_cutting", "crosscutting", "shared")
+
+        if any(keyword in scope for keyword in platform_keywords):
+            return "platform"
+        if any(keyword in scope for keyword in website_keywords):
+            return "website"
+        if any(keyword in scope for keyword in game_keywords):
+            return "active_game"
+        if any(keyword in scope for keyword in monetization_keywords):
+            return "monetization_platform"
+        if any(keyword in scope for keyword in cross_cutting_keywords):
+            return "cross_cutting"
+        return scope
 
     def _test_vision(self, seed: str, loop_counter: int, current_version: int) -> LongTermVisionRecord:
         version = current_version + 1
