@@ -3,9 +3,9 @@
 Version: 1
 Refined at loop: 0
 
-Initial long-term vision definition for Generations studio. Establishes the foundational purpose, end states, and failure modes for the three core pillars: self (autonomous platform), game (space logistics product), and monetization_platform (commercial surface). This version sets the strategic constraints for Loop 0 and beyond, prioritizing discipline, quality, and ethical commerce over rapid expansion.
+Loop 0 vision definition establishing the foundational purpose and constraints for the autonomous studio, the target game product, and the commercial platform.
 
 ## Pillars
-- self: The autonomous engine and disciplined process framework of the studio.
-- game: The active product concept, implementation, tests, and design artifacts focused on space logistics.
+- self: The autonomous platform, its website, memory, validation, and operator visibility.
+- game: The active game concept, implementation, tests, and design artifacts.
 - monetization_platform: The honest commercial, support, and audience-building surfaces around the project.
