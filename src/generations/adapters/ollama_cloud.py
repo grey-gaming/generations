@@ -90,8 +90,11 @@ class OllamaCloudAdapter:
     def _prompt(self, seed: str, loop_count: int, memory: dict[str, object]) -> str:
         criteria = memory.get("criteria_history", [])[-1]
         heuristics = memory.get("heuristics", [])
+        heuristic_scores = memory.get("heuristics_rolling_average", {})
         website_heuristics = memory.get("website_heuristics", [])
+        website_scores = memory.get("website_heuristics_rolling_average", {})
         monetization_heuristics = memory.get("monetization_heuristics", [])
+        monetization_scores = memory.get("monetization_heuristics_rolling_average", {})
         outcomes = memory.get("outcomes", {})
         metrics = memory.get("evaluation_metrics", {})
         strategic_intent = memory.get("strategic_intent", {})
@@ -139,9 +142,9 @@ class OllamaCloudAdapter:
             f"Seed: {seed}\n"
             f"Loop: {loop_count}\n"
             f"Current criteria: {json.dumps(criteria, sort_keys=True)}\n"
-            f"Current heuristics: {json.dumps(heuristics, ensure_ascii=True)}\n"
-            f"Current website heuristics: {json.dumps(website_heuristics, ensure_ascii=True)}\n"
-            f"Current monetization heuristics: {json.dumps(monetization_heuristics, ensure_ascii=True)}\n"
+            f"Current heuristics: {json.dumps(self._weighted_heuristics(heuristics, heuristic_scores), ensure_ascii=True)}\n"
+            f"Current website heuristics: {json.dumps(self._weighted_heuristics(website_heuristics, website_scores), ensure_ascii=True)}\n"
+            f"Current monetization heuristics: {json.dumps(self._weighted_heuristics(monetization_heuristics, monetization_scores), ensure_ascii=True)}\n"
             f"Recent outcomes: {json.dumps(outcomes, sort_keys=True)}\n"
             f"Evaluation metrics: {json.dumps(metrics, sort_keys=True)}\n"
             f"Strategic intent: {json.dumps(strategic_intent, sort_keys=True)}\n"
@@ -159,6 +162,22 @@ class OllamaCloudAdapter:
             "When possible, choose a step that clarifies or advances the likely game direction, especially around transport, logistics, simulation, economy, progression, or player motivation.\n"
             "Pick the smallest useful step that moves the system toward autonomous software development capability and eventual game production.\n"
         )
+
+    def _weighted_heuristics(
+        self,
+        heuristics: list[object],
+        scores: dict[str, object],
+    ) -> list[dict[str, object]]:
+        weighted: list[dict[str, object]] = []
+        for item in heuristics:
+            text = str(item)
+            raw_score = scores.get(text, 0.0)
+            try:
+                score = round(float(raw_score), 2)
+            except (TypeError, ValueError):
+                score = 0.0
+            weighted.append({"text": text, "rolling_average": score})
+        return weighted
 
     def _fallback_proposal(self, seed: str, loop_count: int, memory: dict[str, object]) -> StepProposal:
         digest = hashlib.sha256(f"{seed}:{loop_count}".encode("utf-8")).hexdigest()[:12]

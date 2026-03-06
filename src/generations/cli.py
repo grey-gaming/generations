@@ -99,6 +99,9 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def _maybe_start_embedded_web(root: Path, host: str, port: int) -> None:
+    config = AppConfig.from_root(root)
+    if config.test_mode or config.disable_web:
+        return
     try:
         import uvicorn
         from generations.web.app import create_app

@@ -36,6 +36,13 @@ DEFAULT_MEMORY = {
         "Think in larger arcs even when executing in small steps.",
         "Prefer steps that unlock future game-building capability, not just local housekeeping.",
     ],
+    "heuristics_rolling_average": {
+        "Favor coherent, reviewable steps inside a larger strategic arc.": 1.0,
+        "Delay game scope growth until the website, journal, and memory remain healthy.": 1.0,
+        "Think in larger arcs even when executing in small steps.": 1.0,
+        "Prefer steps that unlock future game-building capability, not just local housekeeping.": 1.0,
+    },
+    "heuristics_recent_history": [],
     "strategic_intent": {
         "current_direction": "Grow from autonomous software bootstrap into a system capable of designing and building a commercially plausible game.",
         "current_game_thesis": "No fixed thesis yet. Explore systems that could support a strong game premise.",
@@ -49,10 +56,18 @@ DEFAULT_MEMORY = {
         "Keep the journey page readable offline.",
         "Only add monetization experiments that are honest and reversible.",
     ],
+    "website_heuristics_rolling_average": {
+        "Keep the journey page readable offline.": 1.0,
+        "Only add monetization experiments that are honest and reversible.": 1.0,
+    },
     "monetization_heuristics": [
         "Start with a support placeholder and disclosure.",
         "Track experiments explicitly before optimizing them.",
     ],
+    "monetization_heuristics_rolling_average": {
+        "Start with a support placeholder and disclosure.": 1.0,
+        "Track experiments explicitly before optimizing them.": 1.0,
+    },
     "monetization_experiments": [
         {
             "timestamp": None,

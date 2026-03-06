@@ -85,7 +85,7 @@
           <h3>Core</h3>
           <ul>
             {% for item in memory.heuristics %}
-            <li>{{ item }}</li>
+            <li>{{ item }} {% if memory.heuristics_rolling_average %}<span class="note">(avg {{ memory.heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>
             {% endfor %}
           </ul>
         </div>
@@ -93,7 +93,7 @@
           <h3>Website</h3>
           <ul>
             {% for item in memory.website_heuristics %}
-            <li>{{ item }}</li>
+            <li>{{ item }} {% if memory.website_heuristics_rolling_average %}<span class="note">(avg {{ memory.website_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>
             {% endfor %}
           </ul>
         </div>
@@ -101,7 +101,7 @@
           <h3>Monetization</h3>
           <ul>
             {% for item in memory.monetization_heuristics %}
-            <li>{{ item }}</li>
+            <li>{{ item }} {% if memory.monetization_heuristics_rolling_average %}<span class="note">(avg {{ memory.monetization_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>
             {% endfor %}
           </ul>
         </div>

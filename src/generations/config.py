@@ -23,6 +23,7 @@ class AppConfig:
     opencode_agent: str
     max_rest_seconds: int
     debug: bool
+    disable_web: bool
     test_mode: bool
     operational_max_loops: int | None
 
@@ -44,6 +45,7 @@ class AppConfig:
             opencode_agent=os.getenv("GENERATIONS_OPENCODE_AGENT", "build"),
             max_rest_seconds=int(os.getenv("GENERATIONS_MAX_REST_SECONDS", "5")),
             debug=os.getenv("GENERATIONS_DEBUG", "0") == "1",
+            disable_web=os.getenv("GENERATIONS_DISABLE_WEB", "0") == "1",
             test_mode=os.getenv("GENERATIONS_TEST_MODE", "0") == "1",
             operational_max_loops=_optional_int(os.getenv("GENERATIONS_MAX_LOOPS")),
         )

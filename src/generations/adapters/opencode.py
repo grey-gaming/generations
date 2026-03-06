@@ -244,7 +244,12 @@ class OpenCodeAdapter:
         for line in output.splitlines():
             if not line.strip():
                 continue
-            changed.append(line[3:])
+            if " -> " in line:
+                changed.append(line.split(" -> ", 1)[1].strip())
+                continue
+            parts = line.split(maxsplit=1)
+            if len(parts) == 2:
+                changed.append(parts[1].strip())
         return changed
 
     def _meaningful_repo_files(self, files: list[str]) -> list[str]:
@@ -301,11 +306,12 @@ class OpenCodeAdapter:
             env=self._env(),
             check=False,
             capture_output=True,
-            text=True,
+            text=False,
         )
         if completed.returncode != 0:
             return None
-        lines = completed.stdout.splitlines()
+        stdout = completed.stdout.decode("utf-8", errors="replace")
+        lines = stdout.splitlines()
         json_start = next((index for index, line in enumerate(lines) if line.strip().startswith("{")), None)
         if json_start is None:
             return None

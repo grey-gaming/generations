@@ -88,9 +88,9 @@ Every loop writes a journal entry with:
 Memory snapshots store:
 - current criteria version
 - outcomes summary
-- evolving heuristics
-- website heuristics
-- monetization heuristics
+- evolving heuristics with rolling-average weights
+- website heuristics with rolling-average weights
+- monetization heuristics with rolling-average weights
 - monetization experiments log
 - tool routing summary
 

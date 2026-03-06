@@ -124,16 +124,17 @@ class Runner:
         else:
             latest_memory["outcomes"]["fail_count"] += 1
             latest_memory["outcomes"]["last_error"] = result.validation[-1].output if result.validation else "validation failed"
-            heuristics = list(latest_memory.get("heuristics", []))
-            failure_heuristic = "Avoid no-op loops: each successful iteration should produce a meaningful repo edit outside generated state."
-            if failure_heuristic not in heuristics:
-                heuristics.append(failure_heuristic)
-            latest_memory["heuristics"] = heuristics
         latest_memory["evaluation_metrics"] = self._update_metrics_memory(
             latest_memory.get("evaluation_metrics", {}),
             loop_counter,
             proposal,
             metrics,
+        )
+        latest_memory = self._update_heuristics_memory(
+            latest_memory,
+            loop_counter,
+            proposal,
+            validation_success,
         )
         self.memory.replace(latest_memory, created_at=self._timestamp())
 
@@ -412,12 +413,126 @@ class Runner:
         if new not in heuristics:
             heuristics.insert(0, new)
         normalized["heuristics"] = heuristics
+        normalized["heuristics_recent_history"] = list(normalized.get("heuristics_recent_history", []))
+        normalized["heuristics_rolling_average"] = self._normalize_heuristic_scores(
+            heuristics,
+            normalized.get("heuristics_rolling_average", {}),
+        )
+
+        website_heuristics = list(normalized.get("website_heuristics", DEFAULT_MEMORY["website_heuristics"]))
+        normalized["website_heuristics"] = website_heuristics
+        normalized["website_heuristics_rolling_average"] = self._normalize_heuristic_scores(
+            website_heuristics,
+            normalized.get("website_heuristics_rolling_average", {}),
+        )
+
+        monetization_heuristics = list(
+            normalized.get("monetization_heuristics", DEFAULT_MEMORY["monetization_heuristics"])
+        )
+        normalized["monetization_heuristics"] = monetization_heuristics
+        normalized["monetization_heuristics_rolling_average"] = self._normalize_heuristic_scores(
+            monetization_heuristics,
+            normalized.get("monetization_heuristics_rolling_average", {}),
+        )
 
         if "strategic_intent" not in normalized:
             normalized["strategic_intent"] = DEFAULT_MEMORY["strategic_intent"]
         if "evaluation_metrics" not in normalized:
             normalized["evaluation_metrics"] = DEFAULT_MEMORY["evaluation_metrics"]
         return normalized
+
+    def _normalize_heuristic_scores(
+        self,
+        heuristics: list[str],
+        existing_scores: dict[str, Any],
+    ) -> dict[str, float]:
+        normalized: dict[str, float] = {}
+        for item in heuristics:
+            raw = existing_scores.get(item, 1.0)
+            try:
+                normalized[item] = round(float(raw), 2)
+            except (TypeError, ValueError):
+                normalized[item] = 1.0
+        return normalized
+
+    def _update_heuristics_memory(
+        self,
+        memory: dict[str, Any],
+        loop_counter: int,
+        proposal: Any,
+        validation_success: bool,
+    ) -> dict[str, Any]:
+        updated = dict(memory)
+        core = list(updated.get("heuristics", []))
+        website = list(updated.get("website_heuristics", []))
+        monetization = list(updated.get("monetization_heuristics", []))
+
+        active_core = [item for item in proposal.heuristics_updates if item in core]
+        if not validation_success:
+            failure_heuristic = "Avoid no-op loops: each successful iteration should produce a meaningful repo edit outside generated state."
+            if failure_heuristic not in core:
+                core.append(failure_heuristic)
+            active_core.append(failure_heuristic)
+
+        history = list(updated.get("heuristics_recent_history", []))
+        history.append(
+            {
+                "loop": loop_counter,
+                "core": sorted(set(active_core)),
+                "website": website if proposal.website_change else [],
+                "monetization": monetization if proposal.monetization_change else [],
+            }
+        )
+        history = history[-10:]
+
+        updated["heuristics_recent_history"] = history
+        updated["heuristics_rolling_average"] = self._compute_heuristic_rolling_average(core, history, "core")
+        updated["website_heuristics_rolling_average"] = self._compute_heuristic_rolling_average(
+            website,
+            history,
+            "website",
+        )
+        updated["monetization_heuristics_rolling_average"] = self._compute_heuristic_rolling_average(
+            monetization,
+            history,
+            "monetization",
+        )
+        updated["heuristics"] = self._sort_heuristics_by_score(core, updated["heuristics_rolling_average"])
+        updated["website_heuristics"] = self._sort_heuristics_by_score(
+            website,
+            updated["website_heuristics_rolling_average"],
+        )
+        updated["monetization_heuristics"] = self._sort_heuristics_by_score(
+            monetization,
+            updated["monetization_heuristics_rolling_average"],
+        )
+        return updated
+
+    def _compute_heuristic_rolling_average(
+        self,
+        heuristics: list[str],
+        history: list[dict[str, Any]],
+        key: str,
+    ) -> dict[str, float]:
+        if not history:
+            return {item: 1.0 for item in heuristics}
+        scores: dict[str, float] = {}
+        for item in heuristics:
+            activations = [1.0 if item in entry.get(key, []) else 0.0 for entry in history]
+            if not activations:
+                scores[item] = 1.0
+                continue
+            scores[item] = round(sum(activations) / len(activations), 2)
+        return scores
+
+    def _sort_heuristics_by_score(self, heuristics: list[str], scores: dict[str, float]) -> list[str]:
+        seen: set[str] = set()
+        ordered = []
+        for item in heuristics:
+            if item not in seen:
+                seen.add(item)
+                ordered.append(item)
+        return sorted(ordered, key=lambda item: (-scores.get(item, 0.0), item))
 
     def _score_loop(self, proposal: Any, result: Any, validation_success: bool) -> dict[str, float]:
         changed_files = [
