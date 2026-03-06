@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 17
+Latest loop: 18
 
-Visible intent: Focus is on backend simulation logic; website updates deferred until a playable milestone is reached.
+Visible intent: Internal tooling optimization does not require public documentation update yet.
 
 Support remains a minimal placeholder until a logged experiment is justified.

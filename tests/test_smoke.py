@@ -11,6 +11,7 @@ def test_single_safe_loop_writes_journal_and_memory(tmp_path: Path) -> None:
     env = dict(**__import__("os").environ)
     env["PYTHONPATH"] = str(repo_root / "src")
     env["GENERATIONS_TEST_MODE"] = "1"
+    env["GENERATIONS_LOOP_TIMEOUT_SECONDS"] = "30"
 
     subprocess.run(["git", "init"], cwd=tmp_path, check=True, capture_output=True)
     subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=tmp_path, check=True, capture_output=True)

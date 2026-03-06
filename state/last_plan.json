@@ -1,18 +1,18 @@
 {
-  "summary": "game_workspace:game_pipeline: Implement basic route distance and fuel cost calculation logic in the simulation module.",
+  "summary": "autonomous_platform:tooling: Reduce smoke test simulation ticks to lower execution time from 98s toward 30s target.",
   "editable_files": [
-    "game/src/route.py",
-    "game/tests/test_route.py"
+    "tests/test_smoke.py",
+    "tests/conftest.py"
   ],
   "files_expected": [
-    "game/src/route.py",
-    "game/tests/test_route.py",
+    "tests/test_smoke.py",
+    "tests/conftest.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Focus is on backend simulation logic; website updates deferred until a playable milestone is reached.",
-  "monetization_change_reason": "Monetization experiments are deferred until the core loop is functional and engaging."
+  "website_change_reason": "Internal tooling optimization does not require public documentation update yet.",
+  "monetization_change_reason": "Monetization remains deferred until core loop is compelling and stable."
 }

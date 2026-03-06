@@ -15,22 +15,22 @@
     </section>
     <section class="panel-grid">
       <article class="panel"><h2>Runtime</h2><pre>{
-  "loop_count": 16,
-  "last_commit": "c823f05b490880b68a7f54d10c1877eda712e534",
+  "loop_count": 17,
+  "last_commit": "fc607fbaf655049eda680930c2dda5b485b59fb3",
   "last_validation": {
     "success": true,
     "results": [
       {
         "success": true,
         "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
-        "output": "......                                                                   [100%]\n6 passed in 101.99s (0:01:41)"
+        "output": "......                                                                   [100%]\n6 passed in 98.11s (0:01:38)"
       }
     ]
   },
   "current_criteria_version": 1,
   "paused": false,
   "last_decision": "continue",
-  "updated_at": "2026-03-06T10:22:23.033475+00:00"
+  "updated_at": "2026-03-06T10:25:59.858504+00:00"
 }</pre></article>
       <article class="panel"><h2>Current Criteria</h2><pre>{
   "notes": [
@@ -97,7 +97,92 @@
     </section>
     <section class="panel">
       <h2>Latest Journal Entries</h2>
-      <div class='entry'><strong>Loop 16</strong><pre>{
+      <div class='entry'><strong>Loop 17</strong><pre>{
+  "actions_taken": [
+    "game/workspace/src/routes.py",
+    "game/workspace/tests/test_routes.py",
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html"
+  ],
+  "commit_hash": "fc607fbaf655049eda680930c2dda5b485b59fb3",
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "evaluation_metrics": {
+    "balance": 0.5,
+    "code_change": 0.7,
+    "creativity": 0.9,
+    "game_progress": 0.75,
+    "observability": 0.4,
+    "review_quality": 0.9
+  },
+  "journal_entry_count_before_write": 17,
+  "loop_counter": 17,
+  "model_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "fallback": null,
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": false,
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "Monetization experiments are deferred until the core loop is functional and engaging."
+  },
+  "next_step": {
+    "capability_target": "game_pipeline",
+    "description": "Implement basic route distance and fuel cost calculation logic in the simulation module.",
+    "rationale": "Addresses the critically low game_progress metric (0.1) by delivering executable mechanics required for the logistics core loop defined in the 10-loop plan.",
+    "workstream": "game_workspace"
+  },
+  "opencode": {
+    "binary": "/home/jishm/.opencode/bin/opencode",
+    "changed_files": [
+      "game/workspace/src/routes.py",
+      "game/workspace/tests/test_routes.py"
+    ],
+    "debug_stderr_path": null,
+    "debug_stdout_path": null,
+    "push_output": "To github.com:grey-gaming/generations.git\n   c823f05..fc607fb  main -> main",
+    "pushed": true,
+    "session_export": "state/opencode/ses_33d55092dffe3KLLXtvWCHnJTc.json",
+    "session_id": "ses_33d55092dffe3KLLXtvWCHnJTc"
+  },
+  "rest_decision": {
+    "decision": "continue",
+    "reason": "Continue with another small step after a short bounded rest.",
+    "sleep_seconds": 1
+  },
+  "rolled_back": false,
+  "seed_hash": "d29d1e27aacff87f77266f23cd3c3baf39d47d832755d94e27bec24f9d23c949",
+  "timestamp": "2026-03-06T10:24:03.815006+00:00",
+  "validation_results": [
+    {
+      "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
+      "output": "......                                                                   [100%]\n6 passed in 98.11s (0:01:38)",
+      "success": true
+    }
+  ],
+  "validation_summary": "passed",
+  "website_change": {
+    "changed": false,
+    "summary": "Focus is on backend simulation logic; website updates deferred until a playable milestone is reached."
+  }
+}</pre></div>
+<div class='entry'><strong>Loop 16</strong><pre>{
   "actions_taken": [
     "criteria.json",
     "tests/test_smoke.py",
