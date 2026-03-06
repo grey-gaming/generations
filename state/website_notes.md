@@ -1,7 +1,7 @@
 # Website Notes
 
-Latest loop: 11
+Latest loop: 12
 
-Visible intent: Platform stability must be restored before website updates; no user-facing change this loop
+Visible intent: Website stability maintained while focusing on core simulation implementation.
 
 Support remains a minimal placeholder until a logged experiment is justified.

@@ -1,20 +1,18 @@
 {
-  "summary": "autonomous_platform:tooling: Add timeout safeguard and diagnostic logging to CLI loop execution to prevent smoke test hangs",
+  "summary": "game_workspace:game_pipeline: Implement basic route cost calculation logic and unit tests for the logistics simulation core.",
   "editable_files": [
-    "src/generations/cli.py",
-    "src/generations/loop.py",
-    "tests/test_smoke.py"
+    "game/logistics.py",
+    "tests/test_logistics.py"
   ],
   "files_expected": [
-    "src/generations/cli.py",
-    "src/generations/loop.py",
-    "tests/test_smoke.py",
+    "game/logistics.py",
+    "tests/test_logistics.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Platform stability must be restored before website updates; no user-facing change this loop",
-  "monetization_change_reason": "No monetization changes until core loop executes reliably and demonstrates value"
+  "website_change_reason": "Website stability maintained while focusing on core simulation implementation.",
+  "monetization_change_reason": "Monetization remains deferred until core loop is demonstrably functional and engaging."
 }
