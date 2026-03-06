@@ -15,13 +15,22 @@
     </section>
     <section class="panel-grid">
       <article class="panel"><h2>Runtime</h2><pre>{
-  "loop_count": 0,
-  "last_commit": null,
-  "last_validation": null,
+  "loop_count": 1,
+  "last_commit": "250ffe833ea1963aba0c5d492e50e5f08ac60647",
+  "last_validation": {
+    "success": true,
+    "results": [
+      {
+        "success": true,
+        "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
+        "output": "...                                                                      [100%]\n3 passed in 81.13s (0:01:21)"
+      }
+    ]
+  },
   "current_criteria_version": 1,
   "paused": false,
-  "last_decision": "idle",
-  "updated_at": "2026-03-06T07:46:35.094686+00:00"
+  "last_decision": "continue",
+  "updated_at": "2026-03-06T07:48:50.848218+00:00"
 }</pre></article>
       <article class="panel"><h2>Current Criteria</h2><pre>{
   "notes": [
@@ -40,7 +49,89 @@
     </section>
     <section class="panel">
       <h2>Latest Journal Entries</h2>
-      <p>No journal entries yet.</p>
+      <div class='entry'><strong>Loop 1</strong><pre>{
+  "actions_taken": [
+    "src/generations/web/templates/index.html",
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html"
+  ],
+  "commit_hash": "250ffe833ea1963aba0c5d492e50e5f08ac60647",
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "evaluation_metrics": {
+    "balance": 0.2,
+    "code_change": 0.6,
+    "creativity": 0.35,
+    "game_progress": 0.1,
+    "observability": 0.8,
+    "review_quality": 0.9
+  },
+  "journal_entry_count_before_write": 0,
+  "loop_counter": 1,
+  "model_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "fallback": "TimeoutError: timed out",
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": true,
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "No change; preserve the honest support placeholder until more evidence exists."
+  },
+  "next_step": {
+    "capability_target": "website",
+    "description": "Refresh observability artifacts and keep the website aligned with the latest runtime state",
+    "rationale": "Deterministic fallback derived from seed digest 48da5df53d45 and current heuristics count 4. The chosen step prioritizes a larger development arc while keeping the individual change small and reversible.",
+    "workstream": "autonomous_platform"
+  },
+  "opencode": {
+    "binary": "/home/jishm/.opencode/bin/opencode",
+    "changed_files": [
+      "src/generations/web/templates/index.html"
+    ],
+    "debug_stderr_path": null,
+    "debug_stdout_path": null,
+    "push_output": "To github.com:grey-gaming/generations.git\n   b86102e..250ffe8  main -> main",
+    "pushed": true,
+    "session_export": "state/opencode/ses_33de3a7d9ffeh62RZsqwU7OcRm.json",
+    "session_id": "ses_33de3a7d9ffeh62RZsqwU7OcRm"
+  },
+  "rest_decision": {
+    "decision": "continue",
+    "reason": "Continue with another small step after a short bounded rest.",
+    "sleep_seconds": 1
+  },
+  "rolled_back": false,
+  "seed_hash": "d29d1e27aacff87f77266f23cd3c3baf39d47d832755d94e27bec24f9d23c949",
+  "timestamp": "2026-03-06T07:47:58.759035+00:00",
+  "validation_results": [
+    {
+      "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
+      "output": "...                                                                      [100%]\n3 passed in 81.13s (0:01:21)",
+      "success": true
+    }
+  ],
+  "validation_summary": "passed",
+  "website_change": {
+    "changed": true,
+    "summary": "Keep the journey page and exported site in sync with the latest autonomous state."
+  }
+}</pre></div>
     </section>
   </main>
 </body>

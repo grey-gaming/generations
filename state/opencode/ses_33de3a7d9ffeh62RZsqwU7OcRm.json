@@ -1,0 +1,421 @@
+{
+  "info": {
+    "id": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+    "slug": "silent-island",
+    "projectID": "dcab437ad58279a2521db9a5f641845ff0e8695c",
+    "directory": "/home/jishm/code/generations",
+    "title": "Generations workflow: autonomous_platform:website: Refresh observabili",
+    "version": "1.2.18",
+    "summary": {
+      "additions": 1,
+      "deletions": 1,
+      "files": 1
+    },
+    "permission": [
+      {
+        "permission": "question",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_enter",
+        "pattern": "*",
+        "action": "deny"
+      },
+      {
+        "permission": "plan_exit",
+        "pattern": "*",
+        "action": "deny"
+      }
+    ],
+    "time": {
+      "created": 1772783163430,
+      "updated": 1772783190110
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1772783163443
+        },
+        "summary": {
+          "diffs": [
+            {
+              "file": "src/generations/web/templates/index.html",
+              "before": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Generations Journey</title>\n  <link rel=\"stylesheet\" href=\"/static/style.css\">\n</head>\n<body>\n  <main class=\"page\">\n    <section class=\"hero\">\n      <p class=\"eyebrow\">Generations</p>\n      <h1>Autonomous journey</h1>\n      <p class=\"lede\">The system can evolve its criteria, website, and monetization strategy over time. Each change is logged in the journal and reflected here.</p>\n    </section>\n\n    <section class=\"grid\">\n      <article class=\"card emphasis\">\n        <h2>Status</h2>\n        <dl>\n          <dt>Loop Count</dt><dd>{{ runtime.loop_count }}</dd>\n          <dt>Criteria Version</dt><dd>{{ runtime.current_criteria_version }}</dd>\n          <dt>Paused</dt><dd>{{ runtime.paused }}</dd>\n          <dt>Last Decision</dt><dd>{{ runtime.last_decision }}</dd>\n          <dt>Last Commit</dt><dd>{{ runtime.last_commit or \"none yet\" }}</dd>\n        </dl>\n      </article>\n\n      <article class=\"card\">\n        <h2>Current Criteria</h2>\n        {% set criteria = memory.criteria_history[-1] %}\n        <p>{{ criteria.summary }}</p>\n        <ul>\n          {% for item in criteria.ship_rules %}\n          <li>{{ item }}</li>\n          {% endfor %}\n        </ul>\n      </article>\n\n      <article class=\"card\">\n        <h2>Support</h2>\n        <p>This is a placeholder support area. Generations may test small, honest income ideas later, and every experiment will be logged before it is expanded.</p>\n      </article>\n\n      <article class=\"card\">\n        <h2>Disclosure</h2>\n        <p>No deceptive UI, fake scarcity, dark patterns, or default tracking. Sponsorships, affiliates, and analytics must be labeled, reversible, and validated.</p>\n      </article>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Evaluation Metrics</h2>\n      <div class=\"columns\">\n        <div>\n          <h3>Current</h3>\n          <ul>\n            {% for key, value in memory.evaluation_metrics.current.items() %}\n            <li>{{ key }}: {{ value }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Rolling Average</h3>\n          <ul>\n            {% for key, value in memory.evaluation_metrics.rolling_average.items() %}\n            <li>{{ key }}: {{ value }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Metric Notes</h3>\n          <ul>\n            {% for item in memory.evaluation_metrics.notes %}\n            <li>{{ item }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n      </div>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Heuristics</h2>\n      <div class=\"columns\">\n        <div>\n          <h3>Core</h3>\n          <ul>\n            {% for item in memory.heuristics %}\n            <li>{{ item }} {% if memory.heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Website</h3>\n          <ul>\n            {% for item in memory.website_heuristics %}\n            <li>{{ item }} {% if memory.website_heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.website_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Monetization</h3>\n          <ul>\n            {% for item in memory.monetization_heuristics %}\n            <li>{{ item }} {% if memory.monetization_heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.monetization_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n      </div>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Monetization Experiments</h2>\n      <ul>\n        {% for item in memory.monetization_experiments %}\n        <li>{{ item.name }} - {{ item.status }} - {{ item.reason }} - outcome: {{ item.outcome }}</li>\n        {% endfor %}\n      </ul>\n      <p class=\"note\">Generations may evolve this page and its monetization approach over time. Website changes are treated as first-class artifacts and are logged with intent.</p>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Journal Timeline</h2>\n      {% if entries %}\n        {% for entry in entries %}\n        <article class=\"entry\">\n          <header>\n            <strong>Loop {{ entry.loop_counter }}</strong>\n            <span>{{ entry.timestamp }}</span>\n          </header>\n          <p>{{ entry.next_step.description }}</p>\n          {% if entry.evaluation_metrics %}\n          <p>Metrics: creativity {{ entry.evaluation_metrics.creativity }}, code {{ entry.evaluation_metrics.code_change }}, review {{ entry.evaluation_metrics.review_quality }}, game {{ entry.evaluation_metrics.game_progress }}, balance {{ entry.evaluation_metrics.balance }}</p>\n          {% endif %}\n          <p>Validation: {{ entry.validation_summary }}</p>\n          <p>Website: {{ entry.website_change.summary }}</p>\n          <p>Monetization: {{ entry.monetization_change.summary }}</p>\n        </article>\n        {% endfor %}\n      {% else %}\n        <p>No journal entries yet.</p>\n      {% endif %}\n    </section>\n  </main>\n</body>\n</html>\n",
+              "after": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Generations Journey</title>\n  <link rel=\"stylesheet\" href=\"/static/style.css\">\n</head>\n<body>\n  <main class=\"page\">\n    <section class=\"hero\">\n      <p class=\"eyebrow\">Generations &mdash; Loop {{ runtime.loop_count }}</p>\n      <h1>Autonomous journey</h1>\n      <p class=\"lede\">The system can evolve its criteria, website, and monetization strategy over time. Each change is logged in the journal and reflected here.</p>\n    </section>\n\n    <section class=\"grid\">\n      <article class=\"card emphasis\">\n        <h2>Status</h2>\n        <dl>\n          <dt>Loop Count</dt><dd>{{ runtime.loop_count }}</dd>\n          <dt>Criteria Version</dt><dd>{{ runtime.current_criteria_version }}</dd>\n          <dt>Paused</dt><dd>{{ runtime.paused }}</dd>\n          <dt>Last Decision</dt><dd>{{ runtime.last_decision }}</dd>\n          <dt>Last Commit</dt><dd>{{ runtime.last_commit or \"none yet\" }}</dd>\n        </dl>\n      </article>\n\n      <article class=\"card\">\n        <h2>Current Criteria</h2>\n        {% set criteria = memory.criteria_history[-1] %}\n        <p>{{ criteria.summary }}</p>\n        <ul>\n          {% for item in criteria.ship_rules %}\n          <li>{{ item }}</li>\n          {% endfor %}\n        </ul>\n      </article>\n\n      <article class=\"card\">\n        <h2>Support</h2>\n        <p>This is a placeholder support area. Generations may test small, honest income ideas later, and every experiment will be logged before it is expanded.</p>\n      </article>\n\n      <article class=\"card\">\n        <h2>Disclosure</h2>\n        <p>No deceptive UI, fake scarcity, dark patterns, or default tracking. Sponsorships, affiliates, and analytics must be labeled, reversible, and validated.</p>\n      </article>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Evaluation Metrics</h2>\n      <div class=\"columns\">\n        <div>\n          <h3>Current</h3>\n          <ul>\n            {% for key, value in memory.evaluation_metrics.current.items() %}\n            <li>{{ key }}: {{ value }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Rolling Average</h3>\n          <ul>\n            {% for key, value in memory.evaluation_metrics.rolling_average.items() %}\n            <li>{{ key }}: {{ value }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Metric Notes</h3>\n          <ul>\n            {% for item in memory.evaluation_metrics.notes %}\n            <li>{{ item }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n      </div>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Heuristics</h2>\n      <div class=\"columns\">\n        <div>\n          <h3>Core</h3>\n          <ul>\n            {% for item in memory.heuristics %}\n            <li>{{ item }} {% if memory.heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Website</h3>\n          <ul>\n            {% for item in memory.website_heuristics %}\n            <li>{{ item }} {% if memory.website_heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.website_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Monetization</h3>\n          <ul>\n            {% for item in memory.monetization_heuristics %}\n            <li>{{ item }} {% if memory.monetization_heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.monetization_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n      </div>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Monetization Experiments</h2>\n      <ul>\n        {% for item in memory.monetization_experiments %}\n        <li>{{ item.name }} - {{ item.status }} - {{ item.reason }} - outcome: {{ item.outcome }}</li>\n        {% endfor %}\n      </ul>\n      <p class=\"note\">Generations may evolve this page and its monetization approach over time. Website changes are treated as first-class artifacts and are logged with intent.</p>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Journal Timeline</h2>\n      {% if entries %}\n        {% for entry in entries %}\n        <article class=\"entry\">\n          <header>\n            <strong>Loop {{ entry.loop_counter }}</strong>\n            <span>{{ entry.timestamp }}</span>\n          </header>\n          <p>{{ entry.next_step.description }}</p>\n          {% if entry.evaluation_metrics %}\n          <p>Metrics: creativity {{ entry.evaluation_metrics.creativity }}, code {{ entry.evaluation_metrics.code_change }}, review {{ entry.evaluation_metrics.review_quality }}, game {{ entry.evaluation_metrics.game_progress }}, balance {{ entry.evaluation_metrics.balance }}</p>\n          {% endif %}\n          <p>Validation: {{ entry.validation_summary }}</p>\n          <p>Website: {{ entry.website_change.summary }}</p>\n          <p>Monetization: {{ entry.monetization_change.summary }}</p>\n        </article>\n        {% endfor %}\n      {% else %}\n        <p>No journal entries yet.</p>\n      {% endif %}\n    </section>\n  </main>\n</body>\n</html>\n",
+              "additions": 1,
+              "deletions": 1,
+              "status": "modified"
+            }
+          ]
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "ollama",
+          "modelID": "qwen3.5:397b-cloud"
+        },
+        "id": "msg_cc21c5833001y6kOoYmEuHRan4",
+        "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/home/jishm/code/generations/state/opencode/input/workflow_plan.json\"}",
+          "synthetic": true,
+          "id": "prt_cc21c5896001LeQTAgfAkkx7BG",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "<path>/home/jishm/code/generations/state/opencode/input/workflow_plan.json</path>\n<type>file</type>\n<content>1: {\n2:   \"summary\": \"autonomous_platform:website: Refresh observability artifacts and keep the website aligned with the latest runtime state\",\n3:   \"editable_files\": [\n4:     \"README.md\",\n5:     \"games/space_logistics/README.md\",\n6:     \"src/generations/web/templates/index.html\"\n7:   ],\n8:   \"files_expected\": [\n9:     \"README.md\",\n10:     \"games/space_logistics/README.md\",\n11:     \"src/generations/web/templates/index.html\",\n12:     \"state/loop_snapshot.json\",\n13:     \"state/website_notes.md\",\n14:     \"state/memory.sqlite3\",\n15:     \"site/index.html\",\n16:     \"site/style.css\"\n17:   ],\n18:   \"website_change_reason\": \"Keep the journey page and exported site in sync with the latest autonomous state.\",\n19:   \"monetization_change_reason\": \"No change; preserve the honest support placeholder until more evidence exists.\"\n20: }\n\n(End of file - total 20 lines)\n</content>",
+          "synthetic": true,
+          "id": "prt_cc21c5896002IpuQOYdM1wZH0J",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "workflow_plan.json",
+          "url": "file:///home/jishm/code/generations/state/opencode/input/workflow_plan.json",
+          "id": "prt_cc21c5896003nmdYb35GckXWOZ",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/home/jishm/code/generations/state/opencode/input/git_context.json\"}",
+          "synthetic": true,
+          "id": "prt_cc21c58960041r3ge5OZ2rszSQ",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "<path>/home/jishm/code/generations/state/opencode/input/git_context.json</path>\n<type>file</type>\n<content>1: {\n2:   \"head\": \"b86102e522af64eca995ea671249541173bd2649\",\n3:   \"branch\": \"main\",\n4:   \"status_short\": \"M site/index.html\\n M state/memory.sqlite3\\n?? state/last_plan.json\",\n5:   \"recent_commits\": \"b86102e Simplify core heuristics and reset baseline\\n02314fd loop 5: Add ship rule requiring data schemas for game logic modules and enfo\\ndd4ea20 loop 4: Create a design document defining the core cargo and route data stru\\nfdc5fba loop 3: Add a Design Decision Record template to docs for tracking game mech\\nf8d25d7 loop 2: Define the core transport logistics loop in a design document.\",\n6:   \"planned_commit_message\": \"loop 1: Refresh observability artifacts and keep the website aligned with th\"\n7: }\n\n(End of file - total 7 lines)\n</content>",
+          "synthetic": true,
+          "id": "prt_cc21c5896005vWA3QeMDtnx2Bk",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "git_context.json",
+          "url": "file:///home/jishm/code/generations/state/opencode/input/git_context.json",
+          "id": "prt_cc21c58960065IaemWFKMe9FtG",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/home/jishm/code/generations/state/opencode/input/workflow_note.txt\"}",
+          "synthetic": true,
+          "id": "prt_cc21c5896007kFOy5caVTFoydT",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "<path>/home/jishm/code/generations/state/opencode/input/workflow_note.txt</path>\n<type>file</type>\n<content>1: Generations OpenCode session bootstrap.\n2: Attached files provide the planned workflow and current git context.\n3: Use them for repository-aware editing within the allowed editable files only.\n\n(End of file - total 3 lines)\n</content>",
+          "synthetic": true,
+          "id": "prt_cc21c58970014a2d5FT3SNhDt1",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "workflow_note.txt",
+          "url": "file:///home/jishm/code/generations/state/opencode/input/workflow_note.txt",
+          "id": "prt_cc21c5897002rKRO2q3SPsklNy",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/home/jishm/code/generations/README.md\"}",
+          "synthetic": true,
+          "id": "prt_cc21c589700337NEdNN4EeOJ5k",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "<path>/home/jishm/code/generations/README.md</path>\n<type>file</type>\n<content>1: # Generations\n2: \n3: Generations is a minimal Ubuntu-first autonomous codebase that can run locally, maintain a visible journal and memory, serve a journey website, and self-modify through a local OpenCode-style workflow.\n4: \n5: ## What Exists In This Seed\n6: \n7: - Python 3.11+ package under `src/generations`\n8: - CLI commands:\n9:   - `generations run --seed \"...\"`\n10:   - `generations web --host 127.0.0.1 --port 8000`\n11:   - `generations status`\n12:   - `generations pause`\n13:   - `generations resume`\n14:   - `generations export-web --out ./site/`\n15: - Append-only journal in `state/journal.jsonl`\n16: - Queryable memory snapshots in `state/memory.sqlite3`\n17: - Local journey website rendered from on-disk artifacts\n18: - `games/space_logistics/` seed game workspace\n19: - OpenCode CLI adapter using the installed `opencode` binary for workflow session artifacts\n20: - Ollama adapter using the local daemon/API with required default model `qwen3.5:397b-cloud`\n21: \n22: ## Ubuntu Setup\n23: \n24: ```bash\n25: python -m venv .venv\n26: source .venv/bin/activate\n27: pip install -e .[dev]\n28: pytest\n29: ```\n30: \n31: ## Run The Autonomous Loop\n32: \n33: ```bash\n34: generations run --seed \"Build yourself into a capable autonomous game studio\"\n35: ```\n36: \n37: Behavior:\n38: - Runs until Generations decides to stop under its current criteria.\n39: - Current bootstrap criteria intentionally stop after a few validated tiny loops in normal mode.\n40: - `Ctrl+C` is handled gracefully: the current step finishes safely, journal and runtime state are flushed, and the process exits.\n41: - `state/pause.flag` is checked between loops.\n42: \n43: Operational-only safety valve:\n44: - `GENERATIONS_MAX_LOOPS=<n>` limits loop count for operator safety only.\n45: - This is not the definition of done.\n46: - Default is no limit.\n47: \n48: Test harness only:\n49: - `GENERATIONS_TEST_MODE=1` forces exactly one safe loop, then stop.\n50: - This exists only so automated tests stay fast and deterministic.\n51: - It must not be used to define done in normal operation.\n52: \n53: ## Web Journey\n54: \n55: Start the local web server:\n56: \n57: ```bash\n58: generations web --host 127.0.0.1 --port 8000\n59: ```\n60: \n61: Endpoints:\n62: - `/` human-readable journey page\n63: - `/journal` JSON journal feed\n64: - `/memory` JSON memory snapshot\n65: - `/status` JSON runtime status\n66: \n67: Export a static copy:\n68: \n69: ```bash\n70: generations export-web --out ./site\n71: ```\n72: \n73: ## Journal And Memory\n74: \n75: Every loop writes a journal entry with:\n76: - timestamp and loop counter\n77: - seed hash\n78: - current criteria version and content\n79: - chosen next step\n80: - files touched\n81: - validation results\n82: - commit hash\n83: - model/provider metadata\n84: - rest decision\n85: - website change summary\n86: - monetization change summary\n87: \n88: Memory snapshots store:\n89: - current criteria version\n90: - outcomes summary\n91: - evolving heuristics with rolling-average weights\n92: - website heuristics with rolling-average weights\n93: - monetization heuristics with rolling-average weights\n94: - monetization experiments log\n95: - tool routing summary\n96: \n97: ## Website And Monetization Evolution Rules\n98: \n99: Implemented baseline:\n100: - local-first journey page works offline from disk state\n101: - support panel is present but intentionally minimal and honest\n102: - disclosure panel explains that monetization may evolve and all changes are logged\n103: - monetization experiments are stored in memory and journaled\n104: \n105: Guardrails:\n106: - no deceptive UI\n107: - no fake scarcity\n108: - no dark patterns\n109: - no intrusive tracking by default\n110: - sponsorships/affiliates/analytics must be labeled, reversible, and validated\n111: \n112: The runner treats website changes as first-class artifacts and records their intent each loop.\n113: \n114: ## Self-Modification Guardrails\n115: \n116: All autonomous edits go through the OpenCode adapter interface only.\n117: \n118: Current adapter behavior:\n119: 1. produce a plan\n120: 2. apply a small change\n121: 3. run validation\n122: 4. create one small commit if validation passes\n123: \n124: OpenCode notes:\n125: - uses the installed `opencode` binary if available\n126: - stores OpenCode session artifacts under `state/opencode/`\n127: - keeps rollback and shell execution guardrails in Python because OpenCode CLI command execution is not yet relied on for file mutation here\n128: - each loop journals the OpenCode session id/export path\n129: \n130: If validation fails, the loop stops, expected touched files are rolled back, and the failure is journaled.\n131: \n132: Validation behavior:\n133: - preferred: `pytest` smoke/unit checks\n134: - fallback when `pytest` is not installed: `python -m compileall src tests games`\n135: - failed validation triggers rollback of expected touched files before the loop journals the failure\n136: \n137: ## Real Integration Swap Points\n138: \n139: ### OpenCode\n140: \n141: Current file: `src/generations/adapters/opencode.py`\n142: \n143: Defaults:\n144: - binary path: `~/.opencode/bin/opencode`\n145: - state dirs redirected into `state/opencode/` to avoid writing into restricted home paths\n146: \n147: Override with:\n148: - `OPENCODE_BIN=/path/to/opencode`\n149: \n150: ### Ollama\n151: \n152: Current file: `src/generations/adapters/ollama_cloud.py`\n153: \n154: Defaults:\n155: - provider metadata: `ollama_cloud`\n156: - model: `qwen3.5:397b-cloud`\n157: - base URL: `http://127.0.0.1:11434`\n158: \n159: Override with:\n160: - `GENERATIONS_MODEL=...`\n161: - `OLLAMA_BASE_URL=http://host:11434`\n162: \n163: If the local daemon is unreachable, the adapter falls back to the deterministic proposal path and records that fallback in journal metadata.\n164: \n165: ## Tests\n166: \n167: - `tests/test_smoke.py`: temp-repo smoke test that runs one safe loop and confirms journal, memory, and exported site are written\n168: - `tests/test_journal.py`: append-only journal behavior\n169: \n170: ## Notes\n171: \n172: - Ubuntu-only assumptions: bash, git, standard Linux filesystem paths.\n173: - The initial seed is intentionally conservative: it proves the autonomous operating loop, observability surface, and safe self-edit path before pursuing larger game scope.\n174: - Active development phase: autonomous loop refreshing observability artifacts and keeping the website in sync with runtime state.\n\n(End of file - total 174 lines)\n</content>",
+          "synthetic": true,
+          "id": "prt_cc21c58970047zg0jMViZ3VwWQ",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "README.md",
+          "url": "file:///home/jishm/code/generations/README.md",
+          "id": "prt_cc21c58970057oYTE7ITTaC7ph",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/home/jishm/code/generations/games/space_logistics/README.md\"}",
+          "synthetic": true,
+          "id": "prt_cc21c5897006qicBGdhTrW4CUs",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "<path>/home/jishm/code/generations/games/space_logistics/README.md</path>\n<type>file</type>\n<content>1: # Space Logistics\n2: \n3: `space_logistics` is the current seed game workspace.\n4: \n5: It exists to give Generations a concrete destination: a transport and logistics game with economy, routing, progression, and world simulation.\n6: \n7: The goal is not to stay a placeholder forever. The autonomous loop should gradually turn this workspace into a clearer design, then a prototype, then a more credible game candidate.\n\n(End of file - total 7 lines)\n</content>",
+          "synthetic": true,
+          "id": "prt_cc21c5897007zcYtu1MRc5UUdH",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "README.md",
+          "url": "file:///home/jishm/code/generations/games/space_logistics/README.md",
+          "id": "prt_cc21c5897008useG59ch7FdaLb",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "Called the Read tool with the following input: {\"filePath\":\"/home/jishm/code/generations/src/generations/web/templates/index.html\"}",
+          "synthetic": true,
+          "id": "prt_cc21c58970092TNNzjhqEtQPfh",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "<path>/home/jishm/code/generations/src/generations/web/templates/index.html</path>\n<type>file</type>\n<content>1: <!doctype html>\n2: <html lang=\"en\">\n3: <head>\n4:   <meta charset=\"utf-8\">\n5:   <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n6:   <title>Generations Journey</title>\n7:   <link rel=\"stylesheet\" href=\"/static/style.css\">\n8: </head>\n9: <body>\n10:   <main class=\"page\">\n11:     <section class=\"hero\">\n12:       <p class=\"eyebrow\">Generations</p>\n13:       <h1>Autonomous journey</h1>\n14:       <p class=\"lede\">The system can evolve its criteria, website, and monetization strategy over time. Each change is logged in the journal and reflected here.</p>\n15:     </section>\n16: \n17:     <section class=\"grid\">\n18:       <article class=\"card emphasis\">\n19:         <h2>Status</h2>\n20:         <dl>\n21:           <dt>Loop Count</dt><dd>{{ runtime.loop_count }}</dd>\n22:           <dt>Criteria Version</dt><dd>{{ runtime.current_criteria_version }}</dd>\n23:           <dt>Paused</dt><dd>{{ runtime.paused }}</dd>\n24:           <dt>Last Decision</dt><dd>{{ runtime.last_decision }}</dd>\n25:           <dt>Last Commit</dt><dd>{{ runtime.last_commit or \"none yet\" }}</dd>\n26:         </dl>\n27:       </article>\n28: \n29:       <article class=\"card\">\n30:         <h2>Current Criteria</h2>\n31:         {% set criteria = memory.criteria_history[-1] %}\n32:         <p>{{ criteria.summary }}</p>\n33:         <ul>\n34:           {% for item in criteria.ship_rules %}\n35:           <li>{{ item }}</li>\n36:           {% endfor %}\n37:         </ul>\n38:       </article>\n39: \n40:       <article class=\"card\">\n41:         <h2>Support</h2>\n42:         <p>This is a placeholder support area. Generations may test small, honest income ideas later, and every experiment will be logged before it is expanded.</p>\n43:       </article>\n44: \n45:       <article class=\"card\">\n46:         <h2>Disclosure</h2>\n47:         <p>No deceptive UI, fake scarcity, dark patterns, or default tracking. Sponsorships, affiliates, and analytics must be labeled, reversible, and validated.</p>\n48:       </article>\n49:     </section>\n50: \n51:     <section class=\"card wide\">\n52:       <h2>Evaluation Metrics</h2>\n53:       <div class=\"columns\">\n54:         <div>\n55:           <h3>Current</h3>\n56:           <ul>\n57:             {% for key, value in memory.evaluation_metrics.current.items() %}\n58:             <li>{{ key }}: {{ value }}</li>\n59:             {% endfor %}\n60:           </ul>\n61:         </div>\n62:         <div>\n63:           <h3>Rolling Average</h3>\n64:           <ul>\n65:             {% for key, value in memory.evaluation_metrics.rolling_average.items() %}\n66:             <li>{{ key }}: {{ value }}</li>\n67:             {% endfor %}\n68:           </ul>\n69:         </div>\n70:         <div>\n71:           <h3>Metric Notes</h3>\n72:           <ul>\n73:             {% for item in memory.evaluation_metrics.notes %}\n74:             <li>{{ item }}</li>\n75:             {% endfor %}\n76:           </ul>\n77:         </div>\n78:       </div>\n79:     </section>\n80: \n81:     <section class=\"card wide\">\n82:       <h2>Heuristics</h2>\n83:       <div class=\"columns\">\n84:         <div>\n85:           <h3>Core</h3>\n86:           <ul>\n87:             {% for item in memory.heuristics %}\n88:             <li>{{ item }} {% if memory.heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n89:             {% endfor %}\n90:           </ul>\n91:         </div>\n92:         <div>\n93:           <h3>Website</h3>\n94:           <ul>\n95:             {% for item in memory.website_heuristics %}\n96:             <li>{{ item }} {% if memory.website_heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.website_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n97:             {% endfor %}\n98:           </ul>\n99:         </div>\n100:         <div>\n101:           <h3>Monetization</h3>\n102:           <ul>\n103:             {% for item in memory.monetization_heuristics %}\n104:             <li>{{ item }} {% if memory.monetization_heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.monetization_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n105:             {% endfor %}\n106:           </ul>\n107:         </div>\n108:       </div>\n109:     </section>\n110: \n111:     <section class=\"card wide\">\n112:       <h2>Monetization Experiments</h2>\n113:       <ul>\n114:         {% for item in memory.monetization_experiments %}\n115:         <li>{{ item.name }} - {{ item.status }} - {{ item.reason }} - outcome: {{ item.outcome }}</li>\n116:         {% endfor %}\n117:       </ul>\n118:       <p class=\"note\">Generations may evolve this page and its monetization approach over time. Website changes are treated as first-class artifacts and are logged with intent.</p>\n119:     </section>\n120: \n121:     <section class=\"card wide\">\n122:       <h2>Journal Timeline</h2>\n123:       {% if entries %}\n124:         {% for entry in entries %}\n125:         <article class=\"entry\">\n126:           <header>\n127:             <strong>Loop {{ entry.loop_counter }}</strong>\n128:             <span>{{ entry.timestamp }}</span>\n129:           </header>\n130:           <p>{{ entry.next_step.description }}</p>\n131:           {% if entry.evaluation_metrics %}\n132:           <p>Metrics: creativity {{ entry.evaluation_metrics.creativity }}, code {{ entry.evaluation_metrics.code_change }}, review {{ entry.evaluation_metrics.review_quality }}, game {{ entry.evaluation_metrics.game_progress }}, balance {{ entry.evaluation_metrics.balance }}</p>\n133:           {% endif %}\n134:           <p>Validation: {{ entry.validation_summary }}</p>\n135:           <p>Website: {{ entry.website_change.summary }}</p>\n136:           <p>Monetization: {{ entry.monetization_change.summary }}</p>\n137:         </article>\n138:         {% endfor %}\n139:       {% else %}\n140:         <p>No journal entries yet.</p>\n141:       {% endif %}\n142:     </section>\n143:   </main>\n144: </body>\n145: </html>\n\n(End of file - total 145 lines)\n</content>",
+          "synthetic": true,
+          "id": "prt_cc21c589700ak0waxHv7AlH4Cg",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "file",
+          "mime": "text/plain",
+          "filename": "index.html",
+          "url": "file:///home/jishm/code/generations/src/generations/web/templates/index.html",
+          "id": "prt_cc21c589700bpxeY4IASCpJHVQ",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        },
+        {
+          "type": "text",
+          "text": "\"{\\\"commit_message\\\": \\\"loop 1: Refresh observability artifacts and keep the website aligned with th\\\", \\\"cwd\\\": \\\"/home/jishm/code/generations\\\", \\\"instruction\\\": \\\"Use the attached plan and git context to make a real file edit in this repository. Only edit files listed in editable_files. Keep the change tiny, coherent, and reversible. Do not commit. Do not touch generated state, caches, sqlite files, or logs. Prefer the smallest change that advances the stated workstream and capability target.\\\", \\\"plan\\\": {\\\"editable_files\\\": [\\\"README.md\\\", \\\"games/space_logistics/README.md\\\", \\\"src/generations/web/templates/index.html\\\"], \\\"files_expected\\\": [\\\"README.md\\\", \\\"games/space_logistics/README.md\\\", \\\"src/generations/web/templates/index.html\\\", \\\"state/loop_snapshot.json\\\", \\\"state/website_notes.md\\\", \\\"state/memory.sqlite3\\\", \\\"site/index.html\\\", \\\"site/style.css\\\"], \\\"monetization_change_reason\\\": \\\"No change; preserve the honest support placeholder until more evidence exists.\\\", \\\"summary\\\": \\\"autonomous_platform:website: Refresh observability artifacts and keep the website aligned with the latest runtime state\\\", \\\"website_change_reason\\\": \\\"Keep the journey page and exported site in sync with the latest autonomous state.\\\"}, \\\"task\\\": \\\"Apply one tiny coherent repository edit for Generations.\\\"}\"",
+          "id": "prt_cc21c589700cKbUY9v8P75c9s9",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c5833001y6kOoYmEuHRan4"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772783163568,
+          "completed": 1772783190049
+        },
+        "parentID": "msg_cc21c5833001y6kOoYmEuHRan4",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 16576,
+          "input": 16207,
+          "output": 369,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "tool-calls",
+        "id": "msg_cc21c58b0001sNb9ZKFPy3E6Ia",
+        "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "c77297a9eb3eba3429fe7e7a3d2360dc00517913",
+          "id": "prt_cc21c7e17001jXPgW4TpfM3S2v",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c58b0001sNb9ZKFPy3E6Ia"
+        },
+        {
+          "type": "reasoning",
+          "text": "Looking at the workflow plan and git context, I need to make a tiny, coherent edit to one of the editable files. The plan says to refresh observability artifacts and keep the website aligned. Let me look at the current state - the git status shows site/index.html is modified. I should make a small update to one of the editable files that aligns with keeping the journey page in sync with the autonomous state. A tiny change to the index.html template to better reflect the current state would be appropriate.",
+          "time": {
+            "start": 1772783173147,
+            "end": 1772783189970
+          },
+          "id": "prt_cc21c7e1b0010HZHKf0PV3CErU",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c58b0001sNb9ZKFPy3E6Ia"
+        },
+        {
+          "type": "text",
+          "text": "I'll make a tiny, coherent edit to keep the website aligned with the runtime state. Let me update the journey page template to show the current loop information more prominently.",
+          "time": {
+            "start": 1772783189972,
+            "end": 1772783189972
+          },
+          "id": "prt_cc21c8e6a001QJMo3PwCeGpMsE",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c58b0001sNb9ZKFPy3E6Ia"
+        },
+        {
+          "type": "tool",
+          "callID": "call_ylpoc076",
+          "tool": "edit",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/home/jishm/code/generations/src/generations/web/templates/index.html",
+              "oldString": "    <section class=\"hero\">\n      <p class=\"eyebrow\">Generations</p>\n      <h1>Autonomous journey</h1>\n      <p class=\"lede\">The system can evolve its criteria, website, and monetization strategy over time. Each change is logged in the journal and reflected here.</p>\n    </section>",
+              "newString": "    <section class=\"hero\">\n      <p class=\"eyebrow\">Generations &mdash; Loop {{ runtime.loop_count }}</p>\n      <h1>Autonomous journey</h1>\n      <p class=\"lede\">The system can evolve its criteria, website, and monetization strategy over time. Each change is logged in the journal and reflected here.</p>\n    </section>"
+            },
+            "output": "Edit applied successfully.",
+            "title": "src/generations/web/templates/index.html",
+            "metadata": {
+              "diagnostics": {},
+              "diff": "Index: /home/jishm/code/generations/src/generations/web/templates/index.html\n===================================================================\n--- /home/jishm/code/generations/src/generations/web/templates/index.html\n+++ /home/jishm/code/generations/src/generations/web/templates/index.html\n@@ -8,9 +8,9 @@\n </head>\n <body>\n   <main class=\"page\">\n     <section class=\"hero\">\n-      <p class=\"eyebrow\">Generations</p>\n+      <p class=\"eyebrow\">Generations &mdash; Loop {{ runtime.loop_count }}</p>\n       <h1>Autonomous journey</h1>\n       <p class=\"lede\">The system can evolve its criteria, website, and monetization strategy over time. Each change is logged in the journal and reflected here.</p>\n     </section>\n \n",
+              "filediff": {
+                "file": "/home/jishm/code/generations/src/generations/web/templates/index.html",
+                "before": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Generations Journey</title>\n  <link rel=\"stylesheet\" href=\"/static/style.css\">\n</head>\n<body>\n  <main class=\"page\">\n    <section class=\"hero\">\n      <p class=\"eyebrow\">Generations</p>\n      <h1>Autonomous journey</h1>\n      <p class=\"lede\">The system can evolve its criteria, website, and monetization strategy over time. Each change is logged in the journal and reflected here.</p>\n    </section>\n\n    <section class=\"grid\">\n      <article class=\"card emphasis\">\n        <h2>Status</h2>\n        <dl>\n          <dt>Loop Count</dt><dd>{{ runtime.loop_count }}</dd>\n          <dt>Criteria Version</dt><dd>{{ runtime.current_criteria_version }}</dd>\n          <dt>Paused</dt><dd>{{ runtime.paused }}</dd>\n          <dt>Last Decision</dt><dd>{{ runtime.last_decision }}</dd>\n          <dt>Last Commit</dt><dd>{{ runtime.last_commit or \"none yet\" }}</dd>\n        </dl>\n      </article>\n\n      <article class=\"card\">\n        <h2>Current Criteria</h2>\n        {% set criteria = memory.criteria_history[-1] %}\n        <p>{{ criteria.summary }}</p>\n        <ul>\n          {% for item in criteria.ship_rules %}\n          <li>{{ item }}</li>\n          {% endfor %}\n        </ul>\n      </article>\n\n      <article class=\"card\">\n        <h2>Support</h2>\n        <p>This is a placeholder support area. Generations may test small, honest income ideas later, and every experiment will be logged before it is expanded.</p>\n      </article>\n\n      <article class=\"card\">\n        <h2>Disclosure</h2>\n        <p>No deceptive UI, fake scarcity, dark patterns, or default tracking. Sponsorships, affiliates, and analytics must be labeled, reversible, and validated.</p>\n      </article>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Evaluation Metrics</h2>\n      <div class=\"columns\">\n        <div>\n          <h3>Current</h3>\n          <ul>\n            {% for key, value in memory.evaluation_metrics.current.items() %}\n            <li>{{ key }}: {{ value }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Rolling Average</h3>\n          <ul>\n            {% for key, value in memory.evaluation_metrics.rolling_average.items() %}\n            <li>{{ key }}: {{ value }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Metric Notes</h3>\n          <ul>\n            {% for item in memory.evaluation_metrics.notes %}\n            <li>{{ item }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n      </div>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Heuristics</h2>\n      <div class=\"columns\">\n        <div>\n          <h3>Core</h3>\n          <ul>\n            {% for item in memory.heuristics %}\n            <li>{{ item }} {% if memory.heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Website</h3>\n          <ul>\n            {% for item in memory.website_heuristics %}\n            <li>{{ item }} {% if memory.website_heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.website_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Monetization</h3>\n          <ul>\n            {% for item in memory.monetization_heuristics %}\n            <li>{{ item }} {% if memory.monetization_heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.monetization_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n      </div>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Monetization Experiments</h2>\n      <ul>\n        {% for item in memory.monetization_experiments %}\n        <li>{{ item.name }} - {{ item.status }} - {{ item.reason }} - outcome: {{ item.outcome }}</li>\n        {% endfor %}\n      </ul>\n      <p class=\"note\">Generations may evolve this page and its monetization approach over time. Website changes are treated as first-class artifacts and are logged with intent.</p>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Journal Timeline</h2>\n      {% if entries %}\n        {% for entry in entries %}\n        <article class=\"entry\">\n          <header>\n            <strong>Loop {{ entry.loop_counter }}</strong>\n            <span>{{ entry.timestamp }}</span>\n          </header>\n          <p>{{ entry.next_step.description }}</p>\n          {% if entry.evaluation_metrics %}\n          <p>Metrics: creativity {{ entry.evaluation_metrics.creativity }}, code {{ entry.evaluation_metrics.code_change }}, review {{ entry.evaluation_metrics.review_quality }}, game {{ entry.evaluation_metrics.game_progress }}, balance {{ entry.evaluation_metrics.balance }}</p>\n          {% endif %}\n          <p>Validation: {{ entry.validation_summary }}</p>\n          <p>Website: {{ entry.website_change.summary }}</p>\n          <p>Monetization: {{ entry.monetization_change.summary }}</p>\n        </article>\n        {% endfor %}\n      {% else %}\n        <p>No journal entries yet.</p>\n      {% endif %}\n    </section>\n  </main>\n</body>\n</html>\n",
+                "after": "<!doctype html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <title>Generations Journey</title>\n  <link rel=\"stylesheet\" href=\"/static/style.css\">\n</head>\n<body>\n  <main class=\"page\">\n    <section class=\"hero\">\n      <p class=\"eyebrow\">Generations &mdash; Loop {{ runtime.loop_count }}</p>\n      <h1>Autonomous journey</h1>\n      <p class=\"lede\">The system can evolve its criteria, website, and monetization strategy over time. Each change is logged in the journal and reflected here.</p>\n    </section>\n\n    <section class=\"grid\">\n      <article class=\"card emphasis\">\n        <h2>Status</h2>\n        <dl>\n          <dt>Loop Count</dt><dd>{{ runtime.loop_count }}</dd>\n          <dt>Criteria Version</dt><dd>{{ runtime.current_criteria_version }}</dd>\n          <dt>Paused</dt><dd>{{ runtime.paused }}</dd>\n          <dt>Last Decision</dt><dd>{{ runtime.last_decision }}</dd>\n          <dt>Last Commit</dt><dd>{{ runtime.last_commit or \"none yet\" }}</dd>\n        </dl>\n      </article>\n\n      <article class=\"card\">\n        <h2>Current Criteria</h2>\n        {% set criteria = memory.criteria_history[-1] %}\n        <p>{{ criteria.summary }}</p>\n        <ul>\n          {% for item in criteria.ship_rules %}\n          <li>{{ item }}</li>\n          {% endfor %}\n        </ul>\n      </article>\n\n      <article class=\"card\">\n        <h2>Support</h2>\n        <p>This is a placeholder support area. Generations may test small, honest income ideas later, and every experiment will be logged before it is expanded.</p>\n      </article>\n\n      <article class=\"card\">\n        <h2>Disclosure</h2>\n        <p>No deceptive UI, fake scarcity, dark patterns, or default tracking. Sponsorships, affiliates, and analytics must be labeled, reversible, and validated.</p>\n      </article>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Evaluation Metrics</h2>\n      <div class=\"columns\">\n        <div>\n          <h3>Current</h3>\n          <ul>\n            {% for key, value in memory.evaluation_metrics.current.items() %}\n            <li>{{ key }}: {{ value }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Rolling Average</h3>\n          <ul>\n            {% for key, value in memory.evaluation_metrics.rolling_average.items() %}\n            <li>{{ key }}: {{ value }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Metric Notes</h3>\n          <ul>\n            {% for item in memory.evaluation_metrics.notes %}\n            <li>{{ item }}</li>\n            {% endfor %}\n          </ul>\n        </div>\n      </div>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Heuristics</h2>\n      <div class=\"columns\">\n        <div>\n          <h3>Core</h3>\n          <ul>\n            {% for item in memory.heuristics %}\n            <li>{{ item }} {% if memory.heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Website</h3>\n          <ul>\n            {% for item in memory.website_heuristics %}\n            <li>{{ item }} {% if memory.website_heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.website_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n        <div>\n          <h3>Monetization</h3>\n          <ul>\n            {% for item in memory.monetization_heuristics %}\n            <li>{{ item }} {% if memory.monetization_heuristics_rolling_average %}<span class=\"note\">(avg {{ memory.monetization_heuristics_rolling_average.get(item, 0.0) }})</span>{% endif %}</li>\n            {% endfor %}\n          </ul>\n        </div>\n      </div>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Monetization Experiments</h2>\n      <ul>\n        {% for item in memory.monetization_experiments %}\n        <li>{{ item.name }} - {{ item.status }} - {{ item.reason }} - outcome: {{ item.outcome }}</li>\n        {% endfor %}\n      </ul>\n      <p class=\"note\">Generations may evolve this page and its monetization approach over time. Website changes are treated as first-class artifacts and are logged with intent.</p>\n    </section>\n\n    <section class=\"card wide\">\n      <h2>Journal Timeline</h2>\n      {% if entries %}\n        {% for entry in entries %}\n        <article class=\"entry\">\n          <header>\n            <strong>Loop {{ entry.loop_counter }}</strong>\n            <span>{{ entry.timestamp }}</span>\n          </header>\n          <p>{{ entry.next_step.description }}</p>\n          {% if entry.evaluation_metrics %}\n          <p>Metrics: creativity {{ entry.evaluation_metrics.creativity }}, code {{ entry.evaluation_metrics.code_change }}, review {{ entry.evaluation_metrics.review_quality }}, game {{ entry.evaluation_metrics.game_progress }}, balance {{ entry.evaluation_metrics.balance }}</p>\n          {% endif %}\n          <p>Validation: {{ entry.validation_summary }}</p>\n          <p>Website: {{ entry.website_change.summary }}</p>\n          <p>Monetization: {{ entry.monetization_change.summary }}</p>\n        </article>\n        {% endfor %}\n      {% else %}\n        <p>No journal entries yet.</p>\n      {% endif %}\n    </section>\n  </main>\n</body>\n</html>\n",
+                "additions": 1,
+                "deletions": 1
+              },
+              "truncated": false
+            },
+            "time": {
+              "start": 1772783189699,
+              "end": 1772783189740
+            }
+          },
+          "id": "prt_cc21cbebd001JhhSIdGoJFtzO1",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c58b0001sNb9ZKFPy3E6Ia"
+        },
+        {
+          "type": "step-finish",
+          "reason": "tool-calls",
+          "snapshot": "d1f01ab1cacbccbcdd99a90312f519d35ed93097",
+          "cost": 0,
+          "tokens": {
+            "total": 16576,
+            "input": 16207,
+            "output": 369,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc21cbfd90019KW8Ogq2ZiFTB1",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c58b0001sNb9ZKFPy3E6Ia"
+        },
+        {
+          "type": "patch",
+          "hash": "c77297a9eb3eba3429fe7e7a3d2360dc00517913",
+          "files": [
+            "/home/jishm/code/generations/src/generations/web/templates/index.html"
+          ],
+          "id": "prt_cc21cc018001Gfjspe32pXe9Bo",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21c58b0001sNb9ZKFPy3E6Ia"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "assistant",
+        "time": {
+          "created": 1772783190051,
+          "completed": 1772783193358
+        },
+        "parentID": "msg_cc21c5833001y6kOoYmEuHRan4",
+        "modelID": "qwen3.5:397b-cloud",
+        "providerID": "ollama",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/home/jishm/code/generations",
+          "root": "/home/jishm/code/generations"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 16238,
+          "input": 16190,
+          "output": 48,
+          "reasoning": 0,
+          "cache": {
+            "read": 0,
+            "write": 0
+          }
+        },
+        "finish": "stop",
+        "id": "msg_cc21cc023001yuZ76yRjj1dtDT",
+        "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm"
+      },
+      "parts": [
+        {
+          "type": "step-start",
+          "snapshot": "d1f01ab1cacbccbcdd99a90312f519d35ed93097",
+          "id": "prt_cc21cca3c001XZYrRtbIkKzY64",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21cc023001yuZ76yRjj1dtDT"
+        },
+        {
+          "type": "text",
+          "text": "Done. This tiny change adds the current loop count to the eyebrow text in the hero section, keeping the journey page in sync with the runtime state. The edit is reversible and uses data already available in the template context.",
+          "time": {
+            "start": 1772783193246,
+            "end": 1772783193246
+          },
+          "id": "prt_cc21cca3e001hcqwj2JfcYKTW1",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21cc023001yuZ76yRjj1dtDT"
+        },
+        {
+          "type": "step-finish",
+          "reason": "stop",
+          "snapshot": "d1f01ab1cacbccbcdd99a90312f519d35ed93097",
+          "cost": 0,
+          "tokens": {
+            "total": 16238,
+            "input": 16190,
+            "output": 48,
+            "reasoning": 0,
+            "cache": {
+              "read": 0,
+              "write": 0
+            }
+          },
+          "id": "prt_cc21ccca2001oyfGoyPMKA2GQ7",
+          "sessionID": "ses_33de3a7d9ffeh62RZsqwU7OcRm",
+          "messageID": "msg_cc21cc023001yuZ76yRjj1dtDT"
+        }
+      ]
+    }
+  ]
+}
