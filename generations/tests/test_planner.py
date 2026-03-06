@@ -148,3 +148,49 @@ def test_planner_writes_retrospective_and_next_block(tmp_path: Path) -> None:
     assert plan is not None
     assert plan.primary_pillar == "game"
     assert retrospective.summary == "The block stayed coherent."
+
+
+def test_planner_sanitizes_path_like_artifacts(tmp_path: Path) -> None:
+    config = AppConfig.from_root(tmp_path)
+    journal = JournalStore(config.journal_path)
+    memory = MemoryStore(config.memory_path)
+    planner = Planner(config, StubModel(), journal, memory)
+    planner.ensure_long_term_vision("seed", 0)
+
+    dirty_plan = BlockPlan(
+        block_id=1,
+        planning_loop=1,
+        execution_range=(2, 10),
+        primary_pillar="self",
+        why_this_pillar_now="Tighten generations/platform/validation.py and clarify docs/platform_architecture.md",
+        target_outcomes=["Strengthen platform/loop_manager.py discipline"],
+        sub_goals=["Improve website/journey_generator.py outputs"],
+        allowed_support_work=["Record memory/loop_001.json snapshots"],
+        explicit_non_goals=["Do not chase ci/workflow.yml work yet"],
+        success_signals=["Cleaner generations/website/journey.html behavior"],
+        failure_signals=["More docs/platform_architecture.md drift"],
+        expected_artifacts=["generations/platform/validation.py", "memory/state_schema.json"],
+        metrics_to_watch=["review_quality"],
+        risks=["platform/loop_manager.py drift"],
+        review_focus=["website/journey_generator.py clarity"],
+    )
+
+    cleaned = planner._sanitize_block_plan(dirty_plan)
+    all_text = " ".join(
+        [
+            cleaned.why_this_pillar_now,
+            *cleaned.target_outcomes,
+            *cleaned.sub_goals,
+            *cleaned.allowed_support_work,
+            *cleaned.explicit_non_goals,
+            *cleaned.success_signals,
+            *cleaned.failure_signals,
+            *cleaned.expected_artifacts,
+            *cleaned.risks,
+            *cleaned.review_focus,
+        ]
+    )
+    assert "platform/" not in all_text
+    assert "website/" not in all_text
+    assert "memory/" not in all_text
+    assert "generations/" not in all_text

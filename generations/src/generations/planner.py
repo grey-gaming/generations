@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import re
 from typing import Any
 
 from generations.adapters.ollama_cloud import OllamaCloudAdapter
@@ -12,6 +13,9 @@ from generations.planning.store import PlanningStore
 from generations.state import now_iso, save_json
 
 PILLARS = ["self", "game", "monetization_platform"]
+_PATHLIKE_PATTERN = re.compile(r"(?:^|[\s`'\"(])(?:/?[A-Za-z0-9_.-]+/)+[A-Za-z0-9_.-]+")
+_ROOTLIKE_PATTERN = re.compile(r"\b(?:platform|website|memory|docs|ci|vision|planning|scripts|src|tests)/[A-Za-z0-9_.\-/]+\b")
+_CANONICAL_ROOT_FRAGMENT_PATTERN = re.compile(r"\b(?:generations|games/active)/")
 
 
 class Planner:
@@ -119,6 +123,7 @@ class Planner:
         return 1 + ((planning_loop - 1) // 10)
 
     def _persist_block_plan(self, memory: dict[str, Any], plan: BlockPlan, meta: dict[str, Any]) -> None:
+        plan = self._sanitize_block_plan(plan)
         updated = dict(memory)
         block_state = dict(updated.get("block_planning") or {})
         history = list(block_state.get("history") or [])
@@ -143,6 +148,57 @@ class Planner:
                 "model_provider": meta,
             }
         )
+
+    def _sanitize_block_plan(self, plan: BlockPlan) -> BlockPlan:
+        return BlockPlan(
+            block_id=plan.block_id,
+            planning_loop=plan.planning_loop,
+            execution_range=plan.execution_range,
+            primary_pillar=plan.primary_pillar,
+            why_this_pillar_now=self._sanitize_text(plan.why_this_pillar_now),
+            target_outcomes=self._sanitize_items(plan.target_outcomes),
+            sub_goals=self._sanitize_items(plan.sub_goals),
+            allowed_support_work=self._sanitize_items(plan.allowed_support_work),
+            explicit_non_goals=self._sanitize_items(plan.explicit_non_goals),
+            success_signals=self._sanitize_items(plan.success_signals),
+            failure_signals=self._sanitize_items(plan.failure_signals),
+            expected_artifacts=self._sanitize_items(plan.expected_artifacts),
+            metrics_to_watch=self._sanitize_items(plan.metrics_to_watch),
+            risks=self._sanitize_items(plan.risks),
+            review_focus=self._sanitize_items(plan.review_focus),
+        )
+
+    def _sanitize_items(self, items: list[str]) -> list[str]:
+        cleaned: list[str] = []
+        for item in items:
+            value = self._sanitize_text(item)
+            if value and value not in cleaned:
+                cleaned.append(value)
+        return cleaned
+
+    def _sanitize_text(self, text: str) -> str:
+        value = " ".join(str(text).split()).strip()
+        if not value:
+            return value
+        value = _ROOTLIKE_PATTERN.sub("", value)
+        value = _PATHLIKE_PATTERN.sub("", value)
+        value = _CANONICAL_ROOT_FRAGMENT_PATTERN.sub("", value)
+        replacements = {
+            "journey.html": "journey page template",
+            "validation.py": "validation module",
+            "state_schema.json": "memory schema definition",
+            "block_001_plan.json": "block planning record",
+            "platform_architecture.md": "platform architecture note",
+            "loop_manager.py": "loop orchestration module",
+            "journey_generator.py": "journey renderer",
+            "loop_001.json": "loop state snapshot",
+        }
+        for raw, replacement in replacements.items():
+            value = value.replace(raw, replacement)
+        value = re.sub(r"\s{2,}", " ", value).strip(" -:;,")
+        if not value:
+            return "Describe the capability or artifact without naming repository paths."
+        return value
 
     def _persist_retrospective(self, memory: dict[str, Any], retrospective: RetrospectiveRecord, meta: dict[str, Any]) -> None:
         updated = dict(memory)

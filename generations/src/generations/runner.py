@@ -31,7 +31,7 @@ class Runner:
             self.config.parallel_tasks = parallel_tasks
         self.journal = JournalStore(self.config.journal_path)
         self.memory = MemoryStore(self.config.memory_path)
-        self.ollama = OllamaCloudAdapter()
+        self.ollama = OllamaCloudAdapter(debug=self.config.debug)
         self.opencode = OpenCodeAdapter(root)
         self.integrator = Integrator(self.config)
         self.planner = Planner(self.config, self.ollama, self.journal, self.memory)
@@ -103,6 +103,7 @@ class Runner:
         changed = self._tracked_changes()
         validation = self._run_validation(changed, loop_counter)
         commit_hash, pushed = self._commit_if_valid(validation, f"loop {loop_counter}: define long-term vision")
+        self.tui.log_vision(record, meta, validation, commit_hash)
         self.journal.append(
             {
                 "timestamp": now_iso(),
@@ -147,6 +148,7 @@ class Runner:
         changed = self._tracked_changes()
         validation = self._run_validation(changed, loop_counter)
         commit_hash, pushed = self._commit_if_valid(validation, f"loop {loop_counter}: plan block {plan.block_id}")
+        self.tui.log_block_plan(plan, retrospective, meta, validation, commit_hash)
         self.journal.append(
             {
                 "timestamp": now_iso(),
@@ -296,6 +298,7 @@ class Runner:
         self._finalize_loop(runtime, loop_counter, integration.commit_hash, integration.validation, "continue")
 
     def _record_rest_cycle(self, runtime: dict[str, Any], loop_counter: int, reason: str, provider: dict[str, Any], *, advance_loop: bool = True) -> None:
+        self.tui.log_rest_cycle(loop_counter, reason, provider, advance_loop)
         memory = self.memory.latest()
         outcomes = dict(memory.get("outcomes") or {})
         outcomes["rest_count"] = outcomes.get("rest_count", 0) + 1

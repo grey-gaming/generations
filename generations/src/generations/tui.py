@@ -4,7 +4,7 @@ from pathlib import Path
 import json
 from typing import Any
 
-from generations.models import IntegrationResult, LoopPlan, TaskResult
+from generations.models import BlockPlan, IntegrationResult, LongTermVisionRecord, LoopPlan, RetrospectiveRecord, TaskResult
 
 
 class TUI:
@@ -16,6 +16,62 @@ class TUI:
             f"run start | seed={seed_hash[:12]} | loop={loop_start} | criteria=v{criteria_version} | parallel={parallel_tasks}",
             flush=True,
         )
+
+    def log_vision(self, record: LongTermVisionRecord, meta: dict[str, Any], validation: list[Any], commit_hash: str | None) -> None:
+        print("", flush=True)
+        print(f"loop {record.refined_at_loop} | vision | version={record.version}", flush=True)
+        print(f"goal    | Define the long-term purpose of self, game, and monetization_platform.", flush=True)
+        print(f"pillars | {', '.join(record.pillars.keys())}", flush=True)
+        print(f"result  | commit={(commit_hash[:10] if commit_hash else 'none')}", flush=True)
+        for item in validation:
+            label = "pass" if item.success else "fail"
+            print(f"check   | {item.tier:<8} {label:<4} {_shorten(item.command, 92)}", flush=True)
+        if self.debug:
+            print(
+                f"debug   | provider={meta.get('provider', '-')} model={meta.get('model', '-')} fallback={meta.get('fallback') or '-'}",
+                flush=True,
+            )
+            if meta.get("prompt_preview"):
+                print(f"          prompt={_shorten(str(meta['prompt_preview']), 108)}", flush=True)
+
+    def log_block_plan(
+        self,
+        plan: BlockPlan,
+        retrospective: RetrospectiveRecord | None,
+        meta: dict[str, Any],
+        validation: list[Any],
+        commit_hash: str | None,
+    ) -> None:
+        print("", flush=True)
+        print(f"loop {plan.planning_loop} | block-plan | block={plan.block_id} pillar={plan.primary_pillar}", flush=True)
+        print(f"goal    | {_shorten(plan.why_this_pillar_now, 96)}", flush=True)
+        print(f"outcomes| {', '.join(_shorten(item, 44) for item in plan.target_outcomes[:3]) or '-'}", flush=True)
+        if retrospective:
+            print(f"retro   | {_shorten(retrospective.summary or 'Retrospective recorded.', 96)}", flush=True)
+        print(f"result  | commit={(commit_hash[:10] if commit_hash else 'none')}", flush=True)
+        for item in validation:
+            label = "pass" if item.success else "fail"
+            print(f"check   | {item.tier:<8} {label:<4} {_shorten(item.command, 92)}", flush=True)
+        if self.debug:
+            print(
+                f"debug   | provider={meta.get('provider', '-')} model={meta.get('model', '-')} fallback={meta.get('fallback') or '-'}",
+                flush=True,
+            )
+            if meta.get("prompt_preview"):
+                print(f"          prompt={_shorten(str(meta['prompt_preview']), 108)}", flush=True)
+
+    def log_rest_cycle(self, loop_counter: int, reason: str, provider: dict[str, Any], advance_loop: bool) -> None:
+        print("", flush=True)
+        print(f"loop {loop_counter} | rest-cycle", flush=True)
+        print(f"reason  | {_shorten(reason, 108)}", flush=True)
+        print(f"result  | loop_advance={'yes' if advance_loop else 'no'}", flush=True)
+        if self.debug:
+            print(
+                f"debug   | provider={provider.get('provider', '-')} model={provider.get('model', '-')} fallback={provider.get('fallback') or '-'}",
+                flush=True,
+            )
+            if provider.get("prompt_preview"):
+                print(f"          prompt={_shorten(str(provider['prompt_preview']), 108)}", flush=True)
 
     def log_loop_plan(self, plan: LoopPlan) -> None:
         print("", flush=True)
