@@ -15,22 +15,22 @@
     </section>
     <section class="panel-grid">
       <article class="panel"><h2>Runtime</h2><pre>{
-  "loop_count": 13,
-  "last_commit": "8d83b1b1bd2961441668300e49a046addaaa675d",
+  "loop_count": 14,
+  "last_commit": "5481485a32c71a3d190b1fa5a4145effd0fefd3b",
   "last_validation": {
     "success": true,
     "results": [
       {
         "success": true,
         "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
-        "output": "....                                                                     [100%]\n4 passed in 96.50s (0:01:36)"
+        "output": ".....                                                                    [100%]\n5 passed in 128.82s (0:02:08)"
       }
     ]
   },
   "current_criteria_version": 1,
   "paused": false,
   "last_decision": "continue",
-  "updated_at": "2026-03-06T10:11:42.189072+00:00"
+  "updated_at": "2026-03-06T10:15:27.452765+00:00"
 }</pre></article>
       <article class="panel"><h2>Current Criteria</h2><pre>{
   "notes": [
@@ -97,7 +97,92 @@
     </section>
     <section class="panel">
       <h2>Latest Journal Entries</h2>
-      <div class='entry'><strong>Loop 13</strong><pre>{
+      <div class='entry'><strong>Loop 14</strong><pre>{
+  "actions_taken": [
+    "game/workspace/src/routes.py",
+    "game/workspace/tests/test_routes.py",
+    "state/loop_snapshot.json",
+    "state/website_notes.md",
+    "state/memory.sqlite3",
+    "site/index.html"
+  ],
+  "commit_hash": "5481485a32c71a3d190b1fa5a4145effd0fefd3b",
+  "criteria": {
+    "notes": [
+      "Initial bootstrap criteria seeded from repository creation."
+    ],
+    "ship_rules": [
+      "Only ship a game candidate after smoke validation passes repeatedly.",
+      "Prefer small reversible changes with one commit per loop.",
+      "Record all criteria and monetization changes in journal and memory."
+    ],
+    "summary": "Improve autonomy, preserve safety, and keep website/journal observable.",
+    "version": 1
+  },
+  "evaluation_metrics": {
+    "balance": 0.65,
+    "code_change": 0.7,
+    "creativity": 0.9,
+    "game_progress": 0.75,
+    "observability": 0.55,
+    "review_quality": 0.9
+  },
+  "journal_entry_count_before_write": 14,
+  "loop_counter": 14,
+  "model_provider": {
+    "base_url": "http://127.0.0.1:11434",
+    "fallback": null,
+    "model": "qwen3.5:397b-cloud",
+    "provider": "ollama_cloud",
+    "selected_default_model": "qwen3.5:397b-cloud",
+    "stubbed": false,
+    "todo": "If needed, swap local Ollama daemon access for a different Ollama Cloud endpoint via OLLAMA_BASE_URL."
+  },
+  "monetization_change": {
+    "changed": false,
+    "summary": "Maintain support placeholder until core loop is demonstrably playable per 10-loop plan."
+  },
+  "next_step": {
+    "capability_target": "game_pipeline",
+    "description": "Implement basic distance calculation function for star system routes to support cargo transport logic.",
+    "rationale": "Advances the 'Executable Simulation Core' plan by adding concrete implementation to the previously defined Route schema. This moves the system from design documentation to testable code, directly addressing the historical low game_progress metric and building toward a shippable transport mechanic.",
+    "workstream": "game_workspace"
+  },
+  "opencode": {
+    "binary": "/home/jishm/.opencode/bin/opencode",
+    "changed_files": [
+      "game/workspace/src/routes.py",
+      "game/workspace/tests/test_routes.py"
+    ],
+    "debug_stderr_path": null,
+    "debug_stdout_path": null,
+    "push_output": "To github.com:grey-gaming/generations.git\n   c18ed9a..5481485  main -> main",
+    "pushed": true,
+    "session_export": "state/opencode/ses_33d5f61c8ffeHkgfUNc36GCwks.json",
+    "session_id": "ses_33d5f61c8ffeHkgfUNc36GCwks"
+  },
+  "rest_decision": {
+    "decision": "continue",
+    "reason": "Continue with another small step after a short bounded rest.",
+    "sleep_seconds": 1
+  },
+  "rolled_back": false,
+  "seed_hash": "d29d1e27aacff87f77266f23cd3c3baf39d47d832755d94e27bec24f9d23c949",
+  "timestamp": "2026-03-06T10:13:53.892039+00:00",
+  "validation_results": [
+    {
+      "command": "/home/jishm/code/generations/.venv/bin/python3 -m pytest tests/test_journal.py tests/test_smoke.py",
+      "output": ".....                                                                    [100%]\n5 passed in 128.82s (0:02:08)",
+      "success": true
+    }
+  ],
+  "validation_summary": "passed",
+  "website_change": {
+    "changed": true,
+    "summary": "Update journey page to reflect transition from design phase to implementation of simulation core."
+  }
+}</pre></div>
+<div class='entry'><strong>Loop 13</strong><pre>{
   "actions_taken": [
     "game/",
     "state/loop_snapshot.json",

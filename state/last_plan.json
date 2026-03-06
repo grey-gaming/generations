@@ -1,20 +1,18 @@
 {
-  "summary": "game_workspace:game_pipeline: Implement basic distance calculation function for star system routes to support cargo transport logic.",
+  "summary": "game_workspace:game_pipeline: Implement basic route distance calculation module and unit test for logistics simulation.",
   "editable_files": [
-    "src/simulation/routes.py",
-    "tests/test_routes.py",
-    "docs/journal/loop_14.md"
+    "game/logistics.py",
+    "tests/test_logistics.py"
   ],
   "files_expected": [
-    "src/simulation/routes.py",
-    "tests/test_routes.py",
-    "docs/journal/loop_14.md",
+    "game/logistics.py",
+    "tests/test_logistics.py",
     "state/loop_snapshot.json",
     "state/website_notes.md",
     "state/memory.sqlite3",
     "site/index.html",
     "site/style.css"
   ],
-  "website_change_reason": "Update journey page to reflect transition from design phase to implementation of simulation core.",
-  "monetization_change_reason": "Maintain support placeholder until core loop is demonstrably playable per 10-loop plan."
+  "website_change_reason": "Internal logic change does not yet warrant public journey update.",
+  "monetization_change_reason": "Core simulation loop not yet compelling enough for monetization experiments."
 }
