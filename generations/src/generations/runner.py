@@ -41,6 +41,7 @@ class Runner:
     def _install_signal_handlers(self) -> None:
         def _handle_interrupt(signum: int, frame: Any) -> None:
             self._shutdown.set()
+            raise KeyboardInterrupt
 
         signal.signal(signal.SIGINT, _handle_interrupt)
         signal.signal(signal.SIGTERM, _handle_interrupt)
@@ -49,17 +50,20 @@ class Runner:
         runtime = load_runtime(self.config.runtime_path)
         save_runtime(self.config.runtime_path, runtime)
         self.tui.log_run_header(self._seed_hash(), int(runtime.get("loop_count", 0)), int(runtime.get("current_criteria_version", 1)), self.config.parallel_tasks)
-        while not self._shutdown.is_set():
-            runtime = load_runtime(self.config.runtime_path)
-            if self.config.pause_flag.exists():
-                time.sleep(1)
-                continue
-            if self.config.operational_max_loops is not None and int(runtime.get("loop_count", 0)) >= self.config.operational_max_loops:
-                self._write_shutdown(runtime, "Operational max loop limit reached.")
-                break
-            self._run_single_loop(runtime)
-            if self.config.test_mode:
-                break
+        try:
+            while not self._shutdown.is_set():
+                runtime = load_runtime(self.config.runtime_path)
+                if self.config.pause_flag.exists():
+                    time.sleep(1)
+                    continue
+                if self.config.operational_max_loops is not None and int(runtime.get("loop_count", 0)) >= self.config.operational_max_loops:
+                    self._write_shutdown(runtime, "Operational max loop limit reached.")
+                    break
+                self._run_single_loop(runtime)
+                if self.config.test_mode:
+                    break
+        except KeyboardInterrupt:
+            self._shutdown.set()
         if self._shutdown.is_set():
             self._write_shutdown(load_runtime(self.config.runtime_path), "Graceful shutdown requested by operator.")
 
