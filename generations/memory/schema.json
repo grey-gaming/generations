@@ -1,0 +1,31 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "Loop Memory State Schema",
+  "description": "Strict JSON schema for loop memory state to prevent corruption",
+  "required": [
+    "loop_counter",
+    "block_id",
+    "pillar_budget"
+  ],
+  "properties": {
+    "loop_counter": {
+      "type": "integer",
+      "description": "Counter tracking the current iteration of the autonomous loop",
+      "minimum": 0
+    },
+    "block_id": {
+      "type": "string",
+      "description": "Unique identifier for the current block",
+      "minLength": 1
+    },
+    "pillar_budget": {
+      "type": "object",
+      "description": "Budget allocation across pillars",
+      "additionalProperties": {
+        "type": "number"
+      }
+    }
+  },
+  "additionalProperties": false
+}
