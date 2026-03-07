@@ -38,25 +38,30 @@ def validate_schema(data: dict) -> tuple[bool, list[str]]:
         errors.append("Root must be a dictionary")
         return False, errors
     
-    if "ship_rules" not in data:
-        errors.append("Missing required field: 'ship_rules'")
-        return False, errors
+    required_fields = ["loop_counter", "block_id", "pillar_budget"]
+    for field in required_fields:
+        if field not in data:
+            errors.append(f"Missing required field: '{field}'")
     
-    if not isinstance(data["ship_rules"], list):
-        errors.append("'ship_rules' must be a list")
-        return False, errors
+    if "loop_counter" in data:
+        if not isinstance(data["loop_counter"], int):
+            errors.append("'loop_counter' must be an integer")
+        elif data["loop_counter"] < 0:
+            errors.append("'loop_counter' must be >= 0")
     
-    for i, rule in enumerate(data["ship_rules"]):
-        if not isinstance(rule, dict):
-            errors.append(f"Rule {i}: must be a dictionary")
-            continue
-        
-        required_fields = ["id", "description", "enforcement"]
-        for field in required_fields:
-            if field not in rule:
-                errors.append(f"Rule {i}: missing required field '{field}'")
-            elif not isinstance(rule[field], str):
-                errors.append(f"Rule {i}: '{field}' must be a string")
+    if "block_id" in data:
+        if not isinstance(data["block_id"], str):
+            errors.append("'block_id' must be a string")
+        elif len(data["block_id"]) < 1:
+            errors.append("'block_id' must not be empty")
+    
+    if "pillar_budget" in data:
+        if not isinstance(data["pillar_budget"], dict):
+            errors.append("'pillar_budget' must be an object")
+        else:
+            for key, value in data["pillar_budget"].items():
+                if not isinstance(value, (int, float)):
+                    errors.append(f"'pillar_budget.{key}' must be a number")
     
     return len(errors) == 0, errors
 

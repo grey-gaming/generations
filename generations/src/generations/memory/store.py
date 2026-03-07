@@ -7,6 +7,8 @@ import sqlite3
 import threading
 from typing import Any
 
+from generations.validation.state_validator import validate_loop_state
+
 DEFAULT_MEMORY: dict[str, Any] = {
     "current_criteria_version": 1,
     "criteria_history": [
@@ -105,13 +107,14 @@ DEFAULT_MEMORY: dict[str, Any] = {
 
 
 class MemoryStore:
-    def __init__(self, path: Path) -> None:
+    def __init__(self, path: Path, schema_path: Path | None = None) -> None:
         self.path = path
         self.path.parent.mkdir(parents=True, exist_ok=True)
         self._lock = threading.Lock()
         self.connection = sqlite3.connect(self.path, check_same_thread=False)
         self.connection.row_factory = sqlite3.Row
         self._init_schema()
+        self._schema_path = schema_path
         self._ensure_snapshot()
 
     def _init_schema(self) -> None:
@@ -125,7 +128,7 @@ class MemoryStore:
         with self._lock:
             row = self.connection.execute("select payload from memory_snapshots order by id desc limit 1").fetchone()
         if row is None:
-            self.replace(copy.deepcopy(DEFAULT_MEMORY), created_at="bootstrap")
+            self._persist(copy.deepcopy(DEFAULT_MEMORY), created_at="bootstrap")
 
     def latest(self) -> dict[str, Any]:
         with self._lock:
@@ -134,7 +137,7 @@ class MemoryStore:
             return copy.deepcopy(DEFAULT_MEMORY)
         return json.loads(row["payload"])
 
-    def replace(self, payload: dict[str, Any], created_at: str = "update") -> None:
+    def _persist(self, payload: dict[str, Any], created_at: str) -> None:
         with self._lock:
             self.connection.execute(
                 "insert into memory_snapshots(created_at, payload) values(?, ?)",
@@ -142,10 +145,23 @@ class MemoryStore:
             )
             self.connection.commit()
 
+    def write(self, payload: dict[str, Any], created_at: str = "update") -> None:
+        """Write state to memory store with validation.
+        
+        Raises:
+            ValueError: If state fails validation
+        """
+        if self._schema_path is not None:
+            is_valid, errors = validate_loop_state(payload, self._schema_path)
+            if not is_valid:
+                error_msg = "; ".join(errors)
+                raise ValueError(f"Memory state validation failed: {error_msg}")
+        self._persist(payload, created_at)
+
     def update_current_loop_plan(self, plan: dict[str, Any] | None) -> None:
         updated = self.latest()
         updated["current_loop_plan"] = plan
-        self.replace(updated)
+        self._persist(updated, created_at="update")
 
     def snapshot_rows(self) -> list[dict[str, Any]]:
         with self._lock:

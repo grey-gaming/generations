@@ -261,3 +261,48 @@ def test_planner_compiles_repo_grounded_execution_plan(tmp_path: Path) -> None:
         repo_map,
     )
     assert loop_plan.tasks[0].allowed_paths == ["generations/memory/state_schema.json", "generations/memory", "generations/tests"]
+
+
+def test_planner_normalizes_textual_task_priority(tmp_path: Path) -> None:
+    config = AppConfig.from_root(tmp_path)
+    journal = JournalStore(config.journal_path)
+    memory = MemoryStore(config.memory_path)
+    planner = Planner(config, StubModel(), StubOpenCode(), journal, memory)
+    (tmp_path / "generations" / "memory").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "generations" / "src" / "generations").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "generations" / "tests").mkdir(parents=True, exist_ok=True)
+    repo_map = {
+        "valid_roots": ["generations/memory", "generations/src/generations", "generations/tests"],
+        "roots": [],
+    }
+    block_plan = {
+        "block_id": 1,
+        "primary_pillar": "self",
+    }
+
+    loop_plan = planner._compile_execution_plan(
+        {
+            "tasks": [
+                {
+                    "task_id": "A",
+                    "intent_label": "memory_schema",
+                    "objective": "Clarify memory schema",
+                    "candidate_paths": ["generations/memory/state_schema.json"],
+                    "priority": "high",
+                },
+                {
+                    "task_id": "B",
+                    "intent_label": "memory_schema",
+                    "objective": "Refine persistence",
+                    "candidate_paths": ["generations/memory"],
+                    "priority": "p3",
+                },
+            ],
+        },
+        2,
+        block_plan,
+        repo_map,
+    )
+
+    assert loop_plan.tasks[0].priority == 1
+    assert loop_plan.tasks[1].priority == 3

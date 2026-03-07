@@ -217,7 +217,7 @@ class Planner:
                     objective=str(raw_task.get("objective") or "Advance the active block with one coherent change."),
                     allowed_paths=allowed_paths,
                     success_signal=str(raw_task.get("success_signal") or "A coherent repository change lands."),
-                    priority=int(raw_task.get("priority") or index),
+                    priority=_normalize_priority(raw_task.get("priority"), index),
                     support_reason=str(raw_task.get("support_reason") or "Supports the current block objective."),
                     pillar_alignment=self.model._normalize_pillar_alignment(raw_task.get("pillar_alignment"), route, primary_pillar),
                 )
@@ -487,3 +487,32 @@ def _normalize_integration_policy(value: Any, tasks: list[ExecutionTask]) -> dic
             "notes": value.strip(),
         }
     return {"merge_order": [task.task_id for task in tasks], "allow_partial_success": True}
+
+
+def _normalize_priority(value: Any, default: int) -> int:
+    if isinstance(value, int):
+        return max(1, value)
+    if isinstance(value, float):
+        return max(1, int(value))
+
+    text = str(value or "").strip().lower()
+    if not text:
+        return max(1, default)
+    if text.isdigit():
+        return max(1, int(text))
+
+    normalized = text.replace("-", "_").replace(" ", "_")
+    aliases = {
+        "highest": 1,
+        "critical": 1,
+        "high": 1,
+        "p1": 1,
+        "medium": 2,
+        "normal": 2,
+        "default": 2,
+        "p2": 2,
+        "low": 3,
+        "minor": 3,
+        "p3": 3,
+    }
+    return aliases.get(normalized, max(1, default))
