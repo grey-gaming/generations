@@ -146,7 +146,9 @@ class BlockPlan:
     review_focus: list[str]
 
     def as_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        payload["execution_range"] = list(self.execution_range)
+        return payload
 
 
 @dataclass(slots=True)
@@ -167,7 +169,9 @@ class RetrospectiveRecord:
     summary: str = ""
 
     def as_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        payload["execution_range"] = list(self.execution_range)
+        return payload
 
 
 @dataclass(slots=True)
