@@ -8,6 +8,7 @@ from generations.runner import Runner
 
 
 def test_runner_validates_execution_routes_and_drift_metadata(tmp_path: Path) -> None:
+    (tmp_path / "generations" / "src" / "generations").mkdir(parents=True, exist_ok=True)
     runner = Runner(tmp_path, "seed", debug=False, parallel_tasks=1)
     plan = LoopPlan(
         loop_counter=2,
@@ -28,7 +29,7 @@ def test_runner_validates_execution_routes_and_drift_metadata(tmp_path: Path) ->
                 intent_label="planner_hardening",
                 execution_route="platform",  # type: ignore[arg-type]
                 objective="ok",
-                allowed_paths=["generations/"],
+                allowed_paths=["generations/src/generations"],
                 success_signal="ok",
                 priority=1,
             )

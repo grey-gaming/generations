@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from generations.adapters.ollama_cloud import OllamaCloudAdapter
 from generations.config import AppConfig
 from generations.journal.store import JournalStore
 from generations.memory.store import MemoryStore
@@ -9,7 +10,15 @@ from generations.models import BlockPlan, LongTermVisionRecord, RetrospectiveRec
 from generations.planner import Planner
 
 
+class StubOpenCode:
+    def plan_execution_loop(self, seed, loop_counter, memory, block_plan, vision, repo_map):
+        return None, {"provider": "stub-opencode", "fallback": "disabled", "repo_map": repo_map}
+
+
 class StubModel:
+    def __init__(self) -> None:
+        self._adapter = OllamaCloudAdapter(debug=False)
+
     def plan_long_term_vision(self, seed, loop_counter, memory, recent_entries, *, current_version):
         return (
             LongTermVisionRecord(
@@ -116,12 +125,30 @@ class StubModel:
             {"provider": "stub"},
         )
 
+    def _normalize_intent_label(self, value):
+        return self._adapter._normalize_intent_label(value)
+
+    def _infer_execution_route(self, **kwargs):
+        return self._adapter._infer_execution_route(**kwargs)
+
+    def _normalize_working_on(self, value):
+        return self._adapter._normalize_working_on(value)
+
+    def _normalize_block_alignment(self, value, tasks):
+        return self._adapter._normalize_block_alignment(value, tasks)
+
+    def _normalize_drift_reason(self, value):
+        return self._adapter._normalize_drift_reason(value)
+
+    def _normalize_pillar_alignment(self, value, route, primary_pillar):
+        return self._adapter._normalize_pillar_alignment(value, route, primary_pillar)
+
 
 def test_planner_writes_vision_and_initial_block(tmp_path: Path) -> None:
     config = AppConfig.from_root(tmp_path)
     journal = JournalStore(config.journal_path)
     memory = MemoryStore(config.memory_path)
-    planner = Planner(config, StubModel(), journal, memory)
+    planner = Planner(config, StubModel(), StubOpenCode(), journal, memory)
 
     vision, _ = planner.ensure_long_term_vision("seed", 0)
     assert vision is not None
@@ -139,7 +166,7 @@ def test_planner_writes_retrospective_and_next_block(tmp_path: Path) -> None:
     config = AppConfig.from_root(tmp_path)
     journal = JournalStore(config.journal_path)
     memory = MemoryStore(config.memory_path)
-    planner = Planner(config, StubModel(), journal, memory)
+    planner = Planner(config, StubModel(), StubOpenCode(), journal, memory)
     planner.ensure_long_term_vision("seed", 0)
     planner.ensure_block_material("seed", 1)
 
@@ -154,7 +181,7 @@ def test_planner_sanitizes_path_like_artifacts(tmp_path: Path) -> None:
     config = AppConfig.from_root(tmp_path)
     journal = JournalStore(config.journal_path)
     memory = MemoryStore(config.memory_path)
-    planner = Planner(config, StubModel(), journal, memory)
+    planner = Planner(config, StubModel(), StubOpenCode(), journal, memory)
     planner.ensure_long_term_vision("seed", 0)
 
     dirty_plan = BlockPlan(
@@ -196,3 +223,41 @@ def test_planner_sanitizes_path_like_artifacts(tmp_path: Path) -> None:
     assert "generations/" not in all_text
     assert "at/" not in all_text
     assert " in/" not in all_text
+
+
+def test_planner_compiles_repo_grounded_execution_plan(tmp_path: Path) -> None:
+    config = AppConfig.from_root(tmp_path)
+    journal = JournalStore(config.journal_path)
+    memory = MemoryStore(config.memory_path)
+    planner = Planner(config, StubModel(), StubOpenCode(), journal, memory)
+    (tmp_path / "generations" / "memory").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "generations" / "src" / "generations").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "generations" / "tests").mkdir(parents=True, exist_ok=True)
+    repo_map = {
+        "valid_roots": ["generations/memory", "generations/src/generations", "generations/tests"],
+        "roots": [],
+    }
+    block_plan = {
+        "block_id": 1,
+        "primary_pillar": "self",
+    }
+    loop_plan = planner._compile_execution_plan(
+        {
+            "theme": "Foundation",
+            "goal": "Ground planning in the repo",
+            "working_on": "memory_schema",
+            "tasks": [
+                {
+                    "task_id": "A",
+                    "intent_label": "memory_schema",
+                    "objective": "Clarify memory schema",
+                    "candidate_paths": ["generations/platform/memory/state_schema.json", "generations/memory/state_schema.json"],
+                    "priority": 1,
+                }
+            ],
+        },
+        2,
+        block_plan,
+        repo_map,
+    )
+    assert loop_plan.tasks[0].allowed_paths == ["generations/memory/state_schema.json", "generations/memory", "generations/tests"]

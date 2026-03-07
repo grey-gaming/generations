@@ -16,6 +16,7 @@ from .integrator import Integrator
 from .journal.store import JournalStore
 from .memory.store import MemoryStore
 from .planner import Planner
+from .planning.repo_grounding import KNOWN_ROOTS
 from .state import load_runtime, now_iso, save_current_loop_plan, save_json, save_runtime
 from .tui import TUI
 from .validation.registry import build_validation_plan
@@ -34,7 +35,7 @@ class Runner:
         self.ollama = OllamaCloudAdapter(debug=self.config.debug)
         self.opencode = OpenCodeAdapter(root)
         self.integrator = Integrator(self.config)
-        self.planner = Planner(self.config, self.ollama, self.journal, self.memory)
+        self.planner = Planner(self.config, self.ollama, self.opencode, self.journal, self.memory)
         self.evaluator = Evaluator()
         self.tui = TUI(debug=self.config.debug)
         self._shutdown = threading.Event()
@@ -188,7 +189,7 @@ class Runner:
         if not block_plan:
             self._record_rest_cycle(runtime, loop_counter, "No active block plan is available for execution.", {"provider": "runner", "fallback": None})
             return
-        loop_plan, planner_meta = self.ollama.plan_execution_loop(self.seed, loop_counter, memory, block_plan, vision)
+        loop_plan, planner_meta = self.planner.plan_execution_loop(self.seed, loop_counter, memory, block_plan, vision)
         if loop_plan is None:
             self._record_rest_cycle(runtime, loop_counter, planner_meta.get("rest_required") or planner_meta.get("fallback") or "Planner requested neutral rest.", planner_meta)
             return
@@ -443,6 +444,13 @@ class Runner:
         missing_paths = [task.task_id for task in loop_plan.tasks if not task.allowed_paths]
         if missing_paths:
             return f"Planner omitted allowed paths for task(s): {', '.join(missing_paths)}."
+        invalid_paths = [
+            task.task_id
+            for task in loop_plan.tasks
+            if any(not self._is_valid_allowed_path(path) for path in task.allowed_paths)
+        ]
+        if invalid_paths:
+            return f"Planner produced invalid allowed paths for task(s): {', '.join(invalid_paths)}."
         alignment = str(getattr(loop_plan, "block_alignment", "aligned"))
         if alignment not in {"aligned", "supporting", "drifting"}:
             return f"Planner produced invalid block alignment: {alignment}."
@@ -457,3 +465,12 @@ class Runner:
         if alignment == "aligned" and supporting_tasks and not any(task.pillar_alignment == "primary" for task in loop_plan.tasks):
             return "Planner produced no primary-aligned tasks for an aligned loop."
         return None
+
+    def _is_valid_allowed_path(self, path: str) -> bool:
+        candidate = str(path or "").strip().rstrip("/")
+        if not candidate:
+            return False
+        if not any(candidate == root or candidate.startswith(f"{root}/") for root in KNOWN_ROOTS):
+            return False
+        full = self.root / candidate
+        return full.exists() or full.parent.exists()

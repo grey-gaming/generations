@@ -29,6 +29,81 @@ class OpenCodeAdapter:
             futures = [pool.submit(self._run_task, loop_counter, theme, task, debug_dir) for task in tasks]
             return [future.result() for future in futures]
 
+    def plan_execution_loop(
+        self,
+        seed: str,
+        loop_counter: int,
+        memory: dict[str, Any],
+        block_plan: dict[str, Any],
+        vision: dict[str, Any] | None,
+        repo_map: dict[str, Any],
+    ) -> tuple[dict[str, Any] | None, dict[str, Any]]:
+        meta: dict[str, Any] = {
+            "provider": "opencode",
+            "model": self.model,
+            "fallback": None,
+            "repo_map": repo_map,
+        }
+        if self.config.test_mode or not self.binary.exists():
+            meta["fallback"] = "OpenCode planner unavailable."
+            return None, meta
+
+        worktree, branch = self._create_planning_worktree(loop_counter)
+        try:
+            prompt = json.dumps(
+                {
+                    "role": "Generations planning agent",
+                    "seed": seed,
+                    "loop_counter": loop_counter,
+                    "block_plan": block_plan,
+                    "vision": vision,
+                    "memory": {
+                        "evaluation_metrics": (memory.get("evaluation_metrics") or {}).get("rolling_average") or {},
+                        "execution_history": memory.get("execution_history") or {},
+                        "outcomes": memory.get("outcomes") or {},
+                    },
+                    "repo_map": repo_map,
+                    "instruction": (
+                        "Inspect the repository and propose one execution loop as JSON only. "
+                        "Do not edit files. Do not invent repository roots. "
+                        "Return keys: status, theme, goal, working_on, primary_pillar, block_id, pillar_budget, "
+                        "block_alignment, drift_reason, tasks, integration_policy, rationale. "
+                        "Each task must include task_id, intent_label, objective, candidate_paths, success_signal, "
+                        "priority, support_reason, pillar_alignment, repo_evidence. "
+                        "candidate_paths must only reference paths you verified in the repo map or their existing parents. "
+                        "If no valid plan is available, return status=rest_required with reason."
+                    ),
+                },
+                sort_keys=True,
+            )
+            completed = subprocess.run(
+                [str(self.binary), "run", "--format", "json", "--dir", str(worktree), "--agent", self.config.opencode_agent, "--model", self.model, "--", prompt],
+                cwd=worktree,
+                env=self._env(),
+                capture_output=True,
+                text=True,
+                check=False,
+            )
+            stdout_text = self._extract_text_from_json_stream(completed.stdout)
+            if not stdout_text:
+                session_id = self._latest_session_id()
+                if session_id:
+                    export = self._export_session(session_id)
+                    stdout_text = self._extract_text_from_session_export(export) if export else ""
+            if not stdout_text:
+                meta["fallback"] = "OpenCode planner produced no text response."
+                return None, meta
+            parsed = self._parse_json_text(stdout_text)
+            if not isinstance(parsed, dict):
+                meta["fallback"] = "OpenCode planner response was not a JSON object."
+                return None, meta
+            return parsed, meta
+        except Exception as exc:
+            meta["fallback"] = f"{type(exc).__name__}: {exc}"
+            return None, meta
+        finally:
+            self._remove_planning_worktree(worktree, branch)
+
     def _run_task(self, loop_counter: int, theme: str, task: ExecutionTask, debug_dir: Path) -> TaskResult:
         worktree, branch = self.worktrees.create(loop_counter, task)
         task.status = "running"
@@ -122,6 +197,18 @@ class OpenCodeAdapter:
                     changed.append(relative)
         return sorted(set(changed))
 
+    def _create_planning_worktree(self, loop_counter: int) -> tuple[Path, str]:
+        path = self.worktrees.base / f"planner-{loop_counter:04d}"
+        branch = f"generations/planner-{loop_counter:04d}"
+        shutil.rmtree(path, ignore_errors=True)
+        subprocess.run(["git", "branch", "-D", branch], cwd=self.root, check=False, capture_output=True, text=True)
+        subprocess.run(["git", "worktree", "add", "-b", branch, str(path), "HEAD"], cwd=self.root, check=False, capture_output=True, text=True)
+        return path, branch
+
+    def _remove_planning_worktree(self, path: Path, branch: str) -> None:
+        subprocess.run(["git", "worktree", "remove", "--force", str(path)], cwd=self.root, check=False, capture_output=True, text=True)
+        subprocess.run(["git", "branch", "-D", branch], cwd=self.root, check=False, capture_output=True, text=True)
+
     def _latest_session_id(self) -> str | None:
         if not self.binary.exists():
             return None
@@ -167,6 +254,53 @@ class OpenCodeAdapter:
         model_name = self.model.split("/", 1)[1] if self.model.startswith("ollama/") else self.model
         models[model_name] = {"name": f"Ollama {model_name}"}
         self._workspace_config_path.write_text(json.dumps(config, indent=2) + "\n", encoding="utf-8")
+
+    def _extract_text_from_json_stream(self, payload: str) -> str:
+        texts: list[str] = []
+        for line in payload.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                event = json.loads(line)
+            except json.JSONDecodeError:
+                continue
+            part = event.get("part") or {}
+            if event.get("type") == "text" and isinstance(part.get("text"), str):
+                texts.append(str(part["text"]))
+        return texts[-1] if texts else ""
+
+    def _extract_text_from_session_export(self, export_path: str | None) -> str:
+        if not export_path:
+            return ""
+        path = self.root / export_path
+        if not path.exists():
+            return ""
+        try:
+            payload = json.loads(path.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return ""
+        texts: list[str] = []
+        for message in payload.get("messages") or []:
+            if ((message.get("info") or {}).get("role")) != "assistant":
+                continue
+            for part in message.get("parts") or []:
+                if part.get("type") == "text" and isinstance(part.get("text"), str):
+                    texts.append(str(part["text"]))
+        return texts[-1] if texts else ""
+
+    def _parse_json_text(self, text: str) -> dict[str, Any] | list[Any] | None:
+        candidate = text.strip()
+        if candidate.startswith("```"):
+            lines = candidate.splitlines()
+            if lines:
+                lines = lines[1:]
+            if lines and lines[-1].strip() == "```":
+                lines = lines[:-1]
+            candidate = "\n".join(lines).strip()
+            if candidate.lower().startswith("json"):
+                candidate = candidate[4:].strip()
+        return json.loads(candidate)
 
     def commit(self, message: str) -> str | None:
         subprocess.run(["git", "add", "."], cwd=self.root, check=False, capture_output=True)
