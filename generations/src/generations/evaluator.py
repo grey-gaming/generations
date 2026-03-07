@@ -18,7 +18,7 @@ class Evaluator:
         if any(path.startswith("games/active/") for path in changed):
             game_progress = min(1.0, game_progress + 0.55)
         observability = 0.1
-        if any(task.scope == "website" for task in result.merged_tasks):
+        if any(task.execution_route == "website" for task in result.merged_tasks):
             observability = 0.5
         if any(path.startswith("generations/src/generations/web/") for path in changed):
             observability = min(1.0, observability + 0.2)

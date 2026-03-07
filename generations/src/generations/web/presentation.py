@@ -43,6 +43,8 @@ def build_dashboard_context(
             "why_now": block_plan.get("why_this_pillar_now") or "No active block plan yet.",
             "current_goal": current_loop_plan.get("goal") or "No active loop goal.",
             "working_on": current_loop_plan.get("working_on") or "Not labeled yet.",
+            "block_alignment": current_loop_plan.get("block_alignment") or "aligned",
+            "drift_reason": current_loop_plan.get("drift_reason") or "",
             "pass_count": outcomes.get("pass_count", 0),
             "fail_count": outcomes.get("fail_count", 0),
             "rest_count": outcomes.get("rest_count", 0),
@@ -72,6 +74,8 @@ def build_dashboard_context(
             "theme": current_loop_plan.get("theme") or "No active loop theme",
             "goal": current_loop_plan.get("goal") or "No active loop goal",
             "working_on": current_loop_plan.get("working_on") or "Not labeled yet",
+            "block_alignment": current_loop_plan.get("block_alignment") or "aligned",
+            "drift_reason": current_loop_plan.get("drift_reason") or "",
             "integration_status": current_loop_plan.get("integration_status") or "idle",
             "validation_status": current_loop_plan.get("validation_status") or "idle",
             "tasks": [_task_card(task) for task in tasks],
@@ -146,9 +150,12 @@ def _percent(value: Any) -> int:
 
 
 def _task_card(task: dict[str, Any]) -> dict[str, Any]:
+    route = str(task.get("execution_route") or task.get("scope") or "unknown")
+    intent = str(task.get("intent_label") or task.get("scope") or "unknown")
     return {
         "id": task.get("task_id", "?"),
-        "scope": str(task.get("scope", "unknown")).replace("_", " "),
+        "intent_label": intent.replace("_", " "),
+        "route": route.replace("_", " "),
         "objective": task.get("objective", "No objective recorded."),
         "status": task.get("status", "unknown").replace("_", " "),
         "changed_files": task.get("changed_files") or [],

@@ -34,12 +34,14 @@ class OpenCodeAdapter:
         task.status = "running"
         if self.config.test_mode or not self.binary.exists():
             changed_files = self._fallback_edit(worktree, task)
-            return TaskResult(task.task_id, task.scope, task.objective, str(worktree.relative_to(self.root)), branch, changed_files, "merged" if changed_files else "no_change", None, None, None, None, "fallback edit")
+            return TaskResult(task.task_id, task.intent_label, task.execution_route, task.objective, task.allowed_paths, str(worktree.relative_to(self.root)), branch, changed_files, "merged" if changed_files else "no_change", None, None, None, None, "fallback edit")
 
         prompt = json.dumps(
             {
                 "role": "Generations execution agent",
                 "task": task.objective,
+                "intent_label": task.intent_label,
+                "execution_route": task.execution_route,
                 "theme": theme,
                 "allowed_paths": task.allowed_paths,
                 "success_signal": task.success_signal,
@@ -73,7 +75,7 @@ class OpenCodeAdapter:
         session_id = self._latest_session_id()
         export = self._export_session(session_id) if session_id else None
         status = "merged" if changed else "no_change"
-        return TaskResult(task.task_id, task.scope, task.objective, str(worktree.relative_to(self.root)), branch, changed, status, session_id, export, str(stdout_path.relative_to(self.root)), str(stderr_path.relative_to(self.root)), completed.stderr.strip() or completed.stdout.strip() or "task completed")
+        return TaskResult(task.task_id, task.intent_label, task.execution_route, task.objective, task.allowed_paths, str(worktree.relative_to(self.root)), branch, changed, status, session_id, export, str(stdout_path.relative_to(self.root)), str(stderr_path.relative_to(self.root)), completed.stderr.strip() or completed.stdout.strip() or "task completed")
 
     def cleanup_task_results(self, results: list[TaskResult]) -> None:
         for result in results:

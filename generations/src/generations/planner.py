@@ -180,8 +180,8 @@ class Planner:
         value = " ".join(str(text).split()).strip()
         if not value:
             return value
-        value = _ROOTLIKE_PATTERN.sub("", value)
-        value = _PATHLIKE_PATTERN.sub("", value)
+        value = _ROOTLIKE_PATTERN.sub(lambda match: self._describe_path_fragment(match.group(0)), value)
+        value = _PATHLIKE_PATTERN.sub(lambda match: self._describe_path_fragment(match.group(0).strip(" `\"'()")), value)
         value = _CANONICAL_ROOT_FRAGMENT_PATTERN.sub("", value)
         replacements = {
             "journey.html": "journey page template",
@@ -195,10 +195,21 @@ class Planner:
         }
         for raw, replacement in replacements.items():
             value = value.replace(raw, replacement)
+        value = re.sub(r"\b(at|in|within|on)\s*/\b", "", value)
         value = re.sub(r"\s{2,}", " ", value).strip(" -:;,")
         if not value:
             return "Describe the capability or artifact without naming repository paths."
         return value
+
+    def _describe_path_fragment(self, raw: str) -> str:
+        candidate = raw.strip(" `\"'()")
+        tail = candidate.split("/")[-1]
+        if not tail:
+            return "repository artifact"
+        if "." in tail:
+            stem = tail.rsplit(".", 1)[0]
+            return stem.replace("_", " ")
+        return tail.replace("_", " ")
 
     def _persist_retrospective(self, memory: dict[str, Any], retrospective: RetrospectiveRecord, meta: dict[str, Any]) -> None:
         updated = dict(memory)

@@ -207,15 +207,21 @@ class Runner:
             "goal": loop_plan.goal,
             "working_on": loop_plan.working_on,
             "primary_pillar": loop_plan.primary_pillar,
+            "block_alignment": loop_plan.block_alignment,
+            "drift_reason": loop_plan.drift_reason,
             "block_id": loop_plan.block_id,
             "tasks": [
                 {
                     "task_id": task.task_id,
-                    "scope": task.scope,
+                    "intent_label": task.intent_label,
+                    "execution_route": task.execution_route,
+                    "scope": task.execution_route,
                     "objective": task.objective,
                     "status": "planned",
+                    "allowed_paths": task.allowed_paths,
                     "success_signal": task.success_signal,
                     "support_reason": task.support_reason,
+                    "pillar_alignment": task.pillar_alignment,
                 }
                 for task in loop_plan.tasks
             ],
@@ -231,7 +237,9 @@ class Runner:
         current_loop_plan["tasks"] = [
             {
                 "task_id": result.task_id,
-                "scope": result.scope,
+                "intent_label": result.intent_label,
+                "execution_route": result.execution_route,
+                "scope": result.execution_route,
                 "objective": result.objective,
                 "status": result.status,
                 "changed_files": result.changed_files,
@@ -317,6 +325,8 @@ class Runner:
                 "goal": reason,
                 "working_on": "rest_cycle",
                 "primary_pillar": ((memory.get("block_planning") or {}).get("current") or {}).get("primary_pillar", "self"),
+                "block_alignment": "aligned",
+                "drift_reason": "",
                 "block_id": ((memory.get("block_planning") or {}).get("current") or {}).get("block_id", 0),
                 "tasks": [],
                 "integration_status": "rest_cycle",
@@ -423,8 +433,27 @@ class Runner:
         return sorted(set(path for path in changed if not path.startswith("state/") and not path.startswith("site/")))
 
     def _validate_loop_plan(self, loop_plan: Any) -> str | None:
-        valid_scopes = {"platform", "active_game", "website", "cross_cutting", "monetization_platform"}
-        invalid = [task.task_id for task in loop_plan.tasks if task.scope not in valid_scopes]
+        valid_routes = {"platform", "active_game", "website", "cross_cutting", "monetization_platform"}
+        invalid = [task.task_id for task in loop_plan.tasks if task.execution_route not in valid_routes]
         if invalid:
-            return f"Planner produced invalid task scopes for task(s): {', '.join(invalid)}."
+            return f"Planner produced invalid execution routes for task(s): {', '.join(invalid)}."
+        missing_labels = [task.task_id for task in loop_plan.tasks if not str(task.intent_label).strip()]
+        if missing_labels:
+            return f"Planner omitted semantic intent labels for task(s): {', '.join(missing_labels)}."
+        missing_paths = [task.task_id for task in loop_plan.tasks if not task.allowed_paths]
+        if missing_paths:
+            return f"Planner omitted allowed paths for task(s): {', '.join(missing_paths)}."
+        alignment = str(getattr(loop_plan, "block_alignment", "aligned"))
+        if alignment not in {"aligned", "supporting", "drifting"}:
+            return f"Planner produced invalid block alignment: {alignment}."
+        drifting_tasks = [task.task_id for task in loop_plan.tasks if task.pillar_alignment == "drifting"]
+        supporting_tasks = [task.task_id for task in loop_plan.tasks if task.pillar_alignment == "supporting"]
+        if drifting_tasks and alignment == "aligned":
+            return "Planner marked tasks as drifting but kept block alignment aligned."
+        if alignment in {"supporting", "drifting"} and not str(getattr(loop_plan, "drift_reason", "")).strip():
+            return f"Planner marked the loop as {alignment} but omitted drift_reason."
+        if alignment == "aligned" and str(getattr(loop_plan, "drift_reason", "")).strip():
+            return "Planner provided drift_reason while block alignment remained aligned."
+        if alignment == "aligned" and supporting_tasks and not any(task.pillar_alignment == "primary" for task in loop_plan.tasks):
+            return "Planner produced no primary-aligned tasks for an aligned loop."
         return None

@@ -58,11 +58,16 @@ class Integrator:
             raise
 
     def _allowed(self, changed: str, task: TaskResult) -> bool:
-        if task.scope == "platform":
+        allowed_paths = [path.rstrip("/") for path in getattr(task, "allowed_paths", []) if str(path).strip()]
+        if allowed_paths:
+            if any(changed == path or changed.startswith(f"{path}/") for path in allowed_paths):
+                return True
+            return False
+        if task.execution_route == "platform":
             return changed.startswith("generations/")
-        if task.scope == "active_game":
+        if task.execution_route == "active_game":
             return changed.startswith("games/active/")
-        if task.scope == "website":
+        if task.execution_route == "website":
             return changed.startswith("generations/src/generations/web/") or changed.startswith("site/")
         return changed.startswith("generations/") or changed.startswith("games/active/")
 

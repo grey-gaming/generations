@@ -78,6 +78,8 @@ class TUI:
         print(f"loop {plan.loop_counter} | block={plan.block_id} | pillar={plan.primary_pillar} | theme: {plan.theme}", flush=True)
         print(f"goal    | {plan.goal}", flush=True)
         print(f"focus   | {plan.working_on}", flush=True)
+        if plan.block_alignment != "aligned":
+            print(f"drift   | {plan.block_alignment} | {_shorten(plan.drift_reason or 'No drift reason recorded.', 84)}", flush=True)
         print(
             f"budget  | self={_pct(plan.pillar_budget.get('self'))} game={_pct(plan.pillar_budget.get('game'))} money={_pct(plan.pillar_budget.get('monetization_platform'))}",
             flush=True,
@@ -85,7 +87,7 @@ class TUI:
         print("tasks   |", flush=True)
         for task in plan.tasks:
             print(
-                f"  - {task.task_id:<16} [{task.scope:<21}] p{task.priority}  {_shorten(task.objective, 84)}",
+                f"  - {task.task_id:<16} [{task.execution_route:<21}] {_shorten(task.intent_label, 22):<22} p{task.priority}  {_shorten(task.objective, 58)}",
                 flush=True,
             )
         if self.debug:
@@ -94,7 +96,7 @@ class TUI:
     def log_task_result(self, task_result: TaskResult) -> None:
         changed = ", ".join(task_result.changed_files[:3]) if task_result.changed_files else "-"
         print(
-            f"task    | {task_result.task_id:<24} status={task_result.status:<9} changed={changed}",
+            f"task    | {task_result.task_id:<24} route={task_result.execution_route:<15} status={task_result.status:<9} changed={changed}",
             flush=True,
         )
         summary = _task_summary(task_result.summary)

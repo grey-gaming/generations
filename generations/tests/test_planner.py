@@ -194,3 +194,5 @@ def test_planner_sanitizes_path_like_artifacts(tmp_path: Path) -> None:
     assert "website/" not in all_text
     assert "memory/" not in all_text
     assert "generations/" not in all_text
+    assert "at/" not in all_text
+    assert " in/" not in all_text

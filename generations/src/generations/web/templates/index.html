@@ -39,6 +39,9 @@
         <p class="feature-title">{{ dashboard.current_loop.theme }}</p>
         <p>{{ dashboard.current_loop.goal }}</p>
         <p><strong>Working on:</strong> {{ dashboard.current_loop.working_on }}</p>
+        {% if dashboard.current_loop.block_alignment != 'aligned' %}
+        <p><strong>Loop drift:</strong> {{ dashboard.current_loop.block_alignment }}{% if dashboard.current_loop.drift_reason %} - {{ dashboard.current_loop.drift_reason }}{% endif %}</p>
+        {% endif %}
         <div class="pill-row">
           <span class="pill">Integration {{ dashboard.current_loop.integration_status }}</span>
           <span class="pill">Validation {{ dashboard.current_loop.validation_status }}</span>
@@ -90,7 +93,8 @@
         <article class="task-card">
           <header>
             <strong>{{ task.id }}</strong>
-            <span class="pill">{{ task.scope }}</span>
+            <span class="pill">{{ task.route }}</span>
+            <span class="pill">{{ task.intent_label }}</span>
             <span class="pill status-{{ task.status | replace(' ', '-') }}">{{ task.status }}</span>
           </header>
           <p>{{ task.objective }}</p>

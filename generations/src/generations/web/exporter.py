@@ -101,6 +101,7 @@ def _render_html(dashboard: dict[str, object], entries: list[dict[str, object]])
         <p class='feature-title'>{_escape(current_loop['theme'])}</p>
         <p>{_escape(current_loop['goal'])}</p>
         <p><strong>Working on:</strong> {_escape(current_loop['working_on'])}</p>
+        {"<p><strong>Loop drift:</strong> " + _escape(current_loop['block_alignment']) + (f" - {_escape(current_loop['drift_reason'])}" if current_loop['drift_reason'] else "") + "</p>" if current_loop['block_alignment'] != 'aligned' else ""}
         <div class='pill-row'>
           <span class='pill'>Integration {_escape(current_loop['integration_status'])}</span>
           <span class='pill'>Validation {_escape(current_loop['validation_status'])}</span>
@@ -184,7 +185,8 @@ def _task_card_html(task: dict[str, object]) -> str:
         changed_html = '<ul>' + ''.join(f"<li>{_escape(path)}</li>" for path in changed) + '</ul>'
     return (
         "<article class='task-card'>"
-        f"<header><strong>{_escape(task['id'])}</strong><span class='pill'>{_escape(task['scope'])}</span>"
+        f"<header><strong>{_escape(task['id'])}</strong><span class='pill'>{_escape(task['route'])}</span>"
+        f"<span class='pill'>{_escape(task['intent_label'])}</span>"
         f"<span class='pill status-{_escape(str(task['status']).replace(' ', '-'))}'>{_escape(task['status'])}</span></header>"
         f"<p>{_escape(task['objective'])}</p>"
         f"<p class='muted'>{_escape(task['summary'])}</p>"

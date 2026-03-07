@@ -149,18 +149,21 @@ class OllamaCloudAdapter:
                 meta = self._meta(prompt)
                 meta["rest_required"] = parsed.get("reason") or "Planner requested neutral rest."
                 return None, meta
-            tasks = [ExecutionTask(**self._normalize_task(task)) for task in (parsed.get("tasks") or [])[:3]]
+            primary_pillar = str(parsed.get("primary_pillar") or block_plan["primary_pillar"])
+            tasks = [ExecutionTask(**self._normalize_task(task, primary_pillar=primary_pillar)) for task in (parsed.get("tasks") or [])[:3]]
             return LoopPlan(
                 loop_counter=loop_counter,
                 theme=str(parsed["theme"]),
                 goal=str(parsed["goal"]),
                 working_on=self._normalize_working_on(parsed.get("working_on")),
-                primary_pillar=str(parsed.get("primary_pillar") or block_plan["primary_pillar"]),
+                primary_pillar=primary_pillar,
                 block_id=int(parsed.get("block_id") or block_plan["block_id"]),
                 planning_mode=False,
                 block_plan_ref=int(block_plan["block_id"]),
                 support_task_policy={"requires_justification": True},
                 pillar_budget=_pillar_budget(parsed.get("pillar_budget"), str(block_plan["primary_pillar"])),
+                block_alignment=self._normalize_block_alignment(parsed.get("block_alignment"), tasks),
+                drift_reason=self._normalize_drift_reason(parsed.get("drift_reason")),
                 tasks=tasks,
                 integration_policy=parsed.get("integration_policy") or {"merge_order": [task.task_id for task in tasks], "allow_partial_success": True},
                 rationale=str(parsed.get("rationale") or "Execution loop aligns to the active block."),
@@ -291,20 +294,24 @@ class OllamaCloudAdapter:
             "Required keys: status, theme, goal, working_on, primary_pillar, block_id, pillar_budget, tasks, integration_policy, rationale.\n"
             "status must be ok or rest_required. If rest_required, include reason and an empty tasks list.\n"
             "working_on must be a short snake_case label naming the main thing this loop is trying to advance, such as validation_pipeline, journey_page, simulation_tick, memory_schema, or support_disclosure.\n"
-            "Each task must include task_id, scope, objective, allowed_paths, success_signal, priority, support_reason.\n"
+            "Each task must include task_id, intent_label, objective, allowed_paths, success_signal, priority, support_reason, pillar_alignment.\n"
+            "Optional loop-level keys: block_alignment and drift_reason. Use block_alignment=aligned unless the loop is supporting or drifting from the current block.\n"
             "At least 2 tasks must directly support the block's primary pillar when multiple tasks are returned.\n"
             "Choose tasks that create or modify real artifacts. Prefer code, tests, design docs, or website sections that materially advance the block.\n"
             "Do not return placeholder tasks that mostly narrate intent. If the right move is to rest because no valid task is available, say rest_required.\n"
             "When the primary pillar is self, tasks should improve the autonomous platform, validation, observability, or website clarity.\n"
             "When the primary pillar is game, tasks should move the active game toward executable systems, tests, or solid design artifacts.\n"
             "When the primary pillar is monetization_platform, tasks should improve honest commercial/support surfaces and the supporting governance around them.\n"
+            "You may drift from the current block if another move is clearly higher leverage, but if you do, set block_alignment to supporting or drifting and explain why in drift_reason.\n"
+            "intent_label should be a semantic snake_case label such as data_architecture, memory_schema, journey_page, simulation_tick, or support_disclosure.\n"
+            "allowed_paths must use real repo roots only, such as generations/... or games/active/....\n"
             f"Seed: {seed}\n"
             f"Loop: {loop_counter}\n"
             f"Current block plan: {json.dumps(block_plan, sort_keys=True)}\n"
             f"Long-term vision: {json.dumps(vision, sort_keys=True) if vision else 'null'}\n"
             f"Metrics: {json.dumps((memory.get('evaluation_metrics') or {}).get('rolling_average', {}), sort_keys=True)}\n"
             f"Execution history: {json.dumps(memory.get('execution_history', {}), sort_keys=True)}\n"
-            "Metrics are signals, not commands. Stay inside the current block.\n"
+            "Metrics are signals, not commands. Prefer the current block, but justified drift is allowed.\n"
         )
 
     def _diary_prompt(self, loop_payload: dict[str, Any]) -> str:
@@ -346,58 +353,55 @@ class OllamaCloudAdapter:
             review_focus=_string_list(parsed.get("review_focus")),
         )
 
-    def _normalize_task(self, task: dict[str, Any]) -> dict[str, Any]:
-        scope = self._normalize_scope(task.get("scope"))
-        if scope not in {"platform", "active_game", "website", "cross_cutting", "monetization_platform"}:
-            raise ValueError(f"Invalid task scope from planner: {scope}")
+    def _normalize_task(self, task: dict[str, Any], *, primary_pillar: str) -> dict[str, Any]:
+        intent_label = self._normalize_intent_label(task.get("intent_label") or task.get("scope") or task.get("working_on"))
+        objective = str(task.get("objective") or "Advance the active block with one coherent change.")
+        route = self._infer_execution_route(
+            intent_label=intent_label,
+            allowed_paths=task.get("allowed_paths"),
+            objective=objective,
+            primary_pillar=primary_pillar,
+        )
         return {
             "task_id": str(task.get("task_id") or "A"),
-            "scope": scope,
-            "objective": str(task.get("objective") or "Advance the active block with one coherent change."),
-            "allowed_paths": [str(item) for item in (task.get("allowed_paths") or ["generations/"])],
+            "intent_label": intent_label,
+            "execution_route": route,
+            "objective": objective,
+            "allowed_paths": self._normalize_allowed_paths(task.get("allowed_paths"), route),
             "success_signal": str(task.get("success_signal") or "A coherent repository change lands."),
             "priority": int(task.get("priority") or 1),
             "support_reason": str(task.get("support_reason") or "Supports the current block objective."),
+            "pillar_alignment": self._normalize_pillar_alignment(task.get("pillar_alignment"), route, primary_pillar),
         }
 
-    def _normalize_scope(self, raw_scope: Any) -> str:
+    def _normalize_intent_label(self, raw_scope: Any) -> str:
         scope = (
-            str(raw_scope or "platform")
+            str(raw_scope or "current_block")
             .strip()
             .lower()
             .replace("-", "_")
             .replace(" ", "_")
             .replace("/", "_")
         )
-        canonical = {
-            "platform": "platform",
-            "self": "platform",
-            "validation_hooks": "platform",
-            "validation": "platform",
-            "planner": "platform",
-            "planning": "platform",
-            "memory": "platform",
-            "observability": "platform",
-            "website": "website",
-            "web": "website",
-            "journey": "website",
-            "journey_page": "website",
-            "public_log": "website",
-            "active_game": "active_game",
-            "game": "active_game",
-            "gameplay": "active_game",
-            "simulation": "active_game",
-            "design": "active_game",
-            "cross_cutting": "cross_cutting",
-            "integration": "cross_cutting",
-            "tests": "cross_cutting",
-            "monetization_platform": "monetization_platform",
-            "monetization": "monetization_platform",
-            "support": "monetization_platform",
-            "commercial": "monetization_platform",
-        }
-        if scope in canonical:
-            return canonical[scope]
+        scope = "".join(ch for ch in scope if ch.isalnum() or ch == "_").strip("_")
+        return scope or "current_block"
+
+    def _infer_execution_route(self, *, intent_label: str, allowed_paths: Any, objective: str, primary_pillar: str) -> str:
+        normalized_paths = [str(item).strip().rstrip("/") for item in (allowed_paths or []) if str(item).strip()]
+        if normalized_paths:
+            has_game = any(path.startswith("games/active/") for path in normalized_paths)
+            has_website = any(path.startswith("generations/src/generations/web/") or path == "site" or path.startswith("site/") for path in normalized_paths)
+            has_generations = any(path.startswith("generations/") for path in normalized_paths)
+            if has_game and has_generations:
+                return "cross_cutting"
+            if has_game:
+                return "active_game"
+            if has_website:
+                return "website"
+            if has_generations:
+                return "platform"
+
+        scope = f"{intent_label} {objective}".lower()
 
         platform_keywords = (
             "platform",
@@ -460,7 +464,51 @@ class OllamaCloudAdapter:
             return "monetization_platform"
         if any(keyword in scope for keyword in cross_cutting_keywords):
             return "cross_cutting"
-        return scope
+        if primary_pillar == "game":
+            return "active_game"
+        if primary_pillar == "monetization_platform":
+            return "monetization_platform"
+        return "platform"
+
+    def _normalize_allowed_paths(self, raw_paths: Any, route: str) -> list[str]:
+        if isinstance(raw_paths, list):
+            values = [str(item).strip().rstrip("/") for item in raw_paths if str(item).strip()]
+        elif raw_paths is None:
+            values = []
+        else:
+            values = [str(raw_paths).strip().rstrip("/")]
+        cleaned: list[str] = []
+        for value in values:
+            if value.startswith("./"):
+                value = value[2:]
+            if value and value not in cleaned:
+                cleaned.append(value)
+        return cleaned or list(_default_allowed_paths(route))
+
+    def _normalize_block_alignment(self, raw_value: Any, tasks: list[ExecutionTask]) -> str:
+        value = str(raw_value or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if value in {"aligned", "supporting", "drifting"}:
+            return value
+        if any(task.pillar_alignment == "drifting" for task in tasks):
+            return "drifting"
+        if any(task.pillar_alignment == "supporting" for task in tasks):
+            return "supporting"
+        return "aligned"
+
+    def _normalize_drift_reason(self, raw_value: Any) -> str:
+        return " ".join(str(raw_value or "").split())
+
+    def _normalize_pillar_alignment(self, raw_value: Any, route: str, primary_pillar: str) -> str:
+        value = str(raw_value or "").strip().lower().replace("-", "_").replace(" ", "_")
+        if value in {"primary", "supporting", "drifting"}:
+            return value
+        if primary_pillar == "self" and route in {"platform", "website"}:
+            return "primary"
+        if primary_pillar == "game" and route == "active_game":
+            return "primary"
+        if primary_pillar == "monetization_platform" and route in {"monetization_platform", "website"}:
+            return "primary"
+        return "supporting"
 
     def _normalize_working_on(self, raw_value: Any) -> str:
         value = (
@@ -575,23 +623,23 @@ class OllamaCloudAdapter:
         tasks: list[ExecutionTask]
         if primary == "self":
             tasks = [
-                ExecutionTask("A", "platform", "Tighten the planner or runner around the active block.", ["generations/src/generations", "generations/tests"], "The platform expresses the block more clearly in code and tests.", 1, "Direct self-platform work."),
-                ExecutionTask("B", "platform", "Improve validation, memory, or operator visibility for the current block.", ["generations/src/generations", "generations/tests"], "Validation or observability becomes more legible.", 2, "Direct self-platform work."),
-                ExecutionTask("C", "website", "Update the journey page so the block is legible to a human observer.", ["generations/src/generations/web"], "The public site explains the current block in human terms.", 3, "Website work supports the self pillar by improving observability."),
+                ExecutionTask("A", "planner_hardening", "platform", "Tighten the planner or runner around the active block.", ["generations/src/generations", "generations/tests"], "The platform expresses the block more clearly in code and tests.", 1, "Direct self-platform work."),
+                ExecutionTask("B", "memory_schema", "platform", "Improve validation, memory, or operator visibility for the current block.", ["generations/src/generations", "generations/tests"], "Validation or observability becomes more legible.", 2, "Direct self-platform work."),
+                ExecutionTask("C", "journey_page", "website", "Update the journey page so the block is legible to a human observer.", ["generations/src/generations/web"], "The public site explains the current block in human terms.", 3, "Website work supports the self pillar by improving observability."),
             ]
             budget = {"self": 0.7, "game": 0.15, "monetization_platform": 0.15}
         elif primary == "game":
             tasks = [
-                ExecutionTask("A", "active_game", "Implement one small game-system artifact aligned to the active block.", ["games/active/src", "games/active/tests", "games/active/design"], "A concrete game artifact lands with supporting evidence.", 1, "Direct game work."),
-                ExecutionTask("B", "active_game", "Add or refine tests and design notes for the current game step.", ["games/active/tests", "games/active/design", "games/active/src"], "The game step is better specified and checked.", 2, "Direct game work."),
-                ExecutionTask("C", "platform", "Support the game block with a small platform improvement if needed.", ["generations/src/generations", "generations/tests"], "The platform better serves the active game loop.", 3, "Support work that helps game execution."),
+                ExecutionTask("A", "simulation_tick", "active_game", "Implement one small game-system artifact aligned to the active block.", ["games/active/src", "games/active/tests", "games/active/design"], "A concrete game artifact lands with supporting evidence.", 1, "Direct game work."),
+                ExecutionTask("B", "design_iteration", "active_game", "Add or refine tests and design notes for the current game step.", ["games/active/tests", "games/active/design", "games/active/src"], "The game step is better specified and checked.", 2, "Direct game work."),
+                ExecutionTask("C", "execution_support", "platform", "Support the game block with a small platform improvement if needed.", ["generations/src/generations", "generations/tests"], "The platform better serves the active game loop.", 3, "Support work that helps game execution.", "supporting"),
             ]
             budget = {"self": 0.2, "game": 0.65, "monetization_platform": 0.15}
         else:
             tasks = [
-                ExecutionTask("A", "website", "Improve support and disclosure surfaces with clearer honest copy.", ["generations/src/generations/web"], "The public monetization surface becomes clearer and more honest.", 1, "Direct monetization-platform work."),
-                ExecutionTask("B", "website", "Record monetization experiments and intent more clearly on the website.", ["generations/src/generations/web"], "Monetization experiments are better explained and tracked.", 2, "Direct monetization-platform work."),
-                ExecutionTask("C", "platform", "Add support tracking or validation for monetization changes.", ["generations/src/generations", "generations/tests"], "Monetization-platform work is better governed.", 3, "Support work that protects the monetization pillar."),
+                ExecutionTask("A", "support_disclosure", "website", "Improve support and disclosure surfaces with clearer honest copy.", ["generations/src/generations/web"], "The public monetization surface becomes clearer and more honest.", 1, "Direct monetization-platform work."),
+                ExecutionTask("B", "support_experiment_log", "website", "Record monetization experiments and intent more clearly on the website.", ["generations/src/generations/web"], "Monetization experiments are better explained and tracked.", 2, "Direct monetization-platform work."),
+                ExecutionTask("C", "governance_tracking", "platform", "Add support tracking or validation for monetization changes.", ["generations/src/generations", "generations/tests"], "Monetization-platform work is better governed.", 3, "Support work that protects the monetization pillar.", "supporting"),
             ]
             budget = {"self": 0.15, "game": 0.15, "monetization_platform": 0.7}
         return LoopPlan(
@@ -605,10 +653,23 @@ class OllamaCloudAdapter:
             block_plan_ref=int(block_plan["block_id"]),
             support_task_policy={"requires_justification": True},
             pillar_budget=budget,
+            block_alignment="aligned",
+            drift_reason="",
             tasks=tasks,
             integration_policy={"merge_order": [task.task_id for task in tasks], "allow_partial_success": True},
             rationale="The execution loop should deepen the current block without switching pillars.",
         )
+
+
+def _default_allowed_paths(route: str) -> tuple[str, ...]:
+    mapping = {
+        "platform": ("generations/src/generations", "generations/tests"),
+        "website": ("generations/src/generations/web", "generations/src/generations/web/templates", "site"),
+        "active_game": ("games/active/src", "games/active/tests", "games/active/design"),
+        "monetization_platform": ("generations/src/generations/web", "generations/tests"),
+        "cross_cutting": ("generations/src/generations", "generations/tests", "games/active/src", "games/active/tests", "games/active/design"),
+    }
+    return mapping.get(route, mapping["platform"])
 
 
 def _string_list(value: Any) -> list[str]:

@@ -3,10 +3,12 @@ from __future__ import annotations
 from dataclasses import asdict, dataclass, field
 from typing import Any, Literal
 
-TaskScope = Literal["platform", "active_game", "website", "cross_cutting", "monetization_platform"]
+TaskRoute = Literal["platform", "active_game", "website", "cross_cutting", "monetization_platform"]
 TaskStatus = Literal["planned", "running", "merged", "rejected", "failed", "no_change"]
 Trajectory = Literal["on_track", "unclear", "off_track"]
 PrimaryPillar = Literal["self", "game", "monetization_platform"]
+BlockAlignment = Literal["aligned", "supporting", "drifting"]
+PillarAlignment = Literal["primary", "supporting", "drifting"]
 
 
 @dataclass(slots=True)
@@ -23,16 +25,45 @@ class ValidationResult:
 @dataclass(slots=True)
 class ExecutionTask:
     task_id: str
-    scope: TaskScope
+    intent_label: str
+    execution_route: TaskRoute
     objective: str
     allowed_paths: list[str]
     success_signal: str
     priority: int
     support_reason: str = ""
+    pillar_alignment: PillarAlignment = "primary"
     status: TaskStatus = "planned"
 
     def as_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        payload["scope"] = self.execution_route
+        return payload
+
+    @property
+    def scope(self) -> TaskRoute:
+        return self.execution_route
+
+    @scope.setter
+    def scope(self, value: TaskRoute) -> None:
+        self.execution_route = value
+
+    @classmethod
+    def from_payload(cls, payload: dict[str, Any]) -> "ExecutionTask":
+        route = str(payload.get("execution_route") or payload.get("scope") or "platform")
+        intent = str(payload.get("intent_label") or payload.get("scope") or "platform")
+        return cls(
+            task_id=str(payload.get("task_id") or "A"),
+            intent_label=intent,
+            execution_route=route,  # normalized upstream
+            objective=str(payload.get("objective") or "Advance the active block with one coherent change."),
+            allowed_paths=[str(item) for item in (payload.get("allowed_paths") or [])],
+            success_signal=str(payload.get("success_signal") or "A coherent repository change lands."),
+            priority=int(payload.get("priority") or 1),
+            support_reason=str(payload.get("support_reason") or "Supports the current block objective."),
+            pillar_alignment=str(payload.get("pillar_alignment") or "primary"),  # normalized upstream
+            status=str(payload.get("status") or "planned"),
+        )
 
 
 @dataclass(slots=True)
@@ -47,6 +78,8 @@ class LoopPlan:
     block_plan_ref: int
     support_task_policy: dict[str, Any]
     pillar_budget: dict[str, float]
+    block_alignment: BlockAlignment
+    drift_reason: str
     tasks: list[ExecutionTask]
     integration_policy: dict[str, Any]
     rationale: str
@@ -56,12 +89,34 @@ class LoopPlan:
         payload["tasks"] = [task.as_dict() for task in self.tasks]
         return payload
 
+    @classmethod
+    def from_payload(cls, payload: dict[str, Any]) -> "LoopPlan":
+        return cls(
+            loop_counter=int(payload.get("loop_counter") or 0),
+            theme=str(payload.get("theme") or "Current block"),
+            goal=str(payload.get("goal") or "Advance the active block."),
+            working_on=str(payload.get("working_on") or "current_block"),
+            primary_pillar=str(payload.get("primary_pillar") or "self"),
+            block_id=int(payload.get("block_id") or 0),
+            planning_mode=bool(payload.get("planning_mode", False)),
+            block_plan_ref=int(payload.get("block_plan_ref") or payload.get("block_id") or 0),
+            support_task_policy=dict(payload.get("support_task_policy") or {"requires_justification": True}),
+            pillar_budget={str(key): float(value) for key, value in dict(payload.get("pillar_budget") or {}).items()},
+            block_alignment=str(payload.get("block_alignment") or "aligned"),
+            drift_reason=str(payload.get("drift_reason") or ""),
+            tasks=[ExecutionTask.from_payload(item) for item in (payload.get("tasks") or [])],
+            integration_policy=dict(payload.get("integration_policy") or {"merge_order": [], "allow_partial_success": True}),
+            rationale=str(payload.get("rationale") or "Execution loop aligns to the active block."),
+        )
+
 
 @dataclass(slots=True)
 class TaskResult:
     task_id: str
-    scope: TaskScope
+    intent_label: str
+    execution_route: TaskRoute
     objective: str
+    allowed_paths: list[str]
     worktree: str
     branch: str
     changed_files: list[str]
@@ -73,7 +128,13 @@ class TaskResult:
     summary: str
 
     def as_dict(self) -> dict[str, Any]:
-        return asdict(self)
+        payload = asdict(self)
+        payload["scope"] = self.execution_route
+        return payload
+
+    @property
+    def scope(self) -> TaskRoute:
+        return self.execution_route
 
 
 @dataclass(slots=True)
@@ -195,6 +256,8 @@ class CurrentLoopPlan:
     goal: str
     working_on: str = ""
     primary_pillar: str = "self"
+    block_alignment: str = "aligned"
+    drift_reason: str = ""
     block_id: int = 0
     tasks: list[dict[str, Any]] = field(default_factory=list)
     integration_status: str = "pending"
