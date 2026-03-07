@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Genesis - Journey</title>
+    <style>
+        :root {
+            --bg-primary: #0f0f0f;
+            --bg-secondary: #1a1a1a;
+            --bg-block: #252525;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --text-muted: #666666;
+            --accent-green: #00ff88;
+            --accent-yellow: #ffcc00;
+            --accent-gray: #4a4a4a;
+            --border-color: #333333;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+        
+        .summary {
+            display: flex;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+        
+        .summary-stat {
+            text-align: center;
+        }
+        
+        .summary-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--accent-green);
+        }
+        
+        .summary-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .overall-progress {
+            margin-bottom: 2rem;
+        }
+        
+        .progress-bar-container {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 0.5rem;
+        }
+        
+        .progress-bar {
+            background: linear-gradient(90deg, var(--accent-green), #00cc6a);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .journey-block {
+            background: var(--bg-block);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .journey-block.status-completed {
+            border-left: 4px solid var(--accent-green);
+        }
+        
+        .journey-block.status-in-progress {
+            border-left: 4px solid var(--accent-yellow);
+        }
+        
+        .journey-block.status-pending {
+            border-left: 4px solid var(--accent-gray);
+            opacity: 0.7;
+        }
+        
+        .block-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .block-status-icon {
+            font-size: 1.25rem;
+            min-width: 24px;
+        }
+        
+        .status-completed .block-status-icon {
+            color: var(--accent-green);
+        }
+        
+        .status-in-progress .block-status-icon {
+            color: var(--accent-yellow);
+        }
+        
+        .status-pending .block-status-icon {
+            color: var(--text-muted);
+        }
+        
+        .block-title {
+            flex: 1;
+            font-size: 1.125rem;
+        }
+        
+        .block-id {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: monospace;
+            background: var(--bg-secondary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        .block-description {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .progress-container {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            height: 6px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+        
+        .status-completed .progress-bar {
+            background: var(--accent-green);
+        }
+        
+        .status-in-progress .progress-bar {
+            background: var(--accent-yellow);
+        }
+        
+        .status-pending .progress-bar {
+            background: var(--accent-gray);
+        }
+        
+        .progress-text {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .block-timestamp {
+            float: right;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+        
+        footer {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Project Genesis</h1>
+            <div class="summary">
+                <div class="summary-stat">
+                    <div class="summary-value">4</div>
+                    <div class="summary-label">Total Blocks</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-value" style="color: var(--accent-green);">1</div>
+                    <div class="summary-label">Completed</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-value" style="color: var(--accent-yellow);">1</div>
+                    <div class="summary-label">In Progress</div>
+                </div>
+                <div class="summary-stat">
+                    <div class="summary-value" style="color: var(--text-muted);">2</div>
+                    <div class="summary-label">Pending</div>
+                </div>
+            </div>
+            <div class="overall-progress">
+                <strong>Overall Progress:</strong> 41%
+                <div class="progress-bar-container">
+                    <div class="progress-bar" style="width: 41%"></div>
+                </div>
+            </div>
+        </header>
+        
+        <main class="journey-list">
+
+        <div class="journey-block status-completed">
+            <div class="block-header">
+                <span class="block-status-icon">✓</span>
+                <h3 class="block-title">Foundation Setup</h3>
+                <span class="block-id">block-001</span>
+            </div>
+            <p class="block-description">Initial project structure and configuration</p>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 100%"></div>
+            </div>
+            <span class="progress-text">100% complete</span>
+            <span class="block-timestamp">2026-03-07T10:00:00</span>
+        </div>
+
+        <div class="journey-block status-in-progress">
+            <div class="block-header">
+                <span class="block-status-icon">⋯</span>
+                <h3 class="block-title">Core Implementation</h3>
+                <span class="block-id">block-002</span>
+            </div>
+            <p class="block-description">Building core functionality and modules</p>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 65%"></div>
+            </div>
+            <span class="progress-text">65% complete</span>
+            <span class="block-timestamp">2026-03-07T11:30:00</span>
+        </div>
+
+        <div class="journey-block status-pending">
+            <div class="block-header">
+                <span class="block-status-icon">○</span>
+                <h3 class="block-title">Testing & Validation</h3>
+                <span class="block-id">block-003</span>
+            </div>
+            <p class="block-description">Unit tests, integration tests, and validation</p>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0% complete</span>
+            <span class="block-timestamp">2026-03-07T14:00:00</span>
+        </div>
+
+        <div class="journey-block status-pending">
+            <div class="block-header">
+                <span class="block-status-icon">○</span>
+                <h3 class="block-title">Documentation</h3>
+                <span class="block-id">block-004</span>
+            </div>
+            <p class="block-description">API docs, user guides, and deployment instructions</p>
+            <div class="progress-container">
+                <div class="progress-bar" style="width: 0%"></div>
+            </div>
+            <span class="progress-text">0% complete</span>
+            <span class="block-timestamp">2026-03-07T16:00:00</span>
+        </div>
+
+        </main>
+        
+        <footer>
+            <p>Last updated: 2026-03-07T12:45:00</p>
+            <p>Generated by Generations Platform</p>
+        </footer>
+    </div>
+</body>
+</html>

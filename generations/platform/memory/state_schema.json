@@ -1,0 +1,182 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LoopState",
+  "description": "Schema for autonomous loop state memory persistence",
+  "type": "object",
+  "required": ["id", "created_at", "updated_at", "iteration", "status", "context", "memory"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the loop state",
+      "format": "uuid"
+    },
+    "created_at": {
+      "type": "string",
+      "description": "ISO 8601 timestamp of state creation",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "description": "ISO 8601 timestamp of last state update",
+      "format": "date-time"
+    },
+    "iteration": {
+      "type": "integer",
+      "description": "Current iteration number",
+      "minimum": 0
+    },
+    "status": {
+      "type": "string",
+      "description": "Current execution status",
+      "enum": ["initialized", "running", "paused", "completed", "error", "terminated"]
+    },
+    "context": {
+      "type": "object",
+      "description": "Execution context and configuration",
+      "required": ["task", "intent", "theme"],
+      "properties": {
+        "task": {
+          "type": "string",
+          "description": "Current task description"
+        },
+        "intent": {
+          "type": "string",
+          "description": "Intent label for the current operation"
+        },
+        "theme": {
+          "type": "string",
+          "description": "Thematic category"
+        },
+        "allowed_paths": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of allowed file paths"
+        },
+        "execution_route": {
+          "type": "string",
+          "description": "Execution route identifier"
+        }
+      }
+    },
+    "memory": {
+      "type": "object",
+      "description": "Persistent memory state",
+      "required": ["observations", "decisions", "artifacts"],
+      "properties": {
+        "observations": {
+          "type": "array",
+          "description": "List of observations from execution",
+          "items": {
+            "type": "object",
+            "required": ["timestamp", "type", "content"],
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["info", "warning", "error", "success"]
+              },
+              "content": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "decisions": {
+          "type": "array",
+          "description": "List of decisions made during execution",
+          "items": {
+            "type": "object",
+            "required": ["timestamp", "decision", "rationale"],
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "decision": {
+                "type": "string"
+              },
+              "rationale": {
+                "type": "string"
+              },
+              "alternatives_considered": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "artifacts": {
+          "type": "array",
+          "description": "List of artifacts produced",
+          "items": {
+            "type": "object",
+            "required": ["path", "type", "created_at"],
+            "properties": {
+              "path": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["file", "directory", "output", "log"]
+              },
+              "created_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "checksum": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "variables": {
+          "type": "object",
+          "description": "Key-value store for persistent variables",
+          "additionalProperties": true
+        }
+      }
+    },
+    "errors": {
+      "type": "array",
+      "description": "List of errors encountered",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "message", "code"],
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "message": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "stack_trace": {
+            "type": "string"
+          },
+          "recoverable": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional metadata",
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}
